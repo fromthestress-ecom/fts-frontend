@@ -1,0 +1,26 @@
+{
+  "name": "streetwear-store",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/sync-favicon.mjs && next dev",
+    "build": "node scripts/sync-favicon.mjs && next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-slick": "^0.31.0",
+    "slick-carousel": "^1.8.1",
+    "sortablejs": "^1.15.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "@types/react-slick": "^0.23.13",
+    "@types/sortablejs": "^1.15.9",
+    "typescript": "^5.7.2"
+  }
+}
