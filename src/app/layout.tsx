@@ -3,7 +3,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
-const SITE_NAME = "STREETWEAR";
+const SITE_NAME = "FROM THE STRESS";
 const DEFAULT_DESC =
   "Shop streetwear cao cấp - áo hoodie, tee, quần jogger, giày sneaker. Giao hàng toàn quốc.";
 
