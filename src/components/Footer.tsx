@@ -1,8 +1,7 @@
 import Link from "next/link";
+import { FooterAttribution } from "./FooterAttribution";
 
 export function Footer() {
-  const year = new Date().getFullYear();
-
   return (
     <footer
       style={{
@@ -20,6 +19,8 @@ export function Footer() {
           flexWrap: "wrap",
           justifyContent: "space-between",
           gap: "2rem",
+          borderBottom: "1px solid var(--border)",
+          paddingBottom: "1.5rem",
         }}
       >
         <div>
@@ -64,18 +65,7 @@ export function Footer() {
           </nav>
         </div>
       </div>
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: "2rem auto 0",
-          paddingTop: "1.5rem",
-          borderTop: "1px solid var(--border)",
-          color: "var(--muted)",
-          fontSize: "0.875rem",
-        }}
-      >
-        © {year} STREETWEAR. All rights reserved.
-      </div>
+      <FooterAttribution />
     </footer>
   );
 }

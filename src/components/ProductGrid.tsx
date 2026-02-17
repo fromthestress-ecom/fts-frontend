@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import type { ProductListResult, Category } from '@/lib/api';
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { ProductListResult, Category } from "@/lib/api";
 
 type ProductGridProps = {
   initialData: ProductListResult;
@@ -21,9 +21,9 @@ export function ProductGrid({
   const searchParams = useSearchParams();
 
   const buildUrl = (updates: Record<string, string | null>) => {
-    const next = new URLSearchParams(searchParams?.toString() ?? '');
+    const next = new URLSearchParams(searchParams?.toString() ?? "");
     for (const [k, v] of Object.entries(updates)) {
-      if (v === null || v === '') next.delete(k);
+      if (v === null || v === "") next.delete(k);
       else next.set(k, v);
     }
     const q = next.toString();
@@ -34,20 +34,37 @@ export function ProductGrid({
 
   return (
     <>
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "2rem",
+          flexWrap: "wrap",
+          marginBottom: "2rem",
+        }}
+      >
         <div>
-          <label style={{ fontSize: '0.875rem', color: 'var(--muted)', marginRight: '0.5rem' }}>
+          <label
+            style={{
+              fontSize: "0.875rem",
+              color: "var(--muted)",
+              marginRight: "0.5rem",
+            }}
+          >
             Danh mục
           </label>
           <select
-            value={currentParams.danh_muc ?? ''}
-            onChange={(e) => router.push(buildUrl({ danh_muc: e.target.value || null, page: null }))}
+            value={currentParams.danh_muc ?? ""}
+            onChange={(e) =>
+              router.push(
+                buildUrl({ danh_muc: e.target.value || null, page: null }),
+              )
+            }
             style={{
-              padding: '0.5rem 0.75rem',
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              padding: "0.5rem 0.75rem",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
               borderRadius: 4,
-              color: 'var(--text)',
+              color: "var(--text)",
             }}
           >
             <option value="">Tất cả</option>
@@ -59,18 +76,28 @@ export function ProductGrid({
           </select>
         </div>
         <div>
-          <label style={{ fontSize: '0.875rem', color: 'var(--muted)', marginRight: '0.5rem' }}>
+          <label
+            style={{
+              fontSize: "0.875rem",
+              color: "var(--muted)",
+              marginRight: "0.5rem",
+            }}
+          >
             Sắp xếp
           </label>
           <select
-            value={currentParams.sap_xep ?? ''}
-            onChange={(e) => router.push(buildUrl({ sap_xep: e.target.value || null, page: null }))}
+            value={currentParams.sap_xep ?? ""}
+            onChange={(e) =>
+              router.push(
+                buildUrl({ sap_xep: e.target.value || null, page: null }),
+              )
+            }
             style={{
-              padding: '0.5rem 0.75rem',
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              padding: "0.5rem 0.75rem",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
               borderRadius: 4,
-              color: 'var(--text)',
+              color: "var(--text)",
             }}
           >
             <option value="">Mặc định</option>
@@ -84,39 +111,63 @@ export function ProductGrid({
 
       <ul
         style={{
-          listStyle: 'none',
+          listStyle: "none",
           margin: 0,
           padding: 0,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1.5rem',
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: "1.5rem",
         }}
       >
         {items.map((p) => (
           <li key={p._id}>
             <Link
               href={`/san-pham/${p.slug}`}
+              className="product-card"
               style={{
-                display: 'block',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
+                display: "block",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
                 borderRadius: 8,
-                overflow: 'hidden',
+                overflow: "hidden",
               }}
             >
-              <div style={{ aspectRatio: '1', background: 'var(--border)', position: 'relative' }}>
+              <div
+                style={{
+                  aspectRatio: "1",
+                  background: "var(--border)",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
                 {p.images?.[0] ? (
                   <img
                     src={p.images[0]}
                     alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    className="product-card__image-inner"
+                    style={{ objectFit: "cover" }}
                   />
                 ) : null}
               </div>
-              <div style={{ padding: '1rem' }}>
-                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{p.name}</h2>
-                <p style={{ margin: '0.25rem 0 0', color: 'var(--accent)', fontWeight: 700 }}>
-                  {new Intl.NumberFormat('vi-VN').format(p.price)}₫
+              <div style={{ padding: "1rem" }}>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    minHeight: "42px",
+                  }}
+                >
+                  {p.name}
+                </h2>
+                <p
+                  style={{
+                    margin: "0.25rem 0 0",
+                    color: "var(--accent)",
+                    fontWeight: 700,
+                  }}
+                >
+                  {new Intl.NumberFormat("vi-VN").format(p.price)}₫
                 </p>
               </div>
             </Link>
@@ -127,33 +178,33 @@ export function ProductGrid({
       {totalPages > 1 && (
         <nav
           style={{
-            marginTop: '2rem',
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '0.5rem',
+            marginTop: "2rem",
+            display: "flex",
+            justifyContent: "center",
+            gap: "0.5rem",
           }}
         >
           {page > 1 && (
             <Link
               href={buildUrl({ page: String(page - 1) })}
               style={{
-                padding: '0.5rem 1rem',
-                border: '1px solid var(--border)',
+                padding: "0.5rem 1rem",
+                border: "1px solid var(--border)",
                 borderRadius: 4,
               }}
             >
               Trước
             </Link>
           )}
-          <span style={{ padding: '0.5rem 1rem', color: 'var(--muted)' }}>
+          <span style={{ padding: "0.5rem 1rem", color: "var(--muted)" }}>
             {page} / {totalPages}
           </span>
           {page < totalPages && (
             <Link
               href={buildUrl({ page: String(page + 1) })}
               style={{
-                padding: '0.5rem 1rem',
-                border: '1px solid var(--border)',
+                padding: "0.5rem 1rem",
+                border: "1px solid var(--border)",
                 borderRadius: 4,
               }}
             >
