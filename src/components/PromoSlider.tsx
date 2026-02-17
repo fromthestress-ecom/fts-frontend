@@ -59,7 +59,6 @@ export function PromoSlider({ slides }: { slides: readonly PromoSlide[] }) {
               <div
                 style={{
                   width: "100%",
-                  // aspectRatio: '8 / 3',
                   position: "relative",
                   background: "var(--border)",
                 }}
