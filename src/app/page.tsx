@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import { BannerSlider } from "@/components/BannerSlider";
+import { FeaturesBar } from "@/components/FeaturesBar";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
 
@@ -177,6 +178,7 @@ export default async function HomePage() {
       <PromoSection slides={promoSlides} />
       <FeaturedProductsSection items={items} />
       <BrandsSection />
+      <FeaturesBar />
     </>
   );
 }

@@ -23,7 +23,7 @@ const POLICY_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="mt-16 border-t border-border bg-surface px-4 py-8 sm:px-6">
+    <footer className="border-t border-border bg-surface px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-[1280px] flex flex-col border-b border-border pb-6 md:flex-row md:flex-wrap md:items-start md:justify-between md:gap-8">
         <div className="border-b border-border py-4 md:border-b-0 md:py-0">
           <span className="font-display text-lg tracking-widest sm:text-xl">
