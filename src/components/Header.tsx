@@ -12,6 +12,7 @@ import type { Category } from "@/lib/api";
 const NAV_MAIN = [
   { href: "/", label: "Trang chủ" },
   { href: "/san-pham", label: "Sản phẩm", hasSubmenu: true },
+  { href: "/ve-chung-toi", label: "Về chúng tôi" },
 ];
 
 export function Header() {
@@ -167,6 +168,18 @@ export function Header() {
             )}
           </div>
 
+          <Link
+            href="/ve-chung-toi"
+            onClick={closeMenu}
+            className={`rounded-lg px-4 py-3 text-lg ${
+              pathname === "/ve-chung-toi"
+                ? "font-semibold text-accent"
+                : "font-normal text-muted"
+            }`}
+          >
+            Về chúng tôi
+          </Link>
+
           <div className="mt-2 border-t border-border pt-4">
             <div className="px-4 py-2 text-lg">
               <CartLink />
@@ -241,6 +254,16 @@ export function Header() {
                 </div>
               )}
             </div>
+            <Link
+              href="/ve-chung-toi"
+              className={`text-sm sm:text-base ${
+                pathname === "/ve-chung-toi"
+                  ? "font-semibold text-accent"
+                  : "font-normal text-muted"
+              }`}
+            >
+              Về chúng tôi
+            </Link>
             <CartLink />
           </nav>
 
