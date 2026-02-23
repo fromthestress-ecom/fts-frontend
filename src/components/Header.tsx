@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CartLink } from "./CartLink";
+import { ProductCategoryNav } from "./ProductCategoryNav";
 import { fetchApi } from "@/lib/api";
 import type { Category } from "@/lib/api";
 
@@ -179,7 +180,7 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-[101] border-b border-border bg-[rgba(10,10,10,0.9)] backdrop-blur-md">
-        <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-4 sm:px-6">
+        <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-0 sm:px-6 max-sm:py-4">
           <div className="flex w-1/3 justify-start sm:w-auto sm:flex-initial">
             <Link
               href="/"
@@ -188,7 +189,7 @@ export function Header() {
               <img
                 src="https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_white.png"
                 alt="STREETWEAR"
-                className="h-9 w-[100px] object-contain"
+                className=" w-[100px] max-md:w-24 object-contain aspect-square"
               />
             </Link>
             <div className="sm:hidden">
@@ -203,7 +204,7 @@ export function Header() {
             <img
               src="https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_white.png"
               alt="STREETWEAR"
-              className="h-8 w-24 object-contain sm:h-9 sm:w-[100px]"
+              className="h-8 w-24 max-md:w-16 object-contain sm:h-9 sm:w-[100px]"
             />
           </Link>
 
@@ -232,32 +233,11 @@ export function Header() {
               </Link>
               {categories.length > 0 && (
                 <div className="absolute left-0 top-full z-10 hidden pt-1 group-hover:block">
-                  <div className="min-w-[180px] rounded-lg border border-border bg-surface py-1 shadow-lg">
-                    <Link
-                      href="/san-pham"
-                      className={`block px-4 py-2 text-sm ${
-                        pathname === "/san-pham" &&
-                        !pathname?.includes("?danh_muc=")
-                          ? "font-semibold text-accent"
-                          : "text-muted"
-                      }`}
-                    >
-                      Tất cả
-                    </Link>
-                    {categories.map((c) => (
-                      <Link
-                        key={c._id}
-                        href={`/san-pham?danh_muc=${encodeURIComponent(c._id)}`}
-                        className={`block px-4 py-2 text-sm ${
-                          pathname?.includes(`danh_muc=${c._id}`)
-                            ? "font-semibold text-accent"
-                            : "text-muted"
-                        }`}
-                      >
-                        {c.name}
-                      </Link>
-                    ))}
-                  </div>
+                  <ProductCategoryNav
+                    categories={categories}
+                    pathname={pathname}
+                    basePath="/san-pham"
+                  />
                 </div>
               )}
             </div>

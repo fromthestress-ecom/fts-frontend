@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Cart } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
+import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -105,10 +106,9 @@ export function CartContent() {
             >
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded bg-surface">
                 {p?.images?.[0] ? (
-                  <img
+                  <ImageWithSkeleton
                     src={p.images[0]}
                     alt=""
-                    className="h-full w-full object-cover"
                   />
                 ) : null}
               </div>

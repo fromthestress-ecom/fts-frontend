@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import { BannerSlider } from "@/components/BannerSlider";
+import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -46,11 +47,10 @@ function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
             >
               <div className="relative aspect-square overflow-hidden bg-border">
                 {p.images?.[0] ? (
-                  <img
+                  <ImageWithSkeleton
                     src={p.images[0]}
                     alt=""
-                    loading="lazy"
-                    className="product-card__image-inner h-full w-full object-cover"
+                    className="product-card__image-inner"
                   />
                 ) : null}
               </div>

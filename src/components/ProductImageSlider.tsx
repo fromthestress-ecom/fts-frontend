@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 
 type ProductImageSliderProps = {
   images: string[];
@@ -50,10 +51,9 @@ export function ProductImageSlider({
         <Slider ref={mainSliderRef} {...mainSliderSettings}>
           {images.map((src, index) => (
             <div key={index} className="product-image-slider__slide">
-              <img
+              <ImageWithSkeleton
                 src={src}
                 alt={`${productName} - Ảnh ${index + 1}`}
-                className="h-full w-full object-cover"
               />
             </div>
           ))}
@@ -79,11 +79,7 @@ export function ProductImageSlider({
               }`}
               aria-label={`Xem ảnh ${index + 1}`}
             >
-              <img
-                src={src}
-                alt=""
-                className="h-full w-full object-cover"
-              />
+              <ImageWithSkeleton src={src} alt="" />
               {index === MAX_THUMBNAILS - 1 && remainingCount > 0 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 font-bold text-text">
                   +{remainingCount}

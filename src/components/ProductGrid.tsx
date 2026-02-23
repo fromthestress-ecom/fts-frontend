@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ProductListResult, Category } from "@/lib/api";
+import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 
 type ProductGridProps = {
   initialData: ProductListResult;
@@ -83,10 +84,10 @@ export function ProductGrid({
             >
               <div className="relative aspect-square overflow-hidden bg-border">
                 {p.images?.[0] ? (
-                  <img
+                  <ImageWithSkeleton
                     src={p.images[0]}
                     alt=""
-                    className="product-card__image-inner h-full w-full object-cover"
+                    className="product-card__image-inner"
                   />
                 ) : null}
               </div>

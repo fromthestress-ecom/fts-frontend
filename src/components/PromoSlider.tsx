@@ -4,6 +4,7 @@ import Link from "next/link";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 
 export type PromoSlide = Readonly<{
   src: string;
@@ -52,12 +53,7 @@ export function PromoSlider({ slides }: { slides: readonly PromoSlide[] }) {
               className="block overflow-hidden rounded-xl border border-border bg-surface"
             >
               <div className="relative w-full bg-border aspect-[2/1]">
-                <img
-                  src={slide.src}
-                  alt={slide.label}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
+                <ImageWithSkeleton src={slide.src} alt={slide.label} />
               </div>
             </Link>
           </div>
