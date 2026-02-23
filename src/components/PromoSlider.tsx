@@ -51,7 +51,7 @@ export function PromoSlider({ slides }: { slides: readonly PromoSlide[] }) {
               aria-label={slide.label}
               className="block overflow-hidden rounded-xl border border-border bg-surface"
             >
-              <div className="relative w-full bg-border aspect-[8/3]">
+              <div className="relative w-full bg-border aspect-[2/1]">
                 <img
                   src={slide.src}
                   alt={slide.label}
