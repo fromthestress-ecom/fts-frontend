@@ -67,7 +67,10 @@ function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
         ))}
       </ul>
       <div className="mt-8 text-center">
-        <Link href="/san-pham" className="font-semibold text-accent hover:underline">
+        <Link
+          href="/san-pham"
+          className="font-semibold text-accent hover:underline"
+        >
           Xem tất cả →
         </Link>
       </div>
@@ -90,7 +93,7 @@ function PromoSection({ slides }: { slides: readonly PromoSlide[] }) {
 
 function BrandsSection() {
   return (
-    <section className="mx-auto max-w-[1280px] px-4 pb-16 pt-0 sm:px-6">
+    <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
       <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
         THƯƠNG HIỆU
       </h2>
