@@ -97,16 +97,19 @@ function BrandsSection() {
       <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
         THƯƠNG HIỆU
       </h2>
-      <ul className="grid list-none grid-cols-1 gap-4 p-0 m-0 sm:grid-cols-2 sm:gap-6">
+      <ul className="flex list-none flex-row flex-wrap items-stretch justify-center gap-4 p-0 m-0 sm:gap-8">
         {BRAND_ITEMS.map((brand) => (
-          <li key={brand.src} className="overflow-hidden">
-            <figure className="m-0 flex flex-col items-center justify-center p-5">
-              <div className="grid w-1/2 place-items-center aspect-square">
+          <li
+            key={brand.src}
+            className="flex min-w-0 flex-1 basis-0 items-center justify-center overflow-hidden"
+          >
+            <figure className="m-0 flex flex-col items-center justify-center p-4 sm:p-5">
+              <div className="flex h-[min(18vh,140px)] w-full max-w-[min(45vw,280px)] items-center justify-center">
                 <img
                   src={brand.src}
                   alt={brand.title}
                   loading="lazy"
-                  className="h-full w-full object-contain"
+                  className="max-h-full max-w-full object-contain"
                 />
               </div>
               <figcaption className="font-display mt-3 text-center text-sm capitalize text-muted sm:text-base">
