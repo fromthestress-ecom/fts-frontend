@@ -34,24 +34,9 @@ export function ProductGrid({
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          gap: "2rem",
-          flexWrap: "wrap",
-          marginBottom: "2rem",
-        }}
-      >
-        <div>
-          <label
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--muted)",
-              marginRight: "0.5rem",
-            }}
-          >
-            Danh mục
-          </label>
+      <div className="mb-8 flex flex-wrap gap-6 sm:gap-8">
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted">Danh mục</label>
           <select
             value={currentParams.danh_muc ?? ""}
             onChange={(e) =>
@@ -59,13 +44,7 @@ export function ProductGrid({
                 buildUrl({ danh_muc: e.target.value || null, page: null }),
               )
             }
-            style={{
-              padding: "0.5rem 0.75rem",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 4,
-              color: "var(--text)",
-            }}
+            className="rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base"
           >
             <option value="">Tất cả</option>
             {categories.map((c) => (
@@ -75,16 +54,8 @@ export function ProductGrid({
             ))}
           </select>
         </div>
-        <div>
-          <label
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--muted)",
-              marginRight: "0.5rem",
-            }}
-          >
-            Sắp xếp
-          </label>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted">Sắp xếp</label>
           <select
             value={currentParams.sap_xep ?? ""}
             onChange={(e) =>
@@ -92,13 +63,7 @@ export function ProductGrid({
                 buildUrl({ sap_xep: e.target.value || null, page: null }),
               )
             }
-            style={{
-              padding: "0.5rem 0.75rem",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 4,
-              color: "var(--text)",
-            }}
+            className="rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base"
           >
             <option value="">Mặc định</option>
             <option value="newest">Mới nhất</option>
@@ -109,64 +74,27 @@ export function ProductGrid({
         </div>
       </div>
 
-      <ul
-        style={{
-          listStyle: "none",
-          margin: 0,
-          padding: 0,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: "1.5rem",
-        }}
-      >
+      <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
           <li key={p._id}>
             <Link
               href={`/san-pham/${p.slug}`}
-              className="product-card"
-              style={{
-                display: "block",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                overflow: "hidden",
-              }}
+              className="product-card block overflow-hidden rounded-lg border border-border bg-surface"
             >
-              <div
-                style={{
-                  aspectRatio: "1",
-                  background: "var(--border)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="relative aspect-square overflow-hidden bg-border">
                 {p.images?.[0] ? (
                   <img
                     src={p.images[0]}
                     alt=""
-                    className="product-card__image-inner"
-                    style={{ objectFit: "cover" }}
+                    className="product-card__image-inner h-full w-full object-cover"
                   />
                 ) : null}
               </div>
-              <div style={{ padding: "1rem" }}>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                    minHeight: "42px",
-                  }}
-                >
+              <div className="p-4">
+                <h2 className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
                   {p.name}
                 </h2>
-                <p
-                  style={{
-                    margin: "0.25rem 0 0",
-                    color: "var(--accent)",
-                    fontWeight: 700,
-                  }}
-                >
+                <p className="mt-1 text-sm font-bold text-accent sm:text-base">
                   {new Intl.NumberFormat("vi-VN").format(p.price)}₫
                 </p>
               </div>
@@ -176,37 +104,22 @@ export function ProductGrid({
       </ul>
 
       {totalPages > 1 && (
-        <nav
-          style={{
-            marginTop: "2rem",
-            display: "flex",
-            justifyContent: "center",
-            gap: "0.5rem",
-          }}
-        >
+        <nav className="mt-8 flex justify-center gap-2">
           {page > 1 && (
             <Link
               href={buildUrl({ page: String(page - 1) })}
-              style={{
-                padding: "0.5rem 1rem",
-                border: "1px solid var(--border)",
-                borderRadius: 4,
-              }}
+              className="rounded border border-border px-4 py-2 text-sm sm:text-base"
             >
               Trước
             </Link>
           )}
-          <span style={{ padding: "0.5rem 1rem", color: "var(--muted)" }}>
+          <span className="px-4 py-2 text-sm text-muted sm:text-base">
             {page} / {totalPages}
           </span>
           {page < totalPages && (
             <Link
               href={buildUrl({ page: String(page + 1) })}
-              style={{
-                padding: "0.5rem 1rem",
-                border: "1px solid var(--border)",
-                borderRadius: 4,
-              }}
+              className="rounded border border-border px-4 py-2 text-sm sm:text-base"
             >
               Sau
             </Link>

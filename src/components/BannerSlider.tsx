@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -25,69 +24,12 @@ const SLICK_SETTINGS = {
 
 function HeroSlide({ src }: { src: string }) {
   return (
-    <div style={{ position: "relative", overflow: "hidden" }}>
+    <div className="relative overflow-hidden">
       <img
         src={src}
         alt=""
-        style={{
-          width: "100%",
-          height: "auto",
-          display: "block",
-          verticalAlign: "middle",
-        }}
+        className="block w-full h-auto align-middle"
       />
-      {/* <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(10,10,10,0.5) 0%, rgba(10,10,10,0.7) 100%)",
-          zIndex: 1,
-        }}
-        aria-hidden
-      /> */}
-      {/* <div
-        style={{
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(3rem, 10vw, 5rem)",
-            letterSpacing: "0.08em",
-            margin: 0,
-            lineHeight: 1,
-          }}
-        >
-          STREETWEAR
-        </h1>
-        <p
-          style={{
-            marginTop: "1rem",
-            color: "var(--muted)",
-            fontSize: "1.125rem",
-            maxWidth: 480,
-          }}
-        >
-          Thời trang đường phố cao cấp. Hoodie, tee, jogger, sneaker.
-        </p>
-        <Link
-          href="/san-pham"
-          style={{
-            marginTop: "2rem",
-            display: "inline-block",
-            padding: "0.875rem 2rem",
-            background: "var(--accent)",
-            color: "var(--bg)",
-            fontWeight: 700,
-            borderRadius: 4,
-          }}
-        >
-          Xem sản phẩm
-        </Link>
-      </div> */}
     </div>
   );
 }

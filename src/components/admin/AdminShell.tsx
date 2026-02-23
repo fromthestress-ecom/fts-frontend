@@ -1,97 +1,63 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { setAdminKey } from './AdminGuard';
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { setAdminKey } from "./AdminGuard";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isLogin = pathname === '/admin/login';
+  const isLogin = pathname === "/admin/login";
 
   const handleLogout = () => {
     setAdminKey(null);
-    router.replace('/admin/login');
+    router.replace("/admin/login");
   };
 
   if (isLogin) {
-    return <div style={{ minHeight: '60vh', background: 'var(--surface)' }}>{children}</div>;
+    return (
+      <div className="min-h-[60vh] bg-surface">{children}</div>
+    );
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '60vh',
-        background: 'var(--surface)',
-        borderTop: '1px solid var(--border)',
-      }}
-    >
-      <aside
-        style={{
-          width: 220,
-          borderRight: '1px solid var(--border)',
-          padding: '1.5rem 0',
-        }}
-      >
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+    <div className="flex min-h-[60vh] border-t border-border bg-surface">
+      <aside className="w-52 shrink-0 border-r border-border py-6 sm:w-56">
+        <nav className="flex flex-col gap-1">
           <Link
             href="/admin"
-            style={{
-              padding: '0.5rem 1.5rem',
-              color: pathname === '/admin' ? 'var(--accent)' : 'var(--muted)',
-            }}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin" ? "text-accent" : "text-muted"}`}
           >
             Dashboard
           </Link>
           <Link
             href="/admin/categories"
-            style={{
-              padding: '0.5rem 1.5rem',
-              color: pathname?.startsWith('/admin/categories') ? 'var(--accent)' : 'var(--muted)',
-            }}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/categories") ? "text-accent" : "text-muted"}`}
           >
             Danh mục
           </Link>
           <Link
             href="/admin/products"
-            style={{
-              padding: '0.5rem 1.5rem',
-              color: pathname?.startsWith('/admin/products') ? 'var(--accent)' : 'var(--muted)',
-            }}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/products") ? "text-accent" : "text-muted"}`}
           >
             Sản phẩm
           </Link>
           <Link
             href="/"
-            style={{
-              padding: '0.5rem 1.5rem',
-              color: 'var(--accent)',
-              marginTop: '1rem',
-            }}
+            className="mt-4 px-6 py-2 text-accent text-sm sm:text-base"
           >
             ← Về trang chủ
           </Link>
           <button
             type="button"
             onClick={handleLogout}
-            style={{
-              margin: '0.5rem 1.5rem 0',
-              padding: '0.5rem',
-              background: 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: 4,
-              color: 'var(--muted)',
-              cursor: 'pointer',
-              textAlign: 'left',
-              width: 'calc(100% - 3rem)',
-            }}
+            className="mx-6 mt-2 w-[calc(100%-3rem)] rounded border border-border bg-transparent px-2 py-2 text-left text-sm text-muted sm:text-base"
           >
             Đăng xuất
           </button>
         </nav>
       </aside>
-      <main style={{ flex: 1, padding: '1.5rem 2rem' }}>{children}</main>
+      <main className="min-w-0 flex-1 p-6 sm:p-8">{children}</main>
     </div>
   );
 }

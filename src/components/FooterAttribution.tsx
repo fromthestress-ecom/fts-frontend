@@ -15,19 +15,7 @@ export function FooterAttribution() {
     <button
       type="button"
       onClick={handleClick}
-      style={{
-        maxWidth: "100%",
-        margin: "0 auto",
-        paddingTop: "1.5rem",
-        color: "var(--muted)",
-        fontSize: "0.875rem",
-        textAlign: "center",
-        cursor: "pointer",
-        width: "100%",
-        background: "transparent",
-        outline: "none",
-        border: "none",
-      }}
+      className="mx-auto mt-6 w-full max-w-[1280px] border-none bg-transparent pt-6 text-center text-sm text-muted outline-none cursor-pointer sm:text-base"
     >
       Copyright © {year} FROM THE STRESS. Powered by Nghĩa Đặng.
     </button>

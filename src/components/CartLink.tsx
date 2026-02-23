@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useCartCount } from '@/hooks/useCartCount';
+import Link from "next/link";
+import { useCartCount } from "@/hooks/useCartCount";
 
 export function CartLink() {
   const count = useCartCount();
@@ -9,26 +9,12 @@ export function CartLink() {
   return (
     <Link
       href="/gio-hang"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        color: 'var(--muted)',
-      }}
+      className="flex items-center gap-2 text-muted text-sm sm:text-base"
     >
       <span aria-hidden>🛒</span>
       <span>Giỏ hàng</span>
       {count > 0 && (
-        <span
-          style={{
-            background: 'var(--accent)',
-            color: 'var(--bg)',
-            borderRadius: 9999,
-            padding: '0.15rem 0.5rem',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-          }}
-        >
+        <span className="rounded-full bg-accent px-2 py-0.5 text-bg text-xs font-bold">
           {count}
         </span>
       )}

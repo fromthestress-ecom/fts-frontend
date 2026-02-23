@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import type { Cart } from '@/lib/api';
-import { setCartCount } from '@/hooks/useCartCount';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import type { Cart } from "@/lib/api";
+import { setCartCount } from "@/hooks/useCartCount";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 function getGuestId(): string {
-  if (typeof window === 'undefined') return '';
-  let id = localStorage.getItem('streetwear-guest-id');
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("streetwear-guest-id");
   if (!id) {
     id = `guest-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    localStorage.setItem('streetwear-guest-id', id);
+    localStorage.setItem("streetwear-guest-id", id);
   }
   return id;
 }
@@ -23,14 +23,16 @@ export function CartContent() {
 
   const loadCart = async () => {
     const guestId = getGuestId();
-    const res = await fetch(`${API}/cart`, { headers: { 'x-guest-id': guestId } });
+    const res = await fetch(`${API}/cart`, {
+      headers: { "x-guest-id": guestId },
+    });
     if (res.ok) {
       const data = (await res.json()) as Cart;
       setCart(data);
       const total = data.items?.reduce((s, i) => s + i.quantity, 0) ?? 0;
       setCartCount(total);
     } else {
-      setCart({ _id: '', items: [] });
+      setCart({ _id: "", items: [] });
     }
     setLoading(false);
   };
@@ -42,8 +44,11 @@ export function CartContent() {
   const updateQuantity = async (productId: string, quantity: number) => {
     const guestId = getGuestId();
     const res = await fetch(`${API}/cart/items/${productId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-guest-id': guestId },
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-guest-id": guestId,
+      },
       body: JSON.stringify({ quantity }),
     });
     if (res.ok) loadCart();
@@ -52,21 +57,24 @@ export function CartContent() {
   const removeItem = async (productId: string) => {
     const guestId = getGuestId();
     await fetch(`${API}/cart/items/${productId}`, {
-      method: 'DELETE',
-      headers: { 'x-guest-id': guestId },
+      method: "DELETE",
+      headers: { "x-guest-id": guestId },
     });
     loadCart();
   };
 
   if (loading) {
-    return <p style={{ color: 'var(--muted)' }}>Đang tải giỏ hàng...</p>;
+    return <p className="text-muted">Đang tải giỏ hàng...</p>;
   }
 
   if (!cart?.items?.length) {
     return (
-      <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
+      <div className="py-12 text-center text-muted">
         <p>Giỏ hàng trống.</p>
-        <Link href="/san-pham" style={{ color: 'var(--accent)', marginTop: '1rem', display: 'inline-block' }}>
+        <Link
+          href="/san-pham"
+          className="mt-4 inline-block font-semibold text-accent hover:underline"
+        >
           Mua sắm ngay
         </Link>
       </div>
@@ -80,121 +88,87 @@ export function CartContent() {
 
   return (
     <>
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+      <ul className="list-none p-0 m-0">
         {cart.items.map((item) => {
-          const p = item.productId as { _id: string; name: string; price: number; images?: string[] };
+          const p = item.productId as {
+            _id: string;
+            name: string;
+            price: number;
+            images?: string[];
+            slug?: string;
+          };
           const lineTotal = (p?.price ?? 0) * item.quantity;
           return (
             <li
-              key={`${p._id}-${item.size ?? ''}-${item.color ?? ''}`}
-              style={{
-                display: 'flex',
-                gap: '1rem',
-                padding: '1rem 0',
-                borderBottom: '1px solid var(--border)',
-              }}
+              key={`${p._id}-${item.size ?? ""}-${item.color ?? ""}`}
+              className="flex gap-4 border-b border-border py-4"
             >
-              <div
-                style={{
-                  width: 80,
-                  height: 80,
-                  background: 'var(--surface)',
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                }}
-              >
+              <div className="h-20 w-20 shrink-0 overflow-hidden rounded bg-surface">
                 {p?.images?.[0] ? (
-                  <img src={p.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img
+                    src={p.images[0]}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : null}
               </div>
-              <div style={{ flex: 1 }}>
-                <Link href={`/san-pham/${(p as { slug?: string }).slug ?? p._id}`} style={{ fontWeight: 600 }}>
+              <div className="min-w-0 flex-1">
+                <Link
+                  href={`/san-pham/${p?.slug ?? p._id}`}
+                  className="font-semibold hover:underline"
+                >
                   {p?.name}
                 </Link>
                 {(item.size || item.color) && (
-                  <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--muted)' }}>
-                    {[item.size, item.color].filter(Boolean).join(' / ')}
+                  <p className="mt-1 text-sm text-muted">
+                    {[item.size, item.color].filter(Boolean).join(" / ")}
                   </p>
                 )}
-                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div className="mt-2 flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => updateQuantity(p._id, Math.max(0, item.quantity - 1))}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      border: '1px solid var(--border)',
-                      background: 'var(--surface)',
-                      borderRadius: 4,
-                      color: 'var(--text)',
-                    }}
+                    onClick={() =>
+                      updateQuantity(p._id, Math.max(0, item.quantity - 1))
+                    }
+                    className="flex h-7 w-7 items-center justify-center rounded border border-border bg-surface text-text text-sm"
                   >
                     −
                   </button>
-                  <span style={{ minWidth: 24, textAlign: 'center' }}>{item.quantity}</span>
+                  <span className="min-w-6 text-center text-sm">
+                    {item.quantity}
+                  </span>
                   <button
                     type="button"
                     onClick={() => updateQuantity(p._id, item.quantity + 1)}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      border: '1px solid var(--border)',
-                      background: 'var(--surface)',
-                      borderRadius: 4,
-                      color: 'var(--text)',
-                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded border border-border bg-surface text-text text-sm"
                   >
                     +
                   </button>
                   <button
                     type="button"
                     onClick={() => removeItem(p._id)}
-                    style={{
-                      marginLeft: 'auto',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--muted)',
-                      fontSize: '0.875rem',
-                    }}
+                    className="ml-auto border-none bg-transparent text-sm text-muted hover:text-text"
                   >
                     Xóa
                   </button>
                 </div>
               </div>
-              <div style={{ fontWeight: 700, color: 'var(--accent)' }}>
-                {new Intl.NumberFormat('vi-VN').format(lineTotal)}₫
+              <div className="font-bold text-accent text-sm sm:text-base">
+                {new Intl.NumberFormat("vi-VN").format(lineTotal)}₫
               </div>
             </li>
           );
         })}
       </ul>
-      <div
-        style={{
-          marginTop: '2rem',
-          paddingTop: '1rem',
-          borderTop: '1px solid var(--border)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <span style={{ fontSize: '1.125rem' }}>Tạm tính</span>
-        <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)' }}>
-          {new Intl.NumberFormat('vi-VN').format(subtotal)}₫
+      <div className="mt-8 flex items-center justify-between border-t border-border pt-4">
+        <span className="text-lg">Tạm tính</span>
+        <span className="text-xl font-bold text-accent">
+          {new Intl.NumberFormat("vi-VN").format(subtotal)}₫
         </span>
       </div>
       <Link
         href="/thanh-toan"
-        style={{
-          display: 'inline-block',
-          marginTop: '1.5rem',
-          padding: '0.875rem 2rem',
-          background: 'var(--accent)',
-          color: 'var(--bg)',
-          fontWeight: 700,
-          borderRadius: 4,
-        }}
+        className="mt-6 inline-block rounded bg-accent px-8 py-3.5 font-bold text-bg hover:opacity-90"
       >
         Thanh toán
       </Link>

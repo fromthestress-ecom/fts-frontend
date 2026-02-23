@@ -312,75 +312,74 @@ export default function AdminProductsPage() {
 
   return (
     <>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', marginBottom: '1rem' }}>
-        Sản phẩm
-      </h1>
+      <h1 className="font-display mb-4 text-xl sm:text-2xl">Sản phẩm</h1>
       {editingId && (
-        <p style={{ marginBottom: '1rem', color: 'var(--accent)', fontSize: '0.875rem' }}>
-          Đang sửa sản phẩm. <button type="button" onClick={resetForm} style={{ ...btnPrimary, background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)' }}>Hủy</button>
+        <p className="mb-4 text-sm text-accent">
+          Đang sửa sản phẩm.{" "}
+          <button
+            type="button"
+            onClick={resetForm}
+            className="cursor-pointer rounded border border-border bg-transparent px-4 py-2 font-semibold text-muted"
+          >
+            Hủy
+          </button>
         </p>
       )}
       <form
         onSubmit={handleSubmit}
-        style={{
-          background: 'var(--bg)',
-          border: '1px solid var(--border)',
-          borderRadius: 8,
-          padding: '1rem',
-          marginBottom: '1.5rem',
-        }}
+        className="mb-6 rounded-lg border border-border bg-bg p-4"
       >
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label style={labelStyle}>Slug *</label>
+            <label className={labelClass}>Slug *</label>
             <input
               value={form.slug}
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
               placeholder="hoodie-black"
               required
-              style={inputStyle}
+              className={inputClass}
             />
           </div>
           <div>
-            <label style={labelStyle}>Tên *</label>
+            <label className={labelClass}>Tên *</label>
             <input
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Hoodie Black"
               required
-              style={inputStyle}
+              className={inputClass}
             />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label style={labelStyle}>Giá (VNĐ) *</label>
+            <label className={labelClass}>Giá (VNĐ) *</label>
             <input
               type="number"
               value={form.price}
               onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
               placeholder="450000"
               required
-              style={inputStyle}
+              className={inputClass}
             />
           </div>
           <div>
-            <label style={labelStyle}>Giá so sánh (VNĐ)</label>
+            <label className={labelClass}>Giá so sánh (VNĐ)</label>
             <input
               type="number"
               value={form.compareAtPrice}
               onChange={(e) => setForm((f) => ({ ...f, compareAtPrice: e.target.value }))}
               placeholder="550000"
-              style={inputStyle}
+              className={inputClass}
             />
           </div>
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={labelStyle}>Danh mục</label>
+        <div className="mb-4">
+          <label className={labelClass}>Danh mục</label>
           <select
             value={form.categoryId}
             onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
-            style={inputStyle}
+            className={inputClass}
           >
             <option value="">-- Chọn --</option>
             {categories.map((c) => (
@@ -390,79 +389,50 @@ export default function AdminProductsPage() {
             ))}
           </select>
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={labelStyle}>Mô tả</label>
+        <div className="mb-4">
+          <label className={labelClass}>Mô tả</label>
           <textarea
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             rows={2}
-            style={{ ...inputStyle, width: '100%' }}
+            className={inputClass}
           />
         </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={labelStyle}>Ảnh</label>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+        <div className="mb-4">
+          <label className={labelClass}>Ảnh</label>
+          <div className="mb-2 flex items-center gap-2">
             <input
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
               multiple
               onChange={handleFileSelect}
               disabled={uploading}
-              style={{ fontSize: '0.875rem' }}
+              className="text-sm"
             />
-            {uploading && <span style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>Đang upload...</span>}
+            {uploading && <span className="text-sm text-muted">Đang upload...</span>}
           </div>
           {form.images.length > 0 && (
             <>
-              <p style={{ color: 'var(--accent)', fontSize: '0.75rem', marginTop: '0.5rem', marginBottom: '0.25rem' }}>
+              <p className="mb-1 mt-2 text-xs text-accent">
                 💡 Kéo thả ảnh để sắp xếp thứ tự
               </p>
               <div
                 ref={imagesContainerRef}
-                style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}
+                className="mt-2 flex flex-wrap gap-2"
               >
                 {form.images.map((url, idx) => (
                   <div
                     key={`${url}-${idx}`}
                     data-url={url}
-                    style={{
-                      position: 'relative',
-                      width: 100,
-                      height: 100,
-                      border: '2px solid var(--border)',
-                      borderRadius: 4,
-                      overflow: 'hidden',
-                      background: 'var(--surface)',
-                      cursor: 'move',
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--accent)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--border)';
-                    }}
+                    className="relative h-[100px] w-[100px] cursor-move overflow-hidden rounded border-2 border-border bg-surface transition-colors hover:border-accent"
                   >
                     <img
                       src={url}
                       alt=""
                       data-url={url}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                      className="h-full w-full object-cover pointer-events-none"
                     />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 2,
-                        left: 2,
-                        background: 'rgba(0,0,0,0.8)',
-                        color: '#fff',
-                        borderRadius: 4,
-                        padding: '2px 4px',
-                        fontSize: '10px',
-                        pointerEvents: 'none',
-                        userSelect: 'none',
-                      }}
-                    >
+                    <div className="pointer-events-none absolute left-0.5 top-0.5 rounded bg-black/80 px-1 py-0.5 text-[10px] text-white select-none">
                       ⋮⋮
                     </div>
                     <button
@@ -471,23 +441,7 @@ export default function AdminProductsPage() {
                         e.stopPropagation();
                         removeImage(idx);
                       }}
-                      style={{
-                        position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        width: 24,
-                        height: 24,
-                        background: 'rgba(220,38,38,0.9)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 4,
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 10,
-                      }}
+                      className="absolute right-0.5 top-0.5 z-10 flex h-6 w-6 items-center justify-center rounded border-none bg-red-600/90 text-xs text-white cursor-pointer"
                     >
                       ×
                     </button>
@@ -497,124 +451,108 @@ export default function AdminProductsPage() {
             </>
           )}
         </div>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <div className="mb-4 flex flex-wrap gap-4">
           <div>
-            <label style={labelStyle}>Size (cách nhau dấu phẩy)</label>
+            <label className={labelClass}>Size (cách nhau dấu phẩy)</label>
             <input
               value={form.sizes}
               onChange={(e) => setForm((f) => ({ ...f, sizes: e.target.value }))}
               placeholder="S,M,L,XL"
-              style={inputStyle}
+              className={inputClass}
             />
           </div>
           <div>
-            <label style={labelStyle}>Màu (cách nhau dấu phẩy)</label>
+            <label className={labelClass}>Màu (cách nhau dấu phẩy)</label>
             <input
               value={form.colors}
               onChange={(e) => setForm((f) => ({ ...f, colors: e.target.value }))}
               placeholder="Đen,Trắng"
-              style={inputStyle}
+              className={inputClass}
             />
           </div>
           <div>
-            <label style={labelStyle}>Tồn kho</label>
+            <label className={labelClass}>Tồn kho</label>
             <input
               type="number"
               value={form.stockQuantity}
               onChange={(e) => setForm((f) => ({ ...f, stockQuantity: e.target.value }))}
-              style={{ ...inputStyle, width: 100 }}
+              className={`${inputClass} w-24`}
             />
           </div>
         </div>
-        <button type="submit" disabled={saving} style={btnPrimary}>
-          {saving ? (editingId ? 'Đang cập nhật...' : 'Đang thêm...') : (editingId ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm')}
+        <button type="submit" disabled={saving} className={btnPrimaryClass}>
+          {saving ? (editingId ? "Đang cập nhật..." : "Đang thêm...") : (editingId ? "Cập nhật sản phẩm" : "Thêm sản phẩm")}
         </button>
-        {message && <span style={{ marginLeft: '1rem', color: 'var(--muted)', fontSize: '0.875rem' }}>{message}</span>}
+        {message && <span className="ml-4 text-sm text-muted">{message}</span>}
       </form>
       {loading ? (
-        <p style={{ color: 'var(--muted)' }}>Đang tải...</p>
+        <p className="text-muted">Đang tải...</p>
       ) : (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <span style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>
+          <div className="mb-3 flex items-center gap-3">
+            <span className="text-sm text-muted">
               💡 Kéo biểu tượng ↕ để sắp xếp thứ tự sản phẩm
             </span>
             <button
               type="button"
               disabled={!orderDirty || orderSaving}
               onClick={saveProductOrder}
-              style={{
-                ...btnPrimary,
-                background: orderDirty ? 'var(--accent)' : 'var(--border)',
-                cursor: orderDirty ? 'pointer' : 'not-allowed',
-                opacity: orderSaving ? 0.8 : 1,
-              }}
+              className={`rounded border-none px-4 py-2 font-semibold text-bg ${orderDirty ? "cursor-pointer bg-accent" : "cursor-not-allowed bg-border"} ${orderSaving ? "opacity-80" : ""}`}
             >
-              {orderSaving ? 'Đang lưu...' : 'Lưu thứ tự'}
+              {orderSaving ? "Đang lưu..." : "Lưu thứ tự"}
             </button>
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)' }}>
-              <th style={{ width: 44, padding: '0.5rem' }}></th>
-              <th style={{ textAlign: 'left', padding: '0.5rem' }}>Slug</th>
-              <th style={{ textAlign: 'left', padding: '0.5rem' }}>Tên</th>
-              <th style={{ textAlign: 'right', padding: '0.5rem' }}>Giá</th>
-              <th style={{ textAlign: 'left', padding: '0.5rem' }}>Danh mục</th>
-              <th style={{ textAlign: 'right', padding: '0.5rem' }}></th>
-            </tr>
-          </thead>
-          <tbody ref={productsTbodyRef}>
-            {products.map((p) => (
-              <tr key={p._id} data-id={p._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ padding: '0.5rem' }}>
-                  <span
-                    className="drag-handle"
-                    title="Kéo để sắp xếp"
-                    style={{
-                      display: 'inline-flex',
-                      width: 28,
-                      height: 28,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '1px solid var(--border)',
-                      borderRadius: 6,
-                      color: 'var(--muted)',
-                      cursor: 'grab',
-                      userSelect: 'none',
-                      background: 'var(--bg)',
-                    }}
-                  >
-                    ↕
-                  </span>
-                </td>
-                <td style={{ padding: '0.5rem' }}>{p.slug}</td>
-                <td style={{ padding: '0.5rem' }}>{p.name}</td>
-                <td style={{ padding: '0.5rem', textAlign: 'right' }}>
-                  {new Intl.NumberFormat('vi-VN').format(p.price)}₫
-                </td>
-                <td style={{ padding: '0.5rem' }}>
-                  {p.categoryId && typeof p.categoryId === 'object' ? p.categoryId.name : '-'}
-                </td>
-                <td style={{ padding: '0.5rem', textAlign: 'right' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(p)}
-                    style={{ ...btnPrimary, marginRight: '0.5rem' }}
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(p._id)}
-                    style={{ ...btnPrimary, background: '#dc2626', color: '#fff' }}
-                  >
-                    Xóa
-                  </button>
-                </td>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="w-11 p-2"></th>
+                <th className="p-2 text-left">Slug</th>
+                <th className="p-2 text-left">Tên</th>
+                <th className="p-2 text-right">Giá</th>
+                <th className="p-2 text-left">Danh mục</th>
+                <th className="p-2 text-right"></th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
+            <tbody ref={productsTbodyRef}>
+              {products.map((p) => (
+                <tr key={p._id} data-id={p._id} className="border-b border-border">
+                  <td className="p-2">
+                    <span
+                      className="drag-handle inline-flex h-7 w-7 cursor-grab select-none items-center justify-center rounded-md border border-border bg-bg text-muted"
+                      title="Kéo để sắp xếp"
+                    >
+                      ↕
+                    </span>
+                  </td>
+                  <td className="p-2">{p.slug}</td>
+                  <td className="p-2">{p.name}</td>
+                  <td className="p-2 text-right">
+                    {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+                  </td>
+                  <td className="p-2">
+                    {p.categoryId && typeof p.categoryId === "object"
+                      ? p.categoryId.name
+                      : "-"}
+                  </td>
+                  <td className="p-2 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(p)}
+                      className={`${btnPrimaryClass} mr-2`}
+                    >
+                      Sửa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(p._id)}
+                      className="cursor-pointer rounded border-none bg-red-600 px-4 py-2 font-semibold text-white"
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </>
       )}
@@ -622,26 +560,6 @@ export default function AdminProductsPage() {
   );
 }
 
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '0.75rem',
-  color: 'var(--muted)',
-  marginBottom: '0.25rem',
-};
-const inputStyle: React.CSSProperties = {
-  padding: '0.5rem 0.75rem',
-  background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  borderRadius: 4,
-  color: 'var(--text)',
-  width: '100%',
-};
-const btnPrimary: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  background: 'var(--accent)',
-  color: 'var(--bg)',
-  fontWeight: 600,
-  border: 'none',
-  borderRadius: 4,
-  cursor: 'pointer',
-};
+const labelClass = 'mb-1 block text-xs text-muted';
+const inputClass = 'w-full rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base';
+const btnPrimaryClass = 'cursor-pointer rounded border-none bg-accent px-4 py-2 font-semibold text-bg';

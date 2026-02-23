@@ -21,15 +21,7 @@ export function ProductImageSlider({
 
   if (!images || images.length === 0) {
     return (
-      <div
-        style={{
-          aspectRatio: "1",
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: 8,
-          overflow: "hidden",
-        }}
-      />
+      <div className="aspect-square overflow-hidden rounded-lg border border-border bg-surface" />
     );
   }
 
@@ -54,43 +46,25 @@ export function ProductImageSlider({
 
   return (
     <div className="product-image-slider">
-      {/* Main slider */}
-      <div
-        className="product-image-slider__main"
-        style={{
-          aspectRatio: "1",
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: 8,
-          overflow: "hidden",
-          marginBottom: "1rem",
-          maxWidth: 500,
-        }}
-      >
+      <div className="product-image-slider__main mb-4 max-w-[500px] aspect-square overflow-hidden rounded-lg border border-border bg-surface">
         <Slider ref={mainSliderRef} {...mainSliderSettings}>
           {images.map((src, index) => (
             <div key={index} className="product-image-slider__slide">
               <img
                 src={src}
                 alt={`${productName} - Ảnh ${index + 1}`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
+                className="h-full w-full object-cover"
               />
             </div>
           ))}
         </Slider>
       </div>
 
-      {/* Thumbnail navigation */}
       {images.length > 1 && (
         <div
+          className="grid gap-2"
           style={{
-            display: "grid",
             gridTemplateColumns: `repeat(${Math.min(images.length, MAX_THUMBNAILS)}, 1fr)`,
-            gap: "0.5rem",
           }}
         >
           {visibleThumbnails.map((src, index) => (
@@ -98,41 +72,20 @@ export function ProductImageSlider({
               key={index}
               type="button"
               onClick={() => handleThumbnailClick(index)}
-              style={{
-                aspectRatio: "1",
-                background: "var(--surface)",
-                border: `2px solid ${currentSlide === index ? "var(--accent)" : "var(--border)"}`,
-                borderRadius: 4,
-                overflow: "hidden",
-                cursor: "pointer",
-                padding: 0,
-                position: "relative",
-              }}
+              className={`relative aspect-square cursor-pointer overflow-hidden rounded border-2 p-0 ${
+                currentSlide === index
+                  ? "border-accent bg-surface"
+                  : "border-border bg-surface"
+              }`}
               aria-label={`Xem ảnh ${index + 1}`}
             >
               <img
                 src={src}
                 alt=""
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
+                className="h-full w-full object-cover"
               />
               {index === MAX_THUMBNAILS - 1 && remainingCount > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(0, 0, 0, 0.6)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "var(--text)",
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                  }}
-                >
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60 font-bold text-text">
                   +{remainingCount}
                 </div>
               )}

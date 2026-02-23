@@ -21,13 +21,6 @@ const BRAND_ITEMS = [
   },
 ] as const satisfies readonly BrandItem[];
 
-const SECTION_TITLE_STYLE = {
-  fontFamily: "var(--font-display)",
-  fontSize: "2rem",
-  letterSpacing: "0.05em",
-  marginBottom: "1.5rem",
-} as const;
-
 async function getFeaturedProducts(): Promise<ProductListResult> {
   try {
     return await fetchApi<ProductListResult>("/products?limit=8&sort=newest");
@@ -40,71 +33,32 @@ function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section
-      style={{ maxWidth: 1280, margin: "0 auto", padding: "4rem 1.5rem" }}
-    >
-      <h2 style={{ ...SECTION_TITLE_STYLE, marginBottom: "2rem" }}>
+    <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
+      <h2 className="font-display mb-6 text-xl tracking-wide sm:mb-8 sm:text-2xl">
         SẢN PHẨM MỚI
       </h2>
-      <ul
-        style={{
-          listStyle: "none",
-          margin: 0,
-          padding: 0,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: "1.5rem",
-        }}
-      >
+      <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
           <li key={p._id}>
             <Link
               href={`/san-pham/${p.slug}`}
-              className="product-card"
-              style={{
-                display: "block",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: 8,
-                overflow: "hidden",
-              }}
+              className="product-card block overflow-hidden rounded-lg border border-border bg-surface"
             >
-              <div
-                style={{
-                  aspectRatio: "1",
-                  background: "var(--border)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="relative aspect-square overflow-hidden bg-border">
                 {p.images?.[0] ? (
                   <img
                     src={p.images[0]}
                     alt=""
                     loading="lazy"
-                    className="product-card__image-inner"
-                    style={{ objectFit: "cover" }}
+                    className="product-card__image-inner h-full w-full object-cover"
                   />
                 ) : null}
               </div>
-              <div style={{ padding: "1rem" }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                    minHeight: "42px",
-                  }}
-                >
+              <div className="p-4">
+                <h3 className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
                   {p.name}
                 </h3>
-                <p
-                  style={{
-                    margin: "0.25rem 0 0",
-                    color: "var(--accent)",
-                    fontWeight: 700,
-                  }}
-                >
+                <p className="mt-1 text-sm font-bold text-accent sm:text-base">
                   {new Intl.NumberFormat("vi-VN").format(p.price)}₫
                 </p>
               </div>
@@ -112,11 +66,8 @@ function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
           </li>
         ))}
       </ul>
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <Link
-          href="/san-pham"
-          style={{ color: "var(--accent)", fontWeight: 600 }}
-        >
+      <div className="mt-8 text-center">
+        <Link href="/san-pham" className="font-semibold text-accent hover:underline">
           Xem tất cả →
         </Link>
       </div>
@@ -128,10 +79,10 @@ function PromoSection({ slides }: { slides: readonly PromoSlide[] }) {
   if (slides.length === 0) return null;
 
   return (
-    <section
-      style={{ maxWidth: 1280, margin: "0 auto", padding: "4rem 1.5rem" }}
-    >
-      <h2 style={SECTION_TITLE_STYLE}>KHUYẾN MÃI</h2>
+    <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
+      <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
+        KHUYẾN MÃI
+      </h2>
       <PromoSlider slides={slides} />
     </section>
   );
@@ -139,66 +90,23 @@ function PromoSection({ slides }: { slides: readonly PromoSlide[] }) {
 
 function BrandsSection() {
   return (
-    <section
-      style={{ maxWidth: 1280, margin: "0 auto", padding: "0 1.5rem 4rem" }}
-    >
-      <h2 style={SECTION_TITLE_STYLE}>THƯƠNG HIỆU</h2>
-      <ul
-        style={{
-          listStyle: "none",
-          margin: 0,
-          padding: 0,
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "1rem",
-        }}
-      >
+    <section className="mx-auto max-w-[1280px] px-4 pb-16 pt-0 sm:px-6">
+      <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
+        THƯƠNG HIỆU
+      </h2>
+      <ul className="grid list-none grid-cols-1 gap-4 p-0 m-0 sm:grid-cols-2 sm:gap-6">
         {BRAND_ITEMS.map((brand) => (
-          <li
-            key={brand.src}
-            style={{
-              overflow: "hidden",
-            }}
-          >
-            <figure
-              style={{
-                margin: 0,
-                padding: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column",
-              }}
-            >
-              <div
-                style={{
-                  width: "50%",
-                  aspectRatio: "1 / 1",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
+          <li key={brand.src} className="overflow-hidden">
+            <figure className="m-0 flex flex-col items-center justify-center p-5">
+              <div className="grid w-1/2 place-items-center aspect-square">
                 <img
                   src={brand.src}
                   alt={brand.title}
                   loading="lazy"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                  }}
+                  className="h-full w-full object-contain"
                 />
               </div>
-              <figcaption
-                style={{
-                  marginTop: "0.75rem",
-                  color: "var(--muted)",
-                  fontSize: "0.95rem",
-                  textTransform: "capitalize",
-                  textAlign: "center",
-                  fontFamily: "var(--font-display)",
-                }}
-              >
+              <figcaption className="font-display mt-3 text-center text-sm capitalize text-muted sm:text-base">
                 {brand.title}
               </figcaption>
             </figure>

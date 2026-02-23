@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { Product } from '@/lib/api';
-import { setCartCount } from '@/hooks/useCartCount';
+import { useState } from "react";
+import type { Product } from "@/lib/api";
+import { setCartCount } from "@/hooks/useCartCount";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 function getGuestId(): string {
-  if (typeof window === 'undefined') return '';
-  let id = localStorage.getItem('streetwear-guest-id');
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("streetwear-guest-id");
   if (!id) {
     id = `guest-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    localStorage.setItem('streetwear-guest-id', id);
+    localStorage.setItem("streetwear-guest-id", id);
   }
   return id;
 }
@@ -29,9 +29,13 @@ function OptionGroup({ label, options, value, onChange }: OptionGroupProps) {
   if (!options.length) return null;
 
   return (
-    <div style={{ marginBottom: '1rem' }}>
-      <div style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>{label}</div>
-      <div role="radiogroup" aria-label={label} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+    <div className="mb-4">
+      <div className="mb-2 text-sm">{label}</div>
+      <div
+        role="radiogroup"
+        aria-label={label}
+        className="flex flex-wrap gap-2"
+      >
         {options.map((opt) => {
           const isSelected = opt === value;
           return (
@@ -41,15 +45,11 @@ function OptionGroup({ label, options, value, onChange }: OptionGroupProps) {
               role="radio"
               aria-checked={isSelected}
               onClick={() => onChange(opt)}
-              style={{
-                padding: '0.5rem 0.75rem',
-                background: isSelected ? 'var(--accent)' : 'var(--surface)',
-                color: isSelected ? 'var(--bg)' : 'var(--text)',
-                border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
-                borderRadius: 999,
-                fontWeight: isSelected ? 700 : 500,
-                lineHeight: 1,
-              }}
+              className={`rounded-full border px-3 py-2 text-sm leading-none sm:text-base ${
+                isSelected
+                  ? "border-accent bg-accent font-bold text-bg"
+                  : "border-border bg-surface font-medium text-text"
+              }`}
             >
               {opt}
             </button>
@@ -62,20 +62,22 @@ function OptionGroup({ label, options, value, onChange }: OptionGroupProps) {
 
 export function AddToCartForm({ product }: AddToCartFormProps) {
   const [quantity, setQuantity] = useState(1);
-  const [size, setSize] = useState(product.sizes?.[0] ?? '');
-  const [color, setColor] = useState(product.colors?.[0] ?? '');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [size, setSize] = useState(product.sizes?.[0] ?? "");
+  const [color, setColor] = useState(product.colors?.[0] ?? "");
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">(
+    "idle",
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('loading');
+    setStatus("loading");
     try {
       const guestId = getGuestId();
       const res = await fetch(`${API}/cart/items`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-guest-id': guestId,
+          "Content-Type": "application/json",
+          "x-guest-id": guestId,
         },
         body: JSON.stringify({
           productId: product._id,
@@ -84,13 +86,13 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
           color: color || undefined,
         }),
       });
-      if (!res.ok) throw new Error('Failed to add');
+      if (!res.ok) throw new Error("Failed to add");
       const data = (await res.json()) as { items?: { quantity: number }[] };
       const total = data.items?.reduce((s, i) => s + i.quantity, 0) ?? quantity;
       setCartCount(total);
-      setStatus('done');
+      setStatus("done");
     } catch {
-      setStatus('error');
+      setStatus("error");
     }
   };
 
@@ -108,50 +110,34 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
         value={color}
         onChange={setColor}
       />
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-          Số lượng
-        </label>
+      <div className="mb-4">
+        <label className="mb-2 block text-sm">Số lượng</label>
         <input
           type="number"
           min={1}
           max={product.stockQuantity || 99}
           value={quantity}
           onChange={(e) => setQuantity(Number(e.target.value) || 1)}
-          style={{
-            width: 80,
-            padding: '0.5rem 0.75rem',
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 4,
-            color: 'var(--text)',
-          }}
+          className="w-20 rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base"
         />
       </div>
       <button
         type="submit"
-        disabled={status === 'loading' || !product.inStock}
-        style={{
-          padding: '0.875rem 2rem',
-          background: product.inStock ? 'var(--accent)' : 'var(--border)',
-          color: 'var(--bg)',
-          fontWeight: 700,
-          border: 'none',
-          borderRadius: 4,
-        }}
+        disabled={status === "loading" || !product.inStock}
+        className={`rounded border-none px-8 py-3.5 font-bold text-bg ${
+          product.inStock ? "bg-accent" : "bg-border"
+        }`}
       >
-        {status === 'loading'
-          ? 'Đang thêm...'
-          : status === 'done'
-            ? 'Đã thêm vào giỏ'
+        {status === "loading"
+          ? "Đang thêm..."
+          : status === "done"
+            ? "Đã thêm vào giỏ"
             : product.inStock
-              ? 'Thêm vào giỏ'
-              : 'Hết hàng'}
+              ? "Thêm vào giỏ"
+              : "Hết hàng"}
       </button>
-      {status === 'error' && (
-        <p style={{ marginTop: '0.5rem', color: '#ef4444', fontSize: '0.875rem' }}>
-          Có lỗi, vui lòng thử lại.
-        </p>
+      {status === "error" && (
+        <p className="mt-2 text-sm text-red-500">Có lỗi, vui lòng thử lại.</p>
       )}
     </form>
   );

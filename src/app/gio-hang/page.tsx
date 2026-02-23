@@ -1,23 +1,15 @@
-import Link from 'next/link';
-import { CartContent } from '@/components/CartContent';
-import type { Metadata } from 'next';
+import { CartContent } from "@/components/CartContent";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Giỏ hàng',
-  description: 'Giỏ hàng mua sắm thời trang streetwear.',
+  title: "Giỏ hàng",
+  description: "Giỏ hàng mua sắm thời trang streetwear.",
 };
 
 export default function CartPage() {
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <h1
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '2rem',
-          letterSpacing: '0.05em',
-          marginBottom: '1.5rem',
-        }}
-      >
+    <div className="mx-auto max-w-[960px] px-4 py-8 sm:px-6">
+      <h1 className="font-display mb-6 text-2xl tracking-wide sm:text-3xl">
         GIỎ HÀNG
       </h1>
       <CartContent />

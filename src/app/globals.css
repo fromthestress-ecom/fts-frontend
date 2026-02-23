@@ -1,3 +1,17 @@
+@import "tailwindcss";
+
+/* Design tokens: map to Tailwind utilities (bg-bg, text-muted, etc.) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
 :root {
   --bg: #0a0a0a;
   --surface: #141414;
@@ -10,36 +24,27 @@
   --font-display: "Bebas Neue", "Impact", sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    @apply bg-bg text-text font-sans antialiased;
+  }
+  a {
+    @apply text-inherit no-underline;
+  }
+  button {
+    font-family: inherit;
+    @apply cursor-pointer;
+  }
+  img {
+    @apply max-w-full h-auto block;
+  }
 }
 
 /* Hero variant: each slide is a full hero section */
@@ -75,7 +80,6 @@ img {
   object-fit: cover;
   display: block;
 }
-/* Product image slider arrows */
 .product-image-slider__main .slick-prev,
 .product-image-slider__main .slick-next {
   z-index: 10;
@@ -119,7 +123,6 @@ img {
   transition: transform 0.3s ease-out;
   will-change: transform;
 }
-
 .product-card:hover .product-card__image-inner {
   transform: scale(1.2);
   transform-origin: center;

@@ -49,26 +49,14 @@ export function PromoSlider({ slides }: { slides: readonly PromoSlide[] }) {
             <Link
               href={slide.href}
               aria-label={slide.label}
-              style={{
-                display: "block",
-                borderRadius: 12,
-                overflow: "hidden",
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-              }}
+              className="block overflow-hidden rounded-xl border border-border bg-surface"
             >
-              <div
-                style={{
-                  width: "100%",
-                  position: "relative",
-                  background: "var(--border)",
-                }}
-              >
+              <div className="relative w-full bg-border aspect-[8/3]">
                 <img
                   src={slide.src}
                   alt={slide.label}
                   loading="lazy"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  className="h-full w-full object-cover"
                 />
               </div>
             </Link>

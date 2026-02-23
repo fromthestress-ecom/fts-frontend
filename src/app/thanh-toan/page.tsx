@@ -1,28 +1,21 @@
-import Link from 'next/link';
-import { CheckoutForm } from '@/components/CheckoutForm';
-import type { Metadata } from 'next';
+import Link from "next/link";
+import { CheckoutForm } from "@/components/CheckoutForm";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Thanh toán',
-  description: 'Thanh toán đơn hàng thời trang streetwear.',
+  title: "Thanh toán",
+  description: "Thanh toán đơn hàng thời trang streetwear.",
 };
 
 export default function CheckoutPage() {
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <h1
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '2rem',
-          letterSpacing: '0.05em',
-          marginBottom: '1.5rem',
-        }}
-      >
+    <div className="mx-auto max-w-[640px] px-4 py-8 sm:px-6">
+      <h1 className="font-display mb-6 text-2xl tracking-wide sm:text-3xl">
         THANH TOÁN
       </h1>
       <CheckoutForm />
-      <p style={{ marginTop: '1rem', color: 'var(--muted)', fontSize: '0.875rem' }}>
-        <Link href="/gio-hang" style={{ color: 'var(--accent)' }}>
+      <p className="mt-4 text-sm text-muted sm:text-base">
+        <Link href="/gio-hang" className="text-accent hover:underline">
           ← Quay lại giỏ hàng
         </Link>
       </p>
