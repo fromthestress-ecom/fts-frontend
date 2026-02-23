@@ -46,10 +46,10 @@ img {
 .banner-slider--hero .slick-slider,
 .banner-slider--hero .slick-list,
 .banner-slider--hero .slick-track {
-  min-height: 70vh;
+  min-height: fit-content;
 }
 .banner-slider--hero .slick-slide > div {
-  min-height: 70vh;
+  min-height: fit-content;
 }
 
 /* Product image slider: main slider fills square container */
