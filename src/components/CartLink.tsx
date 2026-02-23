@@ -18,7 +18,11 @@ export function CartLink({ iconOnly = false, className = "" }: CartLinkProps) {
       aria-label={iconOnly ? "Giỏ hàng" : undefined}
     >
       <span className="relative inline-block" aria-hidden>
-        🛒
+        <img
+          alt="cart-icon"
+          src="/icon/shopping-bag-xxl.png"
+          className="h-[16px] w-[16px] max-md:h-[22px] max-md:w-[22px]"
+        />
         {count > 0 && (
           <span className="absolute -right-2 -top-2 rounded-full bg-accent px-1.5 py-0.5 text-bg text-[10px] font-bold leading-none min-w-[18px] text-center">
             {count}
