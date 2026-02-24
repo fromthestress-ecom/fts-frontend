@@ -3,46 +3,46 @@
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { CartLink } from "./CartLink";
-import { ProductCategoryNav } from "./ProductCategoryNav";
-import { fetchApi } from "@/lib/api";
-import type { Category } from "@/lib/api";
+import { ThemeToggle } from "./ThemeToggle";
 
-const NAV_MAIN = [
-  { href: "/", label: "Trang chủ" },
-  { href: "/san-pham", label: "Sản phẩm", hasSubmenu: true },
-  { href: "/ve-chung-toi", label: "Về chúng tôi" },
-];
+const navConfig = [
+  { label: "Áo", children: ["Boxy", "Baby Tee", "Oversize"] },
+  { label: "Quần", children: ["Cargo", "Shorts", "Jeans"] },
+  { label: "Collection", children: ["Heavy Crown", "Gen Stress"] },
+] as const;
+
+function toSlug(label: string): string {
+  return label.toLowerCase().replace(/\s+/g, "-");
+}
+
+function getChildHref(parentLabel: string, childLabel: string): string {
+  const slug = toSlug(childLabel);
+  const isCollection = parentLabel === "Collection";
+  return isCollection
+    ? `/san-pham?collection=${encodeURIComponent(slug)}`
+    : `/san-pham?phong_cach=${encodeURIComponent(slug)}`;
+}
 
 export function Header() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [productsOpen, setProductsOpen] = useState(false);
+  const [openNavKey, setOpenNavKey] = useState<string | null>(null);
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
-    setProductsOpen(false);
+    setOpenNavKey(null);
+  }, []);
+
+  const toggleNav = useCallback((key: string) => {
+    setOpenNavKey((prev) => (prev === key ? null : key));
   }, []);
 
   useEffect(() => {
     closeMenu();
   }, [pathname, closeMenu]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchApi<Category[]>("/categories")
-      .then((data) => {
-        if (!cancelled) setCategories(data ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setCategories([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -116,57 +116,63 @@ export function Header() {
             Trang chủ
           </Link>
 
-          <div className="flex flex-col gap-1">
-            <button
-              type="button"
-              onClick={() => setProductsOpen((o) => !o)}
-              className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-lg ${
-                isProductsActive
-                  ? "font-semibold text-accent"
-                  : "font-normal text-muted"
-              }`}
-              aria-expanded={productsOpen}
-            >
-              Sản phẩm
-              <span
-                className={`transition-transform duration-200 ${
-                  productsOpen ? "rotate-180" : ""
-                }`}
-              >
-                ▼
-              </span>
-            </button>
-            {productsOpen && (
-              <div className="flex flex-col gap-0.5 pl-4">
-                <Link
-                  href="/san-pham"
-                  onClick={closeMenu}
-                  className={`rounded-lg px-4 py-2.5 text-base ${
-                    pathname === "/san-pham" &&
-                    !pathname?.includes("?danh_muc=")
+          {navConfig.map((item) => {
+            const key = toSlug(item.label);
+            const isOpen = openNavKey === key;
+            return (
+              <div key={key} className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => toggleNav(key)}
+                  className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-lg ${
+                    isProductsActive
                       ? "font-semibold text-accent"
-                      : "text-muted"
+                      : "font-normal text-muted"
                   }`}
+                  aria-expanded={isOpen}
                 >
-                  Tất cả
-                </Link>
-                {categories.map((c) => (
-                  <Link
-                    key={c._id}
-                    href={`/san-pham?danh_muc=${encodeURIComponent(c._id)}`}
-                    onClick={closeMenu}
-                    className={`rounded-lg px-4 py-2.5 text-base ${
-                      pathname?.includes(`danh_muc=${c._id}`)
-                        ? "font-semibold text-accent"
-                        : "text-muted"
+                  {item.label}
+                  <span
+                    className={`transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
                     }`}
                   >
-                    {c.name}
-                  </Link>
-                ))}
+                    <img
+                      alt="arrow-icon"
+                      src="/icon/arrow-down-white.png"
+                      className="h-4 w-4 opacity-50"
+                    />
+                  </span>
+                </button>
+                {isOpen && (
+                  <div className="flex flex-col gap-0.5 pl-4">
+                    {item.children.map((child) => {
+                      const href = getChildHref(item.label, child);
+                      const param = href.split("?")[1] ?? "";
+                      const [key, val] = param.split("=");
+                      const isActive =
+                        pathname === "/san-pham" &&
+                        (searchParams?.get(key ?? "") ?? "") === (val ?? "");
+                      return (
+                        <Link
+                          key={child}
+                          href={href}
+                          onClick={closeMenu}
+                          className={`rounded-lg px-4 py-2.5 text-base ${
+                            isActive
+                              ? "font-semibold text-accent"
+                              : "text-muted"
+                          }`}
+                        >
+                          {child}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })}
 
           <Link
             href="/ve-chung-toi"
@@ -180,8 +186,11 @@ export function Header() {
             Về chúng tôi
           </Link>
 
-          <div className="mt-2 border-t border-border pt-4">
-            <div className="px-4 py-2 text-lg">
+          <div className="mt-2 flex items-center gap-3 border-t border-border pt-4">
+            <div className="px-4 py-2">
+              <ThemeToggle />
+            </div>
+            <div className="text-lg">
               <CartLink />
             </div>
           </div>
@@ -192,7 +201,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-[101] border-b border-border bg-[rgba(10,10,10,0.9)] backdrop-blur-md">
+      <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md">
         <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-0 sm:px-6 max-sm:py-4">
           <div className="flex w-1/3 justify-start sm:w-auto sm:flex-initial">
             <Link
@@ -233,27 +242,45 @@ export function Header() {
             >
               Trang chủ
             </Link>
-            <div className="relative group">
-              <Link
-                href="/san-pham"
-                className={`text-sm sm:text-base ${
-                  isProductsActive
-                    ? "font-semibold text-accent"
-                    : "font-normal text-muted"
-                }`}
-              >
-                Sản phẩm
-              </Link>
-              {categories.length > 0 && (
-                <div className="absolute left-0 top-full z-10 hidden pt-1 group-hover:block">
-                  <ProductCategoryNav
-                    categories={categories}
-                    pathname={pathname}
-                    basePath="/san-pham"
-                  />
+            {navConfig.map((item) => (
+              <div key={item.label} className="relative group">
+                <Link
+                  href="/san-pham"
+                  className={`text-sm sm:text-base ${
+                    isProductsActive
+                      ? "font-semibold text-accent"
+                      : "font-normal text-muted"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+                <div className="absolute left-0 top-full z-10 hidden min-w-[180px] pt-1 group-hover:block">
+                  <div className="rounded-lg border border-border bg-surface py-1 shadow-lg">
+                    {item.children.map((child) => {
+                      const href = getChildHref(item.label, child);
+                      const param = href.split("?")[1] ?? "";
+                      const [key, val] = param.split("=");
+                      const isActive =
+                        pathname === "/san-pham" &&
+                        (searchParams?.get(key ?? "") ?? "") === (val ?? "");
+                      return (
+                        <Link
+                          key={child}
+                          href={href}
+                          className={`block px-4 py-2 text-sm transition-colors duration-150 hover:bg-border/60 hover:text-text ${
+                            isActive
+                              ? "font-semibold text-accent"
+                              : "text-muted"
+                          }`}
+                        >
+                          {child}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            ))}
             <Link
               href="/ve-chung-toi"
               className={`text-sm sm:text-base ${
@@ -264,10 +291,12 @@ export function Header() {
             >
               Về chúng tôi
             </Link>
+            <ThemeToggle />
             <CartLink />
           </nav>
 
-          <div className="flex w-1/3 justify-end gap-3 sm:w-auto sm:flex-initial md:hidden">
+          <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
+            <ThemeToggle />
             <div className="hidden sm:block">
               <CartLink />
             </div>

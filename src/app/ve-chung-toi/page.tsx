@@ -7,7 +7,7 @@ const LOGO_BG_URL =
 export const metadata: Metadata = {
   title: "Về chúng tôi | From the Stress",
   description:
-    "From the Stress to The Best: Biến áp lực thành bản sắc rạng rỡ. Câu chuyện thương hiệu streetwear F.T.S và sứ mệnh đồng hành cùng Gen Stress.",
+    "From the Stress to the Best: Biến áp lực thành bản sắc rạng rỡ. Câu chuyện thương hiệu streetwear F.T.S và sứ mệnh đồng hành cùng Gen Stress.",
 };
 
 export default function VeChungToiPage() {

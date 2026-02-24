@@ -12,16 +12,35 @@
   --font-display: var(--font-display);
 }
 
-:root {
-  --bg: #0a0a0a;
-  --surface: #141414;
-  --border: #262626;
+/* Dark theme (default): #171719 */
+:root,
+[data-theme="dark"] {
+  --bg: #171719;
+  --surface: #1e1e20;
+  --border: #2d2d30;
   --text: #fafafa;
   --muted: #a3a3a3;
   --accent: #eab308;
   --accent-hover: #facc15;
+  --header-bg: rgba(23, 23, 25, 0.95);
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-display: "Bebas Neue", "Impact", sans-serif;
+}
+
+/* Light theme: #F0EEE9 */
+[data-theme="light"] {
+  --bg: #f0eee9;
+  --surface: #e8e6e1;
+  --border: #d4d2cc;
+  --text: #171719;
+  --muted: #525252;
+  --accent: #b8860b;
+  --accent-hover: #c99a0a;
+}
+
+/* Header bar backdrop (light theme) */
+[data-theme="light"] {
+  --header-bg: rgba(240, 238, 233, 0.95);
 }
 
 @layer base {
@@ -45,6 +64,10 @@
   img {
     @apply max-w-full h-auto block;
   }
+}
+
+.header-bar {
+  background: var(--header-bg);
 }
 
 /* Hero variant: each slide is a full hero section */

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ThemeScript } from "@/components/ThemeScript";
 
 const SITE_NAME = "FROM THE STRESS";
 const DEFAULT_DESC =
@@ -38,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <head>
+        <ThemeScript />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
