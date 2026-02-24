@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCartCount } from "@/hooks/useCartCount";
+import { ThemeAwareImg } from "./ThemeAwareImg";
 
 type CartLinkProps = {
   iconOnly?: boolean;
@@ -18,9 +19,10 @@ export function CartLink({ iconOnly = false, className = "" }: CartLinkProps) {
       aria-label={iconOnly ? "Giỏ hàng" : undefined}
     >
       <span className="relative inline-block" aria-hidden>
-        <img
-          alt="cart-icon"
-          src="/icon/shopping-bag-xxl.png"
+        <ThemeAwareImg
+          darkSrc="/icon/shopping-bag-xxl-white.png"
+          lightSrc="/icon/shopping-bag-xxl-black.png"
+          alt=""
           className="h-[16px] w-[16px] max-md:h-[22px] max-md:w-[22px]"
         />
         {count > 0 && (

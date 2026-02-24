@@ -1,8 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-
-const LOGO_BG_URL =
-  "https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_white.png";
+import { AboutLogoBackground } from "@/components/AboutLogoBackground";
 
 export const metadata: Metadata = {
   title: "Về chúng tôi | From the Stress",
@@ -13,11 +11,7 @@ export const metadata: Metadata = {
 export default function VeChungToiPage() {
   return (
     <div className="relative min-h-[60vh]">
-      <div
-        className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-[0.1]"
-        style={{ backgroundImage: `url('${LOGO_BG_URL}')` }}
-        aria-hidden
-      />
+      <AboutLogoBackground />
       <div className="relative z-10 mx-auto max-w-[720px] px-4 py-8 sm:px-6">
         <h1 className="font-display mb-2 text-2xl tracking-wide sm:text-3xl">
           VỀ CHÚNG TÔI

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { CartLink } from "./CartLink";
+import { ThemeAwareImg } from "./ThemeAwareImg";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navConfig = [
@@ -137,9 +138,10 @@ export function Header() {
                       isOpen ? "rotate-180" : ""
                     }`}
                   >
-                    <img
-                      alt="arrow-icon"
-                      src="/icon/arrow-down-white.png"
+                    <ThemeAwareImg
+                      darkSrc="/icon/arrow-down-white.png"
+                      lightSrc="/icon/arrow-down-black.png"
+                      alt=""
                       className="h-4 w-4 opacity-50"
                     />
                   </span>
@@ -208,10 +210,11 @@ export function Header() {
               href="/"
               className="font-display text-xl tracking-[0.15em] text-text hidden sm:inline-block sm:text-2xl"
             >
-              <img
-                src="https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_white.png"
+              <ThemeAwareImg
+                darkSrc="/logo/logo_white.png"
+                lightSrc="/logo/logo_black.png"
                 alt="STREETWEAR"
-                className=" w-[100px] max-md:w-24 object-contain aspect-square"
+                className="w-[100px] max-md:w-24 object-contain aspect-square"
               />
             </Link>
             <div className="sm:hidden">
@@ -223,8 +226,9 @@ export function Header() {
             href="/"
             className="font-display text-xl tracking-[0.15em] text-text flex flex-1 justify-center sm:hidden sm:flex-initial sm:justify-start sm:text-2xl"
           >
-            <img
-              src="https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_white.png"
+            <ThemeAwareImg
+              darkSrc="/logo/logo_white.png"
+              lightSrc="/logo/logo_black.png"
               alt="STREETWEAR"
               className="h-8 w-24 max-md:w-16 object-contain sm:h-9 sm:w-[100px]"
             />

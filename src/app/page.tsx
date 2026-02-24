@@ -1,27 +1,12 @@
 import Link from "next/link";
 import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import { BannerSlider } from "@/components/BannerSlider";
+import { BrandsSectionLogos } from "@/components/BrandsSectionLogos";
 import { FeaturesBar } from "@/components/FeaturesBar";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
-type BrandItem = Readonly<{
-  src: string;
-  title: string;
-}>;
-
-const BRAND_ITEMS = [
-  {
-    src: "https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_white.png",
-    title: "signature logo",
-  },
-  {
-    src: "https://pub-74aaef109f0d41358e5610e57268bc04.r2.dev/pages/logos/logo_new_white.png",
-    title: "fts big logo",
-  },
-] as const satisfies readonly BrandItem[];
 
 async function getFeaturedProducts(): Promise<ProductListResult> {
   try {
@@ -98,28 +83,7 @@ function BrandsSection() {
       <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
         THƯƠNG HIỆU
       </h2>
-      <ul className="flex list-none flex-row flex-wrap items-stretch justify-center gap-4 p-0 m-0 sm:gap-8">
-        {BRAND_ITEMS.map((brand) => (
-          <li
-            key={brand.src}
-            className="flex min-w-0 flex-1 basis-0 items-center justify-center overflow-hidden"
-          >
-            <figure className="m-0 flex flex-col items-center justify-center p-4 sm:p-5">
-              <div className="flex h-[min(18vh,140px)] w-full max-w-[min(45vw,280px)] items-center justify-center">
-                <img
-                  src={brand.src}
-                  alt={brand.title}
-                  loading="lazy"
-                  className="max-h-full max-w-full object-contain"
-                />
-              </div>
-              <figcaption className="font-display mt-3 text-center text-sm capitalize text-muted sm:text-base">
-                {brand.title}
-              </figcaption>
-            </figure>
-          </li>
-        ))}
-      </ul>
+      <BrandsSectionLogos />
     </section>
   );
 }

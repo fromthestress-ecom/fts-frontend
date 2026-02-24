@@ -1,43 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-const THEME_KEY = "fts-theme";
-type Theme = "dark" | "light";
-
-function getStoredTheme(): Theme | null {
-  if (typeof window === "undefined") return null;
-  const stored = window.localStorage.getItem(THEME_KEY);
-  if (stored === "dark" || stored === "light") return stored;
-  return null;
-}
-
-function getSystemTheme(): Theme {
-  if (typeof window === "undefined" || !window.matchMedia) return "dark";
-  return window.matchMedia("(prefers-color-scheme: light)").matches
-    ? "light"
-    : "dark";
-}
-
-function applyTheme(theme: Theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-}
+import { useTheme } from "@/contexts/ThemeContext";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const stored = getStoredTheme();
-    const initial = stored ?? getSystemTheme();
-    setTheme(initial);
-    applyTheme(initial);
-  }, []);
+  const { theme, setTheme } = useTheme();
 
   const toggle = () => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    applyTheme(next);
-    window.localStorage.setItem(THEME_KEY, next);
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -45,7 +14,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={theme === "dark" ? "Bật chế độ sáng" : "Bật chế độ tối"}
-      className="flex size-9 items-center justify-center rounded-lg border border-border bg-surface text-muted transition-colors hover:text-text focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-[var(--bg)]"
+      className="flex size-9 items-center justify-center rounded-lg bg-none outline-none text-muted transition-colors hover:text-text focus:outline-none focus:none "
     >
       {theme === "dark" ? (
         <SunIcon className="size-5" />

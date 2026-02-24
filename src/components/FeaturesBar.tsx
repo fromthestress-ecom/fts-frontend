@@ -1,39 +1,35 @@
+"use client";
+
+import { ThemeAwareImg } from "./ThemeAwareImg";
+
 const FEATURES = [
   {
     title: "MIỄN PHÍ GIAO HÀNG",
     description: "Với hóa đơn từ 500.000 VNĐ",
-    icon: (
-      <img
-        alt="free-shipping-icon"
-        src="/icon/delivery-xxl.png"
-        className="h-8 w-8"
-      />
-    ),
+    darkSrc: "/icon/delivery-xxl-white.png",
+    lightSrc: "/icon/delivery-xxl-black.png",
+    alt: "free-shipping-icon",
   },
   {
     title: "7 NGÀY ĐỔI SẢN PHẨM",
     description: "Đổi sản phẩm trong vòng 7 ngày",
-    icon: (
-      <img
-        alt="7-day-return-icon"
-        src="/icon/empty-box-xxl.png"
-        className="h-8 w-8"
-      />
-    ),
+    darkSrc: "/icon/empty-box-xxl-white.png",
+    lightSrc: "/icon/empty-box-xxl-black.png",
+    alt: "7-day-return-icon",
   },
   {
     title: "MUA HÀNG (09H00 - 22H00, T2 - CN)",
     description: "Hotline Mua hàng 085 378 3578",
-    icon: (
-      <img alt="mua-hang-icon" src="/icon/phone-xxl.png" className="h-8 w-8" />
-    ),
+    darkSrc: "/icon/phone-xxl-white.png",
+    lightSrc: "/icon/phone-xxl-black.png",
+    alt: "mua-hang-icon",
   },
   {
     title: "HỆ THỐNG CỬA HÀNG",
     description: "Cửa hàng trên toàn hệ thống",
-    icon: (
-      <img alt="cua-hang-icon" src="/icon/shop-xxl.png" className="h-8 w-8" />
-    ),
+    darkSrc: "/icon/shop-xxl-white.png",
+    lightSrc: "/icon/shop-xxl-black.png",
+    alt: "cua-hang-icon",
   },
 ] as const;
 
@@ -51,7 +47,12 @@ export function FeaturesBar() {
               className="flex flex-col items-center text-center"
             >
               <div className="mb-4 flex size-16 shrink-0 items-center justify-center rounded-full bg-neutral-700 text-white sm:size-20">
-                {feature.icon}
+                <ThemeAwareImg
+                  darkSrc={feature.darkSrc}
+                  lightSrc={feature.lightSrc}
+                  alt={feature.alt}
+                  className="h-8 w-8"
+                />
               </div>
               <h3 className="mb-1 text-sm font-bold uppercase tracking-wide sm:text-md">
                 {feature.title}
