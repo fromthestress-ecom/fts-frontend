@@ -131,6 +131,31 @@
   opacity: 0.3;
 }
 
+/* Other products section carousel */
+.other-products-slider .slick-prev,
+.other-products-slider .slick-next {
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+}
+.other-products-slider .slick-prev { left: -8px; }
+.other-products-slider .slick-next { right: -8px; }
+.other-products-slider .slick-prev:before,
+.other-products-slider .slick-next:before {
+  color: var(--text);
+  opacity: 0.9;
+}
+.other-products-slider .slick-prev:hover:before,
+.other-products-slider .slick-next:hover:before {
+  color: var(--accent);
+}
+.other-products-slider .slick-dots li button:before {
+  color: var(--muted);
+}
+.other-products-slider .slick-dots li.slick-active button:before {
+  color: var(--accent);
+}
+
 /* SortableJS styles for admin image reordering */
 .sortable-ghost {
   opacity: 0.4 !important;

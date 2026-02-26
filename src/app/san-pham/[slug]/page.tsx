@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { fetchApi, type Product } from "@/lib/api";
+import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { ProductImageSlider } from "@/components/ProductImageSlider";
+import { OtherProductsSection } from "@/components/OtherProductsSection";
 import type { Metadata } from "next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -12,6 +13,24 @@ async function getProduct(slug: string): Promise<Product | null> {
     return await fetchApi<Product>(`/products/${encodeURIComponent(slug)}`);
   } catch {
     return null;
+  }
+}
+
+async function getOtherProductsByNavGroup(
+  navGroup: string,
+  excludeSlug: string,
+): Promise<Product[]> {
+  if (!navGroup.trim()) return [];
+  try {
+    const params = new URLSearchParams({
+      navGroup: navGroup.trim(),
+      exclude: excludeSlug,
+      limit: "20",
+    });
+    const result = await fetchApi<ProductListResult>(`/products?${params}`);
+    return result.items ?? [];
+  } catch {
+    return [];
   }
 }
 
@@ -45,10 +64,17 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProduct(slug);
   if (!product) notFound();
 
-  const categoryName =
+  const category =
     typeof product.categoryId === "object" && product.categoryId !== null
-      ? (product.categoryId as { name?: string }).name
+      ? (product.categoryId as { name?: string; navGroup?: string })
       : null;
+  const categoryName = category?.name ?? null;
+  const navGroup = category?.navGroup ?? "";
+
+  const otherProducts =
+    navGroup.trim() !== ""
+      ? await getOtherProductsByNavGroup(navGroup, slug)
+      : [];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -116,6 +142,8 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
       </div>
+
+      <OtherProductsSection products={otherProducts} />
     </>
   );
 }
