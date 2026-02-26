@@ -1,7 +1,5 @@
 "use client";
 
-import { ThemeAwareImg } from "./ThemeAwareImg";
-
 const FEATURES = [
   {
     title: "MIỄN PHÍ GIAO HÀNG",
@@ -47,9 +45,8 @@ export function FeaturesBar() {
               className="flex flex-col items-center text-center"
             >
               <div className="mb-4 flex size-16 shrink-0 items-center justify-center rounded-full bg-neutral-700 text-white sm:size-20">
-                <ThemeAwareImg
-                  darkSrc={feature.darkSrc}
-                  lightSrc={feature.lightSrc}
+                <img
+                  src={feature.darkSrc}
                   alt={feature.alt}
                   className="h-8 w-8"
                 />
@@ -62,6 +59,7 @@ export function FeaturesBar() {
               </p>
             </li>
           ))}
+          orgi
         </ul>
       </div>
     </section>

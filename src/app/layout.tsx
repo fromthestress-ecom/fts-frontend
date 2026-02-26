@@ -3,6 +3,8 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ThemeScript } from "@/components/ThemeScript";
+import { PurchaseToast } from "@/components/PurchaseToast";
+import { SocialButtons } from "@/components/SocialButtons";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { fetchApi } from "@/lib/api";
 import type { Category } from "@/lib/api";
@@ -40,7 +42,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let navGroups: { label: string; children: { slug: string; name: string }[] }[] = [];
+  let navGroups: {
+    label: string;
+    children: { slug: string; name: string }[];
+  }[] = [];
   try {
     const categories = await fetchApi<Category[]>("/categories");
     navGroups = groupCategoriesForNav(categories);
@@ -68,6 +73,8 @@ export default async function RootLayout({
           <Header navGroups={navGroups} />
           <main>{children}</main>
           <Footer />
+          <PurchaseToast />
+          <SocialButtons />
         </ThemeProvider>
       </body>
     </html>
