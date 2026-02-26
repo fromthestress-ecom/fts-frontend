@@ -103,7 +103,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
           </button>
         </div> */}
         <nav className="flex flex-col gap-1 px-4 pt-0 pb-6">
-          <Link
+          {/* <Link
             href="/"
             onClick={closeMenu}
             className={`rounded-lg px-4 py-3 text-lg ${
@@ -113,7 +113,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
             }`}
           >
             Trang chủ
-          </Link>
+          </Link> */}
 
           {navGroups.length === 0 ? (
             <Link
@@ -242,14 +242,14 @@ export function Header({ navGroups = [] }: HeaderProps) {
           {/* Desktop nav (md+) */}
           <nav className="hidden items-center gap-6 md:flex md:gap-8">
             <Link
-              href="/"
+              href="/san-pham"
               className={`text-sm sm:text-base ${
-                pathname === "/"
+                pathname === "/san-pham"
                   ? "font-semibold text-accent"
                   : "font-normal text-muted"
               }`}
             >
-              Trang chủ
+              Shop
             </Link>
             {navGroups.length === 0 ? (
               <Link

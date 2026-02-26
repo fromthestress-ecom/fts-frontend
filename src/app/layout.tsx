@@ -6,6 +6,8 @@ import { ThemeScript } from "@/components/ThemeScript";
 import { PurchaseToast } from "@/components/PurchaseToast";
 import { SocialButtons } from "@/components/SocialButtons";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { CartDrawerProvider } from "@/contexts/CartDrawerContext";
+import { CartDrawer } from "@/components/CartDrawer";
 import { fetchApi } from "@/lib/api";
 import type { Category } from "@/lib/api";
 import { groupCategoriesForNav } from "@/lib/navGroups";
@@ -70,11 +72,14 @@ export default async function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <Header navGroups={navGroups} />
-          <main>{children}</main>
-          <Footer />
-          <PurchaseToast />
-          <SocialButtons />
+          <CartDrawerProvider>
+            <Header navGroups={navGroups} />
+            <main>{children}</main>
+            <Footer />
+            <CartDrawer />
+            <PurchaseToast />
+            <SocialButtons />
+          </CartDrawerProvider>
         </ThemeProvider>
       </body>
     </html>

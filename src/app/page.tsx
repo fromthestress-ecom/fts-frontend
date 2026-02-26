@@ -3,7 +3,7 @@ import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import { BannerSlider } from "@/components/BannerSlider";
 import { BrandsSectionLogos } from "@/components/BrandsSectionLogos";
 import { FeaturesBar } from "@/components/FeaturesBar";
-import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
+import { ProductCard } from "@/components/ProductCard";
 import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -27,38 +27,17 @@ function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
           <li key={p._id}>
-            <Link
-              href={`/san-pham/${p.slug}`}
-              className="product-card block overflow-hidden rounded-lg border border-border bg-surface"
-            >
-              <div className="relative aspect-square overflow-hidden bg-border">
-                {p.images?.[0] ? (
-                  <ImageWithSkeleton
-                    src={p.images[0]}
-                    alt=""
-                    className="product-card__image-inner"
-                  />
-                ) : null}
-              </div>
-              <div className="p-4">
-                <h3 className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
-                  {p.name}
-                </h3>
-                <p className="mt-1 text-sm font-bold text-accent sm:text-base">
-                  {new Intl.NumberFormat("vi-VN").format(p.price)}₫
-                </p>
-              </div>
-            </Link>
+            <ProductCard product={p} headingLevel="h3" />
           </li>
         ))}
       </ul>
       <div className="mt-8 text-center">
-        <Link
+        <a
           href="/san-pham"
           className="font-semibold text-accent hover:underline"
         >
           Xem tất cả →
-        </Link>
+        </a>
       </div>
     </section>
   );

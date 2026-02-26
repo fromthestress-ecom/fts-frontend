@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ProductListResult, Category } from "@/lib/api";
-import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
+import { ProductCard } from "@/components/ProductCard";
 
 type ProductGridProps = {
   initialData: ProductListResult;
@@ -33,10 +33,11 @@ export function ProductGrid({
     return q ? `${basePath}?${q}` : basePath;
   };
 
-  const { items, total, page, limit, totalPages } = initialData;
+  const { items, page, totalPages } = initialData;
 
   return (
     <>
+      {/* Filters */}
       <div className="mb-8 flex flex-wrap gap-6 sm:gap-8">
         <div className="flex items-center gap-2">
           <label className="text-sm text-muted">Danh mục</label>
@@ -44,9 +45,7 @@ export function ProductGrid({
             value={effectiveCategorySlug ?? currentParams.danh_muc ?? ""}
             onChange={(e) => {
               const v = e.target.value || null;
-              router.push(
-                buildUrl({ danh_muc: v ?? null, page: null }),
-              );
+              router.push(buildUrl({ danh_muc: v ?? null, page: null }));
             }}
             className="rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base"
           >
@@ -78,35 +77,16 @@ export function ProductGrid({
         </div>
       </div>
 
+      {/* Grid */}
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
           <li key={p._id}>
-            <Link
-              href={`/san-pham/${p.slug}`}
-              className="product-card block overflow-hidden rounded-lg border border-border bg-surface"
-            >
-              <div className="relative aspect-square overflow-hidden bg-border">
-                {p.images?.[0] ? (
-                  <ImageWithSkeleton
-                    src={p.images[0]}
-                    alt=""
-                    className="product-card__image-inner"
-                  />
-                ) : null}
-              </div>
-              <div className="p-4">
-                <h2 className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
-                  {p.name}
-                </h2>
-                <p className="mt-1 text-sm font-bold text-accent sm:text-base">
-                  {new Intl.NumberFormat("vi-VN").format(p.price)}₫
-                </p>
-              </div>
-            </Link>
+            <ProductCard product={p} headingLevel="h2" />
           </li>
         ))}
       </ul>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <nav className="mt-8 flex justify-center gap-2">
           {page > 1 && (
