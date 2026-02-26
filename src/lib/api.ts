@@ -19,6 +19,8 @@ export interface Category {
   description?: string;
   image?: string;
   order: number;
+  navGroup?: string;
+  groupOrder?: number;
 }
 
 export interface Product {

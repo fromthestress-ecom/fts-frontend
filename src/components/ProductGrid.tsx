@@ -9,6 +9,7 @@ type ProductGridProps = {
   initialData: ProductListResult;
   categories: Category[];
   currentParams: Record<string, string | undefined>;
+  effectiveCategorySlug?: string;
   basePath: string;
 };
 
@@ -16,6 +17,7 @@ export function ProductGrid({
   initialData,
   categories,
   currentParams,
+  effectiveCategorySlug,
   basePath,
 }: ProductGridProps) {
   const router = useRouter();
@@ -39,17 +41,18 @@ export function ProductGrid({
         <div className="flex items-center gap-2">
           <label className="text-sm text-muted">Danh mục</label>
           <select
-            value={currentParams.danh_muc ?? ""}
-            onChange={(e) =>
+            value={effectiveCategorySlug ?? currentParams.danh_muc ?? ""}
+            onChange={(e) => {
+              const v = e.target.value || null;
               router.push(
-                buildUrl({ danh_muc: e.target.value || null, page: null }),
-              )
-            }
+                buildUrl({ danh_muc: v ?? null, page: null }),
+              );
+            }}
             className="rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base"
           >
             <option value="">Tất cả</option>
             {categories.map((c) => (
-              <option key={c._id} value={c._id}>
+              <option key={c._id} value={c.slug}>
                 {c.name}
               </option>
             ))}

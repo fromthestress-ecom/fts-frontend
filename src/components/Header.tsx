@@ -7,26 +7,27 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { CartLink } from "./CartLink";
 import { ThemeAwareImg } from "./ThemeAwareImg";
 import { ThemeToggle } from "./ThemeToggle";
+import type { NavGroupItem } from "@/lib/navGroups";
 
-const navConfig = [
-  { label: "Áo", children: ["Boxy", "Baby Tee", "Oversize"] },
-  { label: "Quần", children: ["Cargo", "Shorts", "Jeans"] },
-  { label: "Collection", children: ["Heavy Crown", "Gen Stress"] },
-] as const;
-
-function toSlug(label: string): string {
-  return label.toLowerCase().replace(/\s+/g, "-");
+function getChildHref(_parentLabel: string, slug: string): string {
+  return `/san-pham?danh_muc=${encodeURIComponent(slug)}`;
 }
 
-function getChildHref(parentLabel: string, childLabel: string): string {
-  const slug = toSlug(childLabel);
-  const isCollection = parentLabel === "Collection";
-  return isCollection
-    ? `/san-pham?collection=${encodeURIComponent(slug)}`
-    : `/san-pham?phong_cach=${encodeURIComponent(slug)}`;
+function isNavItemActive(
+  item: NavGroupItem,
+  searchParams: URLSearchParams | null,
+): boolean {
+  if (!searchParams) return false;
+  const value = searchParams.get("danh_muc");
+  if (!value) return false;
+  return item.children.some((c) => c.slug === value);
 }
 
-export function Header() {
+type HeaderProps = {
+  navGroups?: NavGroupItem[];
+};
+
+export function Header({ navGroups = [] }: HeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,9 +58,6 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [isMenuOpen, closeMenu]);
-
-  const isProductsActive =
-    pathname === "/san-pham" || pathname?.startsWith("/san-pham");
 
   const mobileMenuContent = (
     <>
@@ -117,64 +115,71 @@ export function Header() {
             Trang chủ
           </Link>
 
-          {navConfig.map((item) => {
-            const key = toSlug(item.label);
-            const isOpen = openNavKey === key;
-            return (
-              <div key={key} className="flex flex-col gap-1">
-                <button
-                  type="button"
-                  onClick={() => toggleNav(key)}
-                  className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-lg ${
-                    isProductsActive
-                      ? "font-semibold text-accent"
-                      : "font-normal text-muted"
-                  }`}
-                  aria-expanded={isOpen}
-                >
-                  {item.label}
-                  <span
-                    className={`transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
+          {navGroups.length === 0 ? (
+            <Link
+              href="/san-pham"
+              onClick={closeMenu}
+              className="rounded-lg px-4 py-3 text-lg font-normal text-muted"
+            >
+              Sản phẩm
+            </Link>
+          ) : (
+            navGroups.map((item) => {
+              const key = item.label;
+              const isOpen = openNavKey === key;
+              return (
+                <div key={key} className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={() => toggleNav(key)}
+                    className={`flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-lg ${
+                      isNavItemActive(item, searchParams)
+                        ? "font-semibold text-accent"
+                        : "font-normal text-muted"
                     }`}
+                    aria-expanded={isOpen}
                   >
-                    <ThemeAwareImg
-                      darkSrc="/icon/arrow-down-white.png"
-                      lightSrc="/icon/arrow-down-black.png"
-                      alt=""
-                      className="h-4 w-4 opacity-50"
-                    />
-                  </span>
-                </button>
-                {isOpen && (
-                  <div className="flex flex-col gap-0.5 pl-4">
-                    {item.children.map((child) => {
-                      const href = getChildHref(item.label, child);
-                      const param = href.split("?")[1] ?? "";
-                      const [key, val] = param.split("=");
-                      const isActive =
-                        pathname === "/san-pham" &&
-                        (searchParams?.get(key ?? "") ?? "") === (val ?? "");
-                      return (
-                        <Link
-                          key={child}
-                          href={href}
-                          onClick={closeMenu}
-                          className={`rounded-lg px-4 py-2.5 text-base ${
-                            isActive
-                              ? "font-semibold text-accent"
-                              : "text-muted"
-                          }`}
-                        >
-                          {child}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                    {item.label}
+                    <span
+                      className={`transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <ThemeAwareImg
+                        darkSrc="/icon/arrow-down-white.png"
+                        lightSrc="/icon/arrow-down-black.png"
+                        alt=""
+                        className="h-4 w-4 opacity-50"
+                      />
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="flex flex-col gap-0.5 pl-4">
+                      {item.children.map((child) => {
+                        const isActive =
+                          pathname === "/san-pham" &&
+                          (searchParams?.get("danh_muc") ?? "") === child.slug;
+                        return (
+                          <Link
+                            key={child.slug}
+                            href={getChildHref(item.label, child.slug)}
+                            onClick={closeMenu}
+                            className={`rounded-lg px-4 py-2.5 text-base ${
+                              isActive
+                                ? "font-semibold text-accent"
+                                : "text-muted"
+                            }`}
+                          >
+                            {child.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
 
           <Link
             href="/ve-chung-toi"
@@ -246,45 +251,51 @@ export function Header() {
             >
               Trang chủ
             </Link>
-            {navConfig.map((item) => (
-              <div key={item.label} className="relative group">
-                <Link
-                  href="/san-pham"
-                  className={`text-sm sm:text-base ${
-                    isProductsActive
-                      ? "font-semibold text-accent"
-                      : "font-normal text-muted"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-                <div className="absolute left-0 top-full z-10 hidden min-w-[180px] pt-1 group-hover:block">
-                  <div className="rounded-lg border border-border bg-surface py-1 shadow-lg">
-                    {item.children.map((child) => {
-                      const href = getChildHref(item.label, child);
-                      const param = href.split("?")[1] ?? "";
-                      const [key, val] = param.split("=");
-                      const isActive =
-                        pathname === "/san-pham" &&
-                        (searchParams?.get(key ?? "") ?? "") === (val ?? "");
-                      return (
-                        <Link
-                          key={child}
-                          href={href}
-                          className={`block px-4 py-2 text-sm transition-colors duration-150 hover:bg-border/60 hover:text-text ${
-                            isActive
-                              ? "font-semibold text-accent"
-                              : "text-muted"
-                          }`}
-                        >
-                          {child}
-                        </Link>
-                      );
-                    })}
+            {navGroups.length === 0 ? (
+              <Link
+                href="/san-pham"
+                className="text-sm sm:text-base font-normal text-muted"
+              >
+                Sản phẩm
+              </Link>
+            ) : (
+              navGroups.map((item) => (
+                <div key={item.label} className="relative group">
+                  <Link
+                    href="/san-pham"
+                    className={`text-sm sm:text-base ${
+                      isNavItemActive(item, searchParams)
+                        ? "font-semibold text-accent"
+                        : "font-normal text-muted"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                  <div className="absolute left-0 top-full z-10 hidden min-w-[180px] pt-1 group-hover:block">
+                    <div className="rounded-lg border border-border bg-surface py-1 shadow-lg">
+                      {item.children.map((child) => {
+                        const isActive =
+                          pathname === "/san-pham" &&
+                          (searchParams?.get("danh_muc") ?? "") === child.slug;
+                        return (
+                          <Link
+                            key={child.slug}
+                            href={getChildHref(item.label, child.slug)}
+                            className={`block px-4 py-2 text-sm transition-colors duration-150 hover:bg-border/60 hover:text-text ${
+                              isActive
+                                ? "font-semibold text-accent"
+                                : "text-muted"
+                            }`}
+                          >
+                            {child.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
             <Link
               href="/ve-chung-toi"
               className={`text-sm sm:text-base ${

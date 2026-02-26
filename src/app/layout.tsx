@@ -4,6 +4,9 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ThemeScript } from "@/components/ThemeScript";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { fetchApi } from "@/lib/api";
+import type { Category } from "@/lib/api";
+import { groupCategoriesForNav } from "@/lib/navGroups";
 
 const SITE_NAME = "FROM THE STRESS";
 const DEFAULT_DESC =
@@ -32,11 +35,19 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let navGroups: { label: string; children: { slug: string; name: string }[] }[] = [];
+  try {
+    const categories = await fetchApi<Category[]>("/categories");
+    navGroups = groupCategoriesForNav(categories);
+  } catch {
+    navGroups = [];
+  }
+
   return (
     <html lang="vi">
       <head>
@@ -54,7 +65,7 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <Header />
+          <Header navGroups={navGroups} />
           <main>{children}</main>
           <Footer />
         </ThemeProvider>

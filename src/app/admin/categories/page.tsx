@@ -5,12 +5,16 @@ import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+const NAV_GROUP_OPTIONS = ["", "Áo", "Quần", "Collection"] as const;
+
 type Category = {
   _id: string;
   slug: string;
   name: string;
   description?: string;
   order: number;
+  navGroup?: string;
+  groupOrder?: number;
 };
 
 function adminFetch(path: string, init?: RequestInit) {
@@ -34,6 +38,9 @@ export default function AdminCategoriesPage() {
   const [slug, setSlug] = useState("");
   const [name, setName] = useState("");
   const [order, setOrder] = useState(0);
+  const [navGroup, setNavGroup] = useState("");
+  const [groupOrder, setGroupOrder] = useState(0);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -52,19 +59,60 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
     setMessage("");
     setSaving(true);
-    const res = await adminFetch("/admin/categories", {
-      method: "POST",
-      body: JSON.stringify({ slug: slug.trim(), name: name.trim(), order }),
-    });
-    const data = await res.json().catch(() => ({}));
-    setMessage(res.ok ? "Đã thêm." : (data.message ?? "Lỗi"));
-    setSaving(false);
-    if (res.ok) {
-      setSlug("");
-      setName("");
-      setOrder(0);
-      load();
+    const payload = {
+      slug: slug.trim(),
+      name: name.trim(),
+      order,
+      navGroup: navGroup.trim() || undefined,
+      groupOrder,
+    };
+    if (editingId) {
+      const res = await adminFetch(`/admin/categories/${editingId}`, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      setMessage(res.ok ? "Đã cập nhật." : (data.message ?? "Lỗi"));
+      if (res.ok) {
+        setEditingId(null);
+        resetForm();
+        load();
+      }
+    } else {
+      const res = await adminFetch("/admin/categories", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      setMessage(res.ok ? "Đã thêm." : (data.message ?? "Lỗi"));
+      if (res.ok) {
+        resetForm();
+        load();
+      }
     }
+    setSaving(false);
+  };
+
+  const resetForm = () => {
+    setSlug("");
+    setName("");
+    setOrder(0);
+    setNavGroup("");
+    setGroupOrder(0);
+  };
+
+  const startEdit = (c: Category) => {
+    setEditingId(c._id);
+    setSlug(c.slug);
+    setName(c.name);
+    setOrder(c.order ?? 0);
+    setNavGroup(c.navGroup ?? "");
+    setGroupOrder(c.groupOrder ?? 0);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    resetForm();
   };
 
   const handleDelete = async (id: string) => {
@@ -109,13 +157,45 @@ export default function AdminCategoriesPage() {
             className={`${inputClass} w-20`}
           />
         </div>
+        <div>
+          <label className="mb-1 block text-xs text-muted">Nhóm nav</label>
+          <select
+            value={navGroup}
+            onChange={(e) => setNavGroup(e.target.value)}
+            className={inputClass}
+          >
+            {NAV_GROUP_OPTIONS.map((opt) => (
+              <option key={opt || "_"} value={opt}>
+                {opt || "— Không —"}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-muted">Thứ tự trong nhóm</label>
+          <input
+            type="number"
+            value={groupOrder}
+            onChange={(e) => setGroupOrder(Number(e.target.value) || 0)}
+            className={`${inputClass} w-24`}
+          />
+        </div>
         <button
           type="submit"
           disabled={saving}
           className="cursor-pointer rounded border-none bg-accent px-4 py-2 font-semibold text-bg"
         >
-          {saving ? "Đang thêm..." : "Thêm danh mục"}
+          {saving ? "Đang lưu..." : editingId ? "Cập nhật" : "Thêm danh mục"}
         </button>
+        {editingId && (
+          <button
+            type="button"
+            onClick={cancelEdit}
+            className="cursor-pointer rounded border border-border px-4 py-2 text-sm"
+          >
+            Hủy
+          </button>
+        )}
         {message && (
           <span className="text-sm text-muted">{message}</span>
         )}
@@ -129,6 +209,8 @@ export default function AdminCategoriesPage() {
               <th className="p-2 text-left">Slug</th>
               <th className="p-2 text-left">Tên</th>
               <th className="p-2 text-left">Thứ tự</th>
+              <th className="p-2 text-left">Nhóm nav</th>
+              <th className="p-2 text-left">Thứ tự nhóm</th>
               <th className="p-2 text-right"></th>
             </tr>
           </thead>
@@ -138,7 +220,16 @@ export default function AdminCategoriesPage() {
                 <td className="p-2">{c.slug}</td>
                 <td className="p-2">{c.name}</td>
                 <td className="p-2">{c.order}</td>
+                <td className="p-2">{c.navGroup ?? "—"}</td>
+                <td className="p-2">{c.groupOrder ?? 0}</td>
                 <td className="p-2 text-right">
+                  <button
+                    type="button"
+                    onClick={() => startEdit(c)}
+                    className="mr-2 rounded border border-border px-3 py-1 text-sm cursor-pointer"
+                  >
+                    Sửa
+                  </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(c._id)}
