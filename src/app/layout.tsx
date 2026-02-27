@@ -77,7 +77,7 @@ export default async function RootLayout({
             <main>{children}</main>
             <Footer />
             <CartDrawer />
-            <PurchaseToast />
+            {/* <PurchaseToast /> */}
             <SocialButtons />
           </CartDrawerProvider>
         </ThemeProvider>

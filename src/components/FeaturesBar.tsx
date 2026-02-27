@@ -59,7 +59,6 @@ export function FeaturesBar() {
               </p>
             </li>
           ))}
-          orgi
         </ul>
       </div>
     </section>
