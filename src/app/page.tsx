@@ -5,6 +5,7 @@ import { BrandsSectionLogos } from "@/components/BrandsSectionLogos";
 import { FeaturesBar } from "@/components/FeaturesBar";
 import { ProductCard } from "@/components/ProductCard";
 import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
+import { CollectionsSection } from "@/components/CollectionsSection";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -120,6 +121,7 @@ export default async function HomePage() {
 
       <PromoSection slides={promoSlides} />
       <FeaturedProductsSection items={items} />
+      <CollectionsSection />
       <BrandsSection />
       <FeaturesBar />
     </>
