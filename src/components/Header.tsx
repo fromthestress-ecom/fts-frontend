@@ -230,6 +230,7 @@ function NavItems({
 
 type MobileMenuProps = {
   isOpen: boolean;
+  isAtTop: boolean;
   navGroups: NavGroupItem[];
   pathname: string;
   searchParams: URLSearchParams | null;
@@ -240,6 +241,7 @@ type MobileMenuProps = {
 
 function MobileMenu({
   isOpen,
+  isAtTop,
   navGroups,
   pathname,
   searchParams,
@@ -258,7 +260,7 @@ function MobileMenu({
       />
       {/* Slide-in panel */}
       <div
-        className={`fixed top-[106px] inset-y-0 right-0 z-[101] w-[min(100vw,320px)] flex flex-col bg-bg shadow-xl transition-transform duration-300 ease-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed inset-y-0 right-0 z-[101] w-[min(100vw,320px)] flex flex-col bg-bg shadow-xl transition-all duration-300 ease-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"} ${isAtTop ? "top-[106px]" : "top-[72px]"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <nav className="flex flex-col gap-1 px-4 pt-0 pb-6">
@@ -294,6 +296,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
   const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openNavKey, setOpenNavKey] = useState<string | null>(null);
+  const [isAtTop, setIsAtTop] = useState(true);
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
@@ -308,6 +311,13 @@ export function Header({ navGroups = [] }: HeaderProps) {
   useEffect(() => {
     closeMenu();
   }, [pathname, closeMenu]);
+
+  // Track scroll position to toggle menu top offset
+  useEffect(() => {
+    const handleScroll = () => setIsAtTop(window.scrollY === 0);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Escape key + body scroll lock
   useEffect(() => {
@@ -411,6 +421,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
         createPortal(
           <MobileMenu
             isOpen={isMenuOpen}
+            isAtTop={isAtTop}
             navGroups={navGroups}
             pathname={pathname}
             searchParams={searchParams}
