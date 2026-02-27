@@ -132,7 +132,7 @@ export function BannerSlider() {
               Xem bộ sưu tập
             </Link>
             <Link
-              href="/ve-chung-toi"
+              href="/lien-he"
               className="banner-slider-hero__btn banner-slider-hero__btn--ghost"
             >
               Liên hệ
