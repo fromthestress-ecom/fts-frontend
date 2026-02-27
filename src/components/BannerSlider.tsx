@@ -5,6 +5,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Link from "next/link";
+import LoadingIcon from "@/components/icons/LoadingIcon";
 
 type BannerSlide = {
   src: string;
@@ -52,6 +53,66 @@ const BANNER_SLIDES: BannerSlide[] = [
   },
 ];
 
+function LoadingOverlay({ size = 60 }: { size?: number }) {
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center bg-surface"
+      style={{ zIndex: 1 }}
+    >
+      <span
+        style={{ width: size, height: size, opacity: 0.6, display: "flex" }}
+      >
+        <LoadingIcon />
+      </span>
+    </div>
+  );
+}
+
+function BannerImg({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && <LoadingOverlay size={80} />}
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onLoad={() => setLoaded(true)}
+        style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease" }}
+      />
+    </div>
+  );
+}
+
+function ThumbImg({ src, alt }: { src: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && <LoadingOverlay size={28} />}
+      <img
+        src={src}
+        alt={alt}
+        onLoad={() => setLoaded(true)}
+        style={{
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+        }}
+      />
+    </div>
+  );
+}
+
 export function BannerSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
   const sliderRef = useRef<Slider>(null);
@@ -83,7 +144,7 @@ export function BannerSlider() {
         <Slider ref={sliderRef} {...settings}>
           {BANNER_SLIDES.map((slide, i) => (
             <div key={i} className="banner-slider-hero__slide">
-              <img
+              <BannerImg
                 src={slide.src}
                 alt={slide.title}
                 className="banner-slider-hero__img"
@@ -150,7 +211,10 @@ export function BannerSlider() {
               className={`banner-slider-hero__thumb ${i === activeIndex ? "banner-slider-hero__thumb--active" : ""}`}
               aria-label={`Slide ${i + 1}`}
             >
-              <img src={slide.thumb} alt={slide.label || `Slide ${i + 1}`} />
+              <ThumbImg
+                src={slide.thumb}
+                alt={slide.label || `Slide ${i + 1}`}
+              />
               {i === activeIndex && slide.label && (
                 <span className="banner-slider-hero__thumb-label">
                   {slide.label}
