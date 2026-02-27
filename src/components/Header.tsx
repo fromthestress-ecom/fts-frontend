@@ -208,6 +208,17 @@ export function Header({ navGroups = [] }: HeaderProps) {
 
   return (
     <>
+      {/* Announcement bar */}
+      <div className="announcement-bar">
+        <div className="announcement-bar__track">
+          {[...Array(6)].map((_, i) => (
+            <span key={i} className="announcement-bar__item">
+              Black friday sale 50% off
+            </span>
+          ))}
+        </div>
+      </div>
+
       <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md">
         <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-0 sm:px-6 max-sm:py-4">
           <div className="flex w-1/3 justify-start sm:w-auto sm:flex-initial">
@@ -241,16 +252,6 @@ export function Header({ navGroups = [] }: HeaderProps) {
 
           {/* Desktop nav (md+) */}
           <nav className="hidden items-center gap-6 md:flex md:gap-8">
-            <Link
-              href="/san-pham"
-              className={`text-sm sm:text-base ${
-                pathname === "/san-pham"
-                  ? "font-semibold text-accent"
-                  : "font-normal text-muted"
-              }`}
-            >
-              Shop
-            </Link>
             {navGroups.length === 0 ? (
               <Link
                 href="/san-pham"
@@ -306,9 +307,36 @@ export function Header({ navGroups = [] }: HeaderProps) {
             >
               Về chúng tôi
             </Link>
+          </nav>
+
+          {/* Right side: search + shop CTA + cart + theme */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Tìm kiếm"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
             <ThemeToggle />
             <CartLink />
-          </nav>
+            <Link href="/san-pham" className="header-shop-btn">
+              Shop all items
+            </Link>
+          </div>
 
           <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
             <ThemeToggle />
