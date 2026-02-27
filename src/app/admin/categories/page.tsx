@@ -5,7 +5,7 @@ import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-const NAV_GROUP_OPTIONS = ["", "Áo", "Quần", "Collection"] as const;
+const NAV_GROUP_OPTIONS = ["", "Tops", "Bottoms", "Collections"] as const;
 
 type Category = {
   _id: string;
@@ -172,7 +172,9 @@ export default function AdminCategoriesPage() {
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-xs text-muted">Thứ tự trong nhóm</label>
+          <label className="mb-1 block text-xs text-muted">
+            Thứ tự trong nhóm
+          </label>
           <input
             type="number"
             value={groupOrder}
@@ -196,9 +198,7 @@ export default function AdminCategoriesPage() {
             Hủy
           </button>
         )}
-        {message && (
-          <span className="text-sm text-muted">{message}</span>
-        )}
+        {message && <span className="text-sm text-muted">{message}</span>}
       </form>
       {loading ? (
         <p className="text-muted">Đang tải...</p>

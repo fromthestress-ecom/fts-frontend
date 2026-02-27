@@ -1,6 +1,6 @@
 import type { Category } from "@/lib/api";
 
-const NAV_GROUP_ORDER = ["Áo", "Quần", "Collection"] as const;
+const NAV_GROUP_ORDER = ["Tops", "Bottoms", "Collection"] as const;
 
 export type NavGroupItem = {
   label: string;

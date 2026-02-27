@@ -50,7 +50,15 @@ export default async function RootLayout({
   }[] = [];
   try {
     const categories = await fetchApi<Category[]>("/categories");
+    console.log(
+      "🔍 ~ RootLayout ~ frontend/src/app/layout.tsx:52 ~ categories:",
+      categories,
+    );
     navGroups = groupCategoriesForNav(categories);
+    console.log(
+      "🔍 ~ RootLayout ~ frontend/src/app/layout.tsx:54 ~ navGroups:",
+      navGroups,
+    );
   } catch {
     navGroups = [];
   }

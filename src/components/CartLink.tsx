@@ -31,7 +31,7 @@ export function CartLink({ iconOnly = false, className = "" }: CartLinkProps) {
           </span>
         )}
       </span>
-      {!iconOnly && <span>Giỏ hàng</span>}
+      {/* {!iconOnly && <span>Giỏ hàng</span>} */}
     </Link>
   );
 }
