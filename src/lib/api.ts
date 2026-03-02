@@ -84,3 +84,42 @@ export interface CreateOrderDto {
   shippingAddress: ShippingAddressDto;
   note?: string;
 }
+
+export interface BlogCategory {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
+export interface Author {
+  _id: string;
+  name: string;
+  avatar?: string;
+  bio?: string;
+}
+
+export interface Tag {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
+export interface BlogItem {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  thumbnail?: string;
+  categoryId?: BlogCategory | string;
+  authorId?: Author | string;
+  status: "draft" | "published";
+  publishedAt?: string;
+  createdAt: string;
+  readingTime: number;
+  tags?: Tag[];
+  metaTitle?: string;
+  metaDescription?: string;
+  ogImage?: string;
+}
+

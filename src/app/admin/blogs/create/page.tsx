@@ -1,0 +1,564 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { getAdminKey } from "@/components/admin/AdminGuard";
+import type { BlogCategory, Author, Tag } from "@/lib/api";
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+function adminFetch(path: string, init?: RequestInit) {
+  const key = getAdminKey();
+  return fetch(`${API}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-key": key ?? "",
+      ...init?.headers,
+    },
+  });
+}
+
+function adminUploadFile(
+  file: File,
+  folder?: string,
+): Promise<{ url: string; key: string }> {
+  const key = getAdminKey();
+  const formData = new FormData();
+  formData.append("file", file);
+  const uploadUrl = folder
+    ? `${API}/admin/upload?folder=${folder}`
+    : `${API}/admin/upload`;
+  return fetch(uploadUrl, {
+    method: "POST",
+    headers: { "x-admin-key": key ?? "" },
+    body: formData,
+  }).then((res) => {
+    if (!res.ok)
+      return res.json().then((data) => {
+        throw new Error(data.message || "Upload thất bại");
+      });
+    return res.json();
+  });
+}
+
+export default function CreateBlogPage() {
+  const router = useRouter();
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const [form, setForm] = useState({
+    title: "",
+    slug: "",
+    excerpt: "",
+    content: "",
+    thumbnail: "",
+    categoryId: "",
+    authorId: "",
+    tags: [] as string[],
+    status: "draft",
+    publishedAt: "",
+    metaTitle: "",
+    metaDescription: "",
+    ogImage: "",
+  });
+
+  useEffect(() => {
+    Promise.all([
+      adminFetch("/admin/blog-categories"),
+      adminFetch("/admin/authors"),
+      adminFetch("/admin/tags"),
+    ]).then(async ([catRes, authRes, tagRes]) => {
+      if (catRes.ok) setCategories(await catRes.json());
+      if (authRes.ok) setAuthors(await authRes.json());
+      if (tagRes.ok) setAvailableTags(await tagRes.json());
+    });
+  }, []);
+
+  // Basic slug auto-gen from title if slug is empty
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    setForm((f) => {
+      const isSlugEmptyOrAuto =
+        f.slug === "" || f.slug === generateSlug(f.title);
+      return {
+        ...f,
+        title,
+        slug: isSlugEmptyOrAuto ? generateSlug(title) : f.slug,
+      };
+    });
+  };
+
+  const generateSlug = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/[\s_]+/g, "-") // Replace spaces and underscores with -
+      .replace(/[^\w\-]+/g, "") // Remove all non-word chars
+      .replace(/\-\-+/g, "-") // Replace multiple - with single -
+      .replace(/^-+/, "") // Trim - from start
+      .replace(/-+$/, ""); // Trim - from end
+  };
+
+  const handleFileSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "thumbnail" | "ogImage",
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await adminUploadFile(file, "blogs");
+      setForm((f) => ({ ...f, [field]: res.url }));
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleInsertContentImage = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await adminUploadFile(file, "blogs");
+      const textarea = document.getElementById(
+        "blog-content-textarea",
+      ) as HTMLTextAreaElement;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = form.content;
+        const before = text.substring(0, start);
+        const after = text.substring(end);
+        const mdImage = `\n![${file.name}](${res.url})\n`;
+        setForm((f) => ({ ...f, content: before + mdImage + after }));
+
+        // Reset cursor back to textarea after React state finishes
+        setTimeout(() => {
+          textarea.focus();
+          textarea.setSelectionRange(
+            start + mdImage.length,
+            start + mdImage.length,
+          );
+        }, 0);
+      } else {
+        // Fallback if ref/id fails
+        setForm((f) => ({
+          ...f,
+          content: f.content + `\n![${file.name}](${res.url})\n`,
+        }));
+      }
+    } catch (err: any) {
+      alert("Lỗi upload ảnh chèn: " + err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage("");
+
+    const payload = { ...form };
+    if (!payload.categoryId) delete (payload as any).categoryId;
+    if (!payload.authorId) delete (payload as any).authorId;
+    if (!payload.publishedAt) delete (payload as any).publishedAt;
+    else
+      payload.publishedAt = new Date(payload.publishedAt).toISOString() as any;
+    if (!payload.metaTitle) payload.metaTitle = payload.title;
+    if (!payload.metaDescription) payload.metaDescription = payload.excerpt;
+    if (!payload.ogImage) payload.ogImage = payload.thumbnail;
+
+    try {
+      const res = await adminFetch("/admin/blogs", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Lỗi lưu bài viết");
+      router.push("/admin/blogs");
+    } catch (err: any) {
+      setMessage(err.message);
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto pb-12">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-xl sm:text-2xl uppercase tracking-wider">
+          Viết bài mới
+        </h1>
+        <Link
+          href="/admin/blogs"
+          className="text-sm font-semibold text-muted hover:text-text transition-colors"
+        >
+          &larr; Quay lại
+        </Link>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          {/* Main Content Info */}
+          <div className="bg-surface border border-border rounded-lg p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-border pb-2">
+              Nội dung chính
+            </h2>
+
+            <div className="mb-4">
+              <label className={labelClass}>Tiêu đề *</label>
+              <input
+                value={form.title}
+                onChange={handleTitleChange}
+                required
+                className={inputClass}
+                placeholder="The future of streetwear..."
+              />
+            </div>
+
+            <div className="mb-4 text-xs font-mono text-muted flex gap-2">
+              <span>Đường dẫn (Slug): </span>
+              <input
+                value={form.slug}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, slug: e.target.value }))
+                }
+                className="bg-transparent border-b border-border outline-none min-w-[300px] text-text"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClass}>Đoạn trích (Excerpt) *</label>
+              <textarea
+                value={form.excerpt}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, excerpt: e.target.value }))
+                }
+                required
+                rows={3}
+                className={inputClass}
+                placeholder="Tóm tắt ngắn gọn bài viết..."
+              />
+            </div>
+
+            <div className="mb-4 relative">
+              <div className="flex justify-between items-end mb-1.5">
+                <label className="text-xs font-bold text-muted uppercase tracking-wider block">
+                  Nội dung bài (Markdown/HTML) *
+                </label>
+                <div>
+                  <label className="cursor-pointer text-xs font-bold bg-surface border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-bg transition-colors flex items-center gap-1">
+                    {uploading ? (
+                      "Đang tải..."
+                    ) : (
+                      <>
+                        <svg
+                          className="w-3 h-3"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        Chèn Ảnh
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleInsertContentImage}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              </div>
+              <textarea
+                id="blog-content-textarea"
+                value={form.content}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, content: e.target.value }))
+                }
+                required
+                rows={20}
+                className={`${inputClass} font-mono text-sm`}
+                placeholder="Sử dụng thẻ HTML hoặc viết nội dung chi tiết..."
+              />
+            </div>
+          </div>
+
+          {/* SEO Info */}
+          <div className="bg-surface border border-border rounded-lg p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-border pb-2">
+              Tối ưu máy chủ chìm (SEO)
+            </h2>
+
+            <div className="mb-4">
+              <label className={labelClass}>Meta Title</label>
+              <input
+                value={form.metaTitle}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, metaTitle: e.target.value }))
+                }
+                className={inputClass}
+                placeholder="Mặc định lấy từ Tiêu đề"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClass}>Meta Description</label>
+              <textarea
+                value={form.metaDescription}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, metaDescription: e.target.value }))
+                }
+                rows={2}
+                className={inputClass}
+                placeholder="Mặc định lấy từ Đoạn trích"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClass}>Ảnh OpenGraph (OG Image)</label>
+              <div className="flex gap-4 items-start">
+                <input
+                  type="file"
+                  onChange={(e) => handleFileSelect(e, "ogImage")}
+                  accept="image/*"
+                  disabled={uploading}
+                  className="text-sm"
+                />
+                {form.ogImage && (
+                  <img
+                    src={form.ogImage}
+                    alt=""
+                    className="h-16 w-32 object-cover border border-border rounded"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {/* Post Settings */}
+          <div className="bg-surface border border-border rounded-lg p-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-border pb-2">
+              Cài đặt xuất bản
+            </h2>
+
+            <div className="mb-6">
+              <label className={labelClass}>Trạng thái</label>
+              <select
+                value={form.status}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, status: e.target.value }))
+                }
+                className={inputClass}
+              >
+                <option value="draft">Bản nháp (Draft)</option>
+                <option value="published">Xuất bản (Published)</option>
+              </select>
+            </div>
+
+            {form.status === "published" && (
+              <div className="mb-6">
+                <label className={labelClass}>
+                  Lên lịch đăng (Published At)
+                </label>
+                <input
+                  type="datetime-local"
+                  value={form.publishedAt}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, publishedAt: e.target.value }))
+                  }
+                  className={inputClass}
+                />
+                <p className="text-xs text-muted mt-1">
+                  Để trống nếu muốn đăng ngay lập tức.
+                </p>
+              </div>
+            )}
+
+            <div className="mb-6">
+              <label className={labelClass}>Tác giả</label>
+              <select
+                value={form.authorId}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, authorId: e.target.value }))
+                }
+                className={inputClass}
+              >
+                <option value="">-- Chọn tác giả --</option>
+                {authors.map((a) => (
+                  <option key={a._id} value={a._id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className={labelClass}>Danh mục</label>
+              <select
+                value={form.categoryId}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, categoryId: e.target.value }))
+                }
+                className={inputClass}
+              >
+                <option value="">-- Chọn danh mục --</option>
+                {categories.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className={labelClass}>Thẻ phân loại (Tags)</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {form.tags.map((tagId) => {
+                  const tag = availableTags.find((t) => t._id === tagId);
+                  if (!tag) return null;
+                  return (
+                    <span
+                      key={tag._id}
+                      className="px-2 py-1 bg-surface border border-border rounded text-xs tracking-wider uppercase flex items-center gap-2"
+                    >
+                      {tag.name}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            tags: f.tags.filter((id) => id !== tagId),
+                          }))
+                        }
+                        className="text-muted hover:text-red-500"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+              <select
+                onChange={(e) => {
+                  if (e.target.value && !form.tags.includes(e.target.value)) {
+                    setForm((f) => ({
+                      ...f,
+                      tags: [...f.tags, e.target.value],
+                    }));
+                  }
+                  e.target.value = "";
+                }}
+                className={inputClass}
+              >
+                <option value="">+ Thêm Tag</option>
+                {availableTags
+                  .filter((t) => !form.tags.includes(t._id))
+                  .map((t) => (
+                    <option key={t._id} value={t._id}>
+                      {t.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className={labelClass}>Ảnh đại diện (Thumbnail)</label>
+              <div className="border-2 border-dashed border-border p-4 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
+                {form.thumbnail ? (
+                  <div className="relative">
+                    <img
+                      src={form.thumbnail}
+                      alt="Thubmail"
+                      className="w-full h-auto rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, thumbnail: "" }))}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
+                    >
+                      x
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-muted text-sm flex flex-col items-center">
+                    <svg
+                      className="w-8 h-8 mb-2 opacity-50"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Chưa có ảnh
+                  </span>
+                )}
+              </div>
+              <input
+                type="file"
+                onChange={(e) => handleFileSelect(e, "thumbnail")}
+                accept="image/*"
+                disabled={uploading}
+                className="block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer"
+              />
+            </div>
+
+            {message && (
+              <p className="mb-4 text-sm text-red-500 font-semibold">
+                {message}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={saving || uploading}
+              className="w-full cursor-pointer rounded border border-text bg-text px-4 py-3 font-bold uppercase tracking-widest text-bg hover:bg-bg hover:text-text transition-colors disabled:opacity-50"
+            >
+              {saving
+                ? "Đang lưu..."
+                : form.status === "published"
+                  ? "Xuất bản bài vết"
+                  : "Lưu bản nháp"}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+const labelClass =
+  "mb-1.5 block text-xs font-bold text-muted uppercase tracking-wider";
+const inputClass =
+  "w-full rounded border border-border bg-bg px-4 py-2.5 text-text text-sm sm:text-base outline-none focus:border-text transition-colors";

@@ -222,6 +222,18 @@ function NavItems({
       >
         Contact
       </Link>
+
+      <Link
+        href="/blogs"
+        onClick={onClose}
+        className={
+          isMobile
+            ? `${linkBase} ${aboutActiveClass}`
+            : `${linkBase} ${aboutActiveClass}`
+        }
+      >
+        Blogs
+      </Link>
     </>
   );
 }

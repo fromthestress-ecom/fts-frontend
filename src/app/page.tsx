@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
+import {
+  fetchApi,
+  type Product,
+  type ProductListResult,
+  type BlogItem,
+} from "@/lib/api";
 import { BannerSlider } from "@/components/BannerSlider";
 import { BrandsSectionLogos } from "@/components/BrandsSectionLogos";
 import { FeaturesBar } from "@/components/FeaturesBar";
 import { ProductCard } from "@/components/ProductCard";
+import { BlogCard } from "@/components/BlogCard";
 import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
 import { CollectionsSection } from "@/components/CollectionsSection";
 
@@ -14,6 +20,14 @@ async function getFeaturedProducts(): Promise<ProductListResult> {
     return await fetchApi<ProductListResult>("/products?limit=8&sort=newest");
   } catch {
     return { items: [], total: 0, page: 1, limit: 8, totalPages: 0 };
+  }
+}
+
+async function getLatestBlogs(): Promise<{ blogs: BlogItem[] }> {
+  try {
+    return await fetchApi<{ blogs: BlogItem[] }>("/blogs?limit=4");
+  } catch {
+    return { blogs: [] };
   }
 }
 
@@ -53,6 +67,47 @@ function PromoSection({ slides }: { slides: readonly PromoSlide[] }) {
         KHUYẾN MÃI
       </h2>
       <PromoSlider slides={slides} />
+    </section>
+  );
+}
+
+function LatestStoriesSection({ blogs }: { blogs: readonly BlogItem[] }) {
+  if (blogs.length === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12 bg-surface mt-12 mb-4">
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h2 className="font-display text-2xl tracking-wide sm:text-3xl uppercase m-0">
+            LATEST STORIES
+          </h2>
+          <p className="text-muted mt-2 text-sm max-w-xl">
+            Dive into the latest drops, culture, and streetwear stories from our
+            journal.
+          </p>
+        </div>
+        <Link
+          href="/blogs"
+          className="hidden sm:inline-flex items-center gap-2 font-semibold text-text border border-text px-4 py-2 rounded-full hover:bg-text hover:text-bg transition-colors uppercase text-xs tracking-widest"
+        >
+          View Journal
+        </Link>
+      </div>
+      <ul className="grid list-none grid-cols-1 gap-6 p-0 m-0 sm:grid-cols-2 lg:grid-cols-4">
+        {blogs.map((b) => (
+          <li key={b._id}>
+            <BlogCard blog={b} headingLevel="h3" />
+          </li>
+        ))}
+      </ul>
+      <div className="mt-8 text-center sm:hidden">
+        <Link
+          href="/blogs"
+          className="inline-flex items-center gap-2 font-semibold text-text border border-text px-6 py-3 rounded-full hover:bg-text hover:text-bg transition-colors uppercase text-xs tracking-widest"
+        >
+          View Journal
+        </Link>
+      </div>
     </section>
   );
 }
@@ -109,6 +164,7 @@ function buildPromoSlides(items: readonly Product[]): readonly PromoSlide[] {
 
 export default async function HomePage() {
   const { items } = await getFeaturedProducts();
+  const { blogs } = await getLatestBlogs();
   const promoSlides = buildPromoSlides(items);
 
   return (
@@ -122,6 +178,7 @@ export default async function HomePage() {
       <PromoSection slides={promoSlides} />
       <FeaturedProductsSection items={items} />
       <CollectionsSection />
+      <LatestStoriesSection blogs={blogs} />
       <BrandsSection />
       <FeaturesBar />
     </>

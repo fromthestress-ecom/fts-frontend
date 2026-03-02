@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { ThemeScript } from "@/components/ThemeScript";
-import { PurchaseToast } from "@/components/PurchaseToast";
-import { SocialButtons } from "@/components/SocialButtons";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { CartDrawerProvider } from "@/contexts/CartDrawerContext";
 import { CartDrawer } from "@/components/CartDrawer";
-import { fetchApi } from "@/lib/api";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { SocialButtons } from "@/components/SocialButtons";
+import { ThemeScript } from "@/components/ThemeScript";
+import { CartDrawerProvider } from "@/contexts/CartDrawerContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import type { Category } from "@/lib/api";
+import { fetchApi } from "@/lib/api";
 import { groupCategoriesForNav } from "@/lib/navGroups";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import "./globals.css";
 
 const SITE_NAME = "FROM THE STRESS";
 const DEFAULT_DESC =
@@ -81,7 +81,9 @@ export default async function RootLayout({
       <body>
         <ThemeProvider>
           <CartDrawerProvider>
-            <Header navGroups={navGroups} />
+            <Suspense fallback={null}>
+              <Header navGroups={navGroups} />
+            </Suspense>
             <main>{children}</main>
             <Footer />
             <CartDrawer />

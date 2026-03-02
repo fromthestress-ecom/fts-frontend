@@ -88,7 +88,7 @@ export function CartContent() {
   }, 0);
 
   return (
-    <>
+    <div className="flex flex-col">
       <ul className="list-none p-0 m-0">
         {cart.items.map((item) => {
           const p = item.productId as {
@@ -106,10 +106,7 @@ export function CartContent() {
             >
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded bg-surface">
                 {p?.images?.[0] ? (
-                  <ImageWithSkeleton
-                    src={p.images[0]}
-                    alt=""
-                  />
+                  <ImageWithSkeleton src={p.images[0]} alt="" />
                 ) : null}
               </div>
               <div className="min-w-0 flex-1">
@@ -147,7 +144,7 @@ export function CartContent() {
                   <button
                     type="button"
                     onClick={() => removeItem(p._id)}
-                    className="ml-auto border-none bg-transparent text-sm text-muted hover:text-text"
+                    className="ml-auto border-none bg-transparent text-sm text-muted hover:text-text cursor-pointer"
                   >
                     Xóa
                   </button>
@@ -168,10 +165,10 @@ export function CartContent() {
       </div>
       <Link
         href="/thanh-toan"
-        className="mt-6 inline-block rounded bg-accent px-8 py-3.5 font-bold text-bg hover:opacity-90"
+        className="mt-6 inline-block rounded bg-accent px-8 py-3.5 font-bold text-bg hover:opacity-90 text-center uppercase tracking-widest"
       >
         Thanh toán
       </Link>
-    </>
+    </div>
   );
 }

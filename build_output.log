@@ -1,0 +1,61 @@
+
+> streetwear-store@1.0.0 build
+> node scripts/sync-favicon.mjs && next build
+
+   ▲ Next.js 15.5.12
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1392ms
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/21) ...
+🔍 ~ RootLayout ~ frontend/src/app/layout.tsx:52 ~ categories: [
+  {
+    _id: '6992d102e1609ae8e4fe18d3',
+    slug: 'boxy-t-shirt',
+    name: 'Boxy',
+    order: 1,
+    createdAt: '2026-02-16T08:10:42.414Z',
+    updatedAt: '2026-02-27T04:09:38.003Z',
+    __v: 0,
+    groupOrder: 1,
+    navGroup: 'Tops'
+  },
+  {
+    _id: '6992f805b6680f2f57a81752',
+    slug: 'baby-tee',
+    name: 'Baby Tee',
+    order: 2,
+    createdAt: '2026-02-16T10:57:09.297Z',
+    updatedAt: '2026-02-27T04:05:27.982Z',
+    __v: 0,
+    groupOrder: 1,
+    navGroup: 'Tops'
+  },
+  {
+    _id: '6992f9feb6680f2f57a8177f',
+    slug: 'oversize',
+    name: 'Oversize',
+    order: 3,
+    createdAt: '2026-02-16T11:05:34.048Z',
+    updatedAt: '2026-02-27T04:09:47.641Z',
+    __v: 0,
+    groupOrder: 1,
+    navGroup: 'Tops'
+  }
+]
+🔍 ~ RootLayout ~ frontend/src/app/layout.tsx:54 ~ navGroups: [ { label: 'Tops', children: [ [Object], [Object], [Object] ] } ]
+ ⨯ useSearchParams() should be wrapped in a suspense boundary at page "/chinh-sach-bao-mat". Read more: https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
+    at g (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/.next/server/chunks/107.js:1:113194)
+    at m (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/.next/server/chunks/107.js:9:14563)
+    at v (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/.next/server/chunks/749.js:8:9536)
+    at n3 (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:82831)
+    at n6 (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:84601)
+    at n6 (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:101560)
+    at n5 (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:104801)
+    at n7 (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:102219)
+    at ia (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:108211)
+    at ie (/Users/dangnghia/Documents/FTS/FTS_WED/frontend/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:2:106833)
+Error occurred prerendering page "/chinh-sach-bao-mat". Read more: https://nextjs.org/docs/messages/prerender-error
+Export encountered an error on /chinh-sach-bao-mat/page: /chinh-sach-bao-mat, exiting the build.
+ ⨯ Next.js build worker exited with code: 1 and signal: null

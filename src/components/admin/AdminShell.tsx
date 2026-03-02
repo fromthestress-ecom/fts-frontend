@@ -15,9 +15,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   };
 
   if (isLogin) {
-    return (
-      <div className="min-h-[60vh] bg-surface">{children}</div>
-    );
+    return <div className="min-h-[60vh] bg-surface">{children}</div>;
   }
 
   return (
@@ -41,6 +39,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/products") ? "text-accent" : "text-muted"}`}
           >
             Sản phẩm
+          </Link>
+          <Link
+            href="/admin/blogs"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/blogs") ? "text-accent" : "text-muted"}`}
+          >
+            Bài viết (Blogs)
+          </Link>
+          <Link
+            href="/admin/tags"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/tags") ? "text-accent" : "text-muted"}`}
+          >
+            Thẻ phân loại (Tags)
           </Link>
           <Link
             href="/"

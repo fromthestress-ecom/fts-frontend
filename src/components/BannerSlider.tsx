@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -72,19 +72,32 @@ function BannerImg({
   src,
   alt,
   className,
+  priority = false,
 }: {
   src: string;
   alt: string;
   className?: string;
+  priority?: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, []);
+
   return (
     <div className="relative w-full h-full">
       {!loaded && <LoadingOverlay size={80} />}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         className={className}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         onLoad={() => setLoaded(true)}
         style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease" }}
       />
@@ -94,12 +107,22 @@ function BannerImg({
 
 function ThumbImg({ src, alt }: { src: string; alt: string }) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, []);
+
   return (
     <div className="relative w-full h-full">
       {!loaded && <LoadingOverlay size={28} />}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
+        loading="lazy"
         onLoad={() => setLoaded(true)}
         style={{
           opacity: loaded ? 1 : 0,
@@ -148,6 +171,7 @@ export function BannerSlider() {
                 src={slide.src}
                 alt={slide.title}
                 className="banner-slider-hero__img"
+                priority={i === 0}
               />
               {/* Dark overlay */}
               <div className="banner-slider-hero__overlay" />

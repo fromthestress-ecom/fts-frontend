@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import LoadingIcon from "@/components/icons/LoadingIcon";
 
 type ImageWithSkeletonProps = React.ImgHTMLAttributes<HTMLImageElement> & {
   skeletonClassName?: string;
+  priority?: boolean;
 };
 
 export function ImageWithSkeleton({
@@ -12,10 +13,18 @@ export function ImageWithSkeleton({
   alt = "",
   className = "",
   skeletonClassName = "",
-  loading = "lazy",
+  priority = false, // defaults to false
   ...rest
 }: ImageWithSkeletonProps) {
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // If the image is already cached / complete, set loaded immediately
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setLoaded(true);
+    }
+  }, []);
 
   return (
     <span className="relative block h-full w-full">
@@ -41,9 +50,11 @@ export function ImageWithSkeleton({
         </span>
       )}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
-        loading={loading}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         onLoad={() => setLoaded(true)}
         className={`block h-full w-full object-cover transition-opacity duration-300 ${
           loaded ? "opacity-100" : "opacity-0"
