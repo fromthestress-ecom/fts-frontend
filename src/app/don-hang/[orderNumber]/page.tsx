@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function OrderDetailPage({ params }: Props) {
   const { orderNumber } = await params;
+  const order = await getOrder(orderNumber);
   if (!order) notFound();
 
   const total = order.subtotal + order.shippingFee;
