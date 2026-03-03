@@ -131,8 +131,13 @@ export default async function ProductPage({ params }: Props) {
           />
 
           <div>
-            <h1 className="font-display mb-2 text-2xl sm:text-3xl">
+            <h1 className="font-display mb-2 text-2xl sm:text-3xl flex items-center gap-3">
               {product.name}
+              {product.preOrder && (
+                <span className="rounded bg-black/80 px-2 py-1 text-sm font-bold text-white shadow-sm">
+                  Pre-order
+                </span>
+              )}
             </h1>
             <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
               {new Intl.NumberFormat("vi-VN").format(product.price)}₫

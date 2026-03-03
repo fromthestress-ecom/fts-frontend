@@ -52,6 +52,7 @@ export interface Product {
   sizes: string[];
   colors: string[];
   order: number;
+  preOrder?: boolean;
 }
 
 export interface ProductListResult {
@@ -82,6 +83,7 @@ export interface OrderItemDto {
   size?: string;
   color?: string;
   image?: string;
+  preOrder?: boolean;
 }
 
 export interface ShippingAddressDto {

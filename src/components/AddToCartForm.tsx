@@ -133,7 +133,9 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
           : status === "done"
             ? "Đã thêm vào giỏ"
             : product.inStock
-              ? "Thêm vào giỏ"
+              ? product.preOrder
+                ? "Đặt trước (Pre-order)"
+                : "Thêm vào giỏ"
               : "Hết hàng"}
       </button>
       {status === "error" && (

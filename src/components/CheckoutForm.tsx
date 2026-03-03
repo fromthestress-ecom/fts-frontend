@@ -59,6 +59,7 @@ export function CheckoutForm() {
           name: string;
           price: number;
           images?: string[];
+          preOrder?: boolean;
         };
         return {
           productId: p._id,
@@ -68,6 +69,7 @@ export function CheckoutForm() {
           size: i.size,
           color: i.color,
           image: p.images?.[0],
+          preOrder: !!p.preOrder,
         };
       }),
       note: (form.note as HTMLInputElement).value.trim() || undefined,
@@ -116,6 +118,14 @@ export function CheckoutForm() {
     return s + (p?.price ?? 0) * i.quantity;
   }, 0);
   const shippingFee = subtotal >= 500000 ? 0 : 30000;
+  const total = subtotal + shippingFee;
+
+  const hasPreOrder = cart.items.some((i) => {
+    const p = i.productId as { preOrder?: boolean };
+    return p?.preOrder;
+  });
+
+  const depositAmount = hasPreOrder ? total / 2 : 0;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -164,19 +174,30 @@ export function CheckoutForm() {
             : `${new Intl.NumberFormat("vi-VN").format(shippingFee)}₫`}
         </p>
         <p className="text-lg font-bold">
-          Tổng:{" "}
-          {new Intl.NumberFormat("vi-VN").format(subtotal + shippingFee)}₫
+          Tổng thanh toán: {new Intl.NumberFormat("vi-VN").format(total)}₫
         </p>
+        {hasPreOrder && (
+          <div className="mt-4 border-t border-border pt-4">
+            <p className="text-sm font-semibold text-accent mb-1">
+              * Đơn hàng có sản phẩm Pre-order, yêu cầu chuyển khoản cọc 50%:
+            </p>
+            <p className="text-xl font-bold text-accent">
+              Tiền cọc: {new Intl.NumberFormat("vi-VN").format(depositAmount)}₫
+            </p>
+          </div>
+        )}
       </div>
-      {error && (
-        <p className="mb-4 text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
       <button
         type="submit"
         disabled={submitting}
         className="w-full rounded border-none bg-accent py-3.5 font-bold text-bg disabled:opacity-70"
       >
-        {submitting ? "Đang xử lý..." : "Đặt hàng"}
+        {submitting
+          ? "Đang xử lý..."
+          : hasPreOrder
+            ? "Đặt hàng & Chuyển khoản"
+            : "Đặt hàng"}
       </button>
     </form>
   );

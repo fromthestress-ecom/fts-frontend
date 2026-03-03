@@ -82,6 +82,11 @@ export function ProductCard({
               className="product-card__image-inner"
             />
           ) : null}
+          {p.preOrder && (
+            <span className="absolute left-2 top-2 rounded bg-black/80 px-2 py-1 text-xs font-bold text-white shadow-sm z-10">
+              Pre-order
+            </span>
+          )}
         </div>
         <div className="p-3 pb-0">
           <Heading className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
@@ -131,7 +136,9 @@ export function ProductCard({
             : status === "done"
               ? "✓ Đã thêm"
               : p.inStock
-                ? "THÊM VÀO GIỎ"
+                ? p.preOrder
+                  ? "ĐẶT TRƯỚC (PRE-ORDER)"
+                  : "THÊM VÀO GIỎ"
                 : "HẾT HÀNG"}
         </button>
       </div>

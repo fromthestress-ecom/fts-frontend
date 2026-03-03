@@ -12,6 +12,7 @@ interface Order {
     quantity: number;
     size?: string;
     color?: string;
+    preOrder?: boolean;
   }[];
   shippingAddress: {
     fullName: string;
@@ -26,9 +27,7 @@ interface Order {
 
 async function getOrder(orderNumber: string): Promise<Order | null> {
   try {
-    return await fetchApi<Order>(
-      `/orders/${encodeURIComponent(orderNumber)}`,
-    );
+    return await fetchApi<Order>(`/orders/${encodeURIComponent(orderNumber)}`);
   } catch {
     return null;
   }
@@ -43,10 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function OrderDetailPage({ params }: Props) {
   const { orderNumber } = await params;
-  const order = await getOrder(orderNumber);
   if (!order) notFound();
 
   const total = order.subtotal + order.shippingFee;
+  const hasPreOrder = order.items.some((item) => item.preOrder);
+  const depositAmount = hasPreOrder ? total / 2 : 0;
 
   return (
     <div className="mx-auto max-w-[640px] px-4 py-8 sm:px-6">
@@ -63,9 +63,7 @@ export default async function OrderDetailPage({ params }: Props) {
         </p>
         <p className="mt-1 text-muted">
           {order.shippingAddress.address}
-          {order.shippingAddress.city
-            ? `, ${order.shippingAddress.city}`
-            : ""}
+          {order.shippingAddress.city ? `, ${order.shippingAddress.city}` : ""}
         </p>
       </div>
       <ul className="list-none p-0 m-0">
@@ -105,6 +103,34 @@ export default async function OrderDetailPage({ params }: Props) {
         <p className="mt-2 text-lg font-bold">
           Tổng: {new Intl.NumberFormat("vi-VN").format(total)}₫
         </p>
+        {hasPreOrder && (
+          <div className="mt-4 rounded-lg bg-accent/10 p-4 border border-accent/20 text-left">
+            <h3 className="text-base font-bold text-accent mb-2">
+              Thông tin thanh toán cọc Pre-order
+            </h3>
+            <p className="text-sm mb-2 text-text">
+              Đơn hàng của bạn có chứa sản phẩm Pre-order. Vui lòng chuyển khoản
+              tiền cọc <strong>50%</strong> theo thông tin dưới đây để chúng tôi
+              tiến hành xử lý đơn hàng:
+            </p>
+            <p className="text-sm mb-1 text-text">
+              Số tiền cọc:{" "}
+              <strong className="text-base text-accent">
+                {new Intl.NumberFormat("vi-VN").format(depositAmount)}₫
+              </strong>
+            </p>
+            <p className="text-sm mb-1 text-text">
+              Số tài khoản: <strong>0123456789</strong> (Ngân hàng VCB)
+            </p>
+            <p className="text-sm mb-0 text-text">
+              Chủ tài khoản: <strong>STREETWEAR STORE</strong>
+            </p>
+            <p className="text-sm mt-2 text-text">
+              Nội dung CK: <strong>{order.orderNumber} SĐT</strong> (VD:{" "}
+              {order.orderNumber} 0987654321)
+            </p>
+          </div>
+        )}
       </div>
       <p className="mt-6">
         <Link href="/san-pham" className="text-accent hover:underline">

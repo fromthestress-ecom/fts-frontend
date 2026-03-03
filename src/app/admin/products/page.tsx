@@ -23,6 +23,7 @@ type Product = {
   colors: string[];
   sizeChart?: string;
   order: number;
+  preOrder?: boolean;
 };
 
 function adminFetch(path: string, init?: RequestInit) {
@@ -78,6 +79,7 @@ export default function AdminProductsPage() {
     colors: "",
     stockQuantity: "0",
     inStock: true,
+    preOrder: false,
   });
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -250,6 +252,7 @@ export default function AdminProductsPage() {
       colors: "",
       stockQuantity: "0",
       inStock: true,
+      preOrder: false,
     });
     setEditingId(null);
   };
@@ -274,6 +277,7 @@ export default function AdminProductsPage() {
       colors: (p.colors ?? []).join(", "),
       stockQuantity: String(p.stockQuantity ?? 0),
       inStock: p.inStock ?? true,
+      preOrder: p.preOrder ?? false,
     });
     setMessage("");
   };
@@ -300,6 +304,7 @@ export default function AdminProductsPage() {
         .filter(Boolean),
       stockQuantity: Number(form.stockQuantity) || 0,
       inStock: form.inStock,
+      preOrder: form.preOrder,
     };
     const isEdit = Boolean(editingId);
     const res = await adminFetch(
@@ -545,6 +550,23 @@ export default function AdminProductsPage() {
               }
               className={`${inputClass} w-24`}
             />
+          </div>
+          <div className="flex items-center gap-2 pt-6">
+            <input
+              type="checkbox"
+              id="preOrder"
+              checked={form.preOrder}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, preOrder: e.target.checked }))
+              }
+              className="h-4 w-4 rounded border-border text-accent mt-0.5"
+            />
+            <label
+              htmlFor="preOrder"
+              className="text-sm font-medium text-text cursor-pointer select-none"
+            >
+              Hàng Pre-order
+            </label>
           </div>
         </div>
         <button type="submit" disabled={saving} className={btnPrimaryClass}>
