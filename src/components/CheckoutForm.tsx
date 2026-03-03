@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Cart, CreateOrderDto } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -19,10 +20,25 @@ const inputClass =
 
 export function CheckoutForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, token } = useAuth();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Referral code state
+  const [referralCode, setReferralCode] = useState("");
+  const [referralValid, setReferralValid] = useState<boolean | null>(null);
+  const [referralDiscount, setReferralDiscount] = useState<{
+    type: string;
+    value: number;
+    name: string;
+  } | null>(null);
+  const [checkingReferral, setCheckingReferral] = useState(false);
+
+  // Affiliate ref from URL
+  const affiliateRef = searchParams?.get("ref") || "";
 
   useEffect(() => {
     const guestId = getGuestId();
@@ -39,11 +55,47 @@ export function CheckoutForm() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Validate referral code
+  const validateReferral = useCallback(async (code: string) => {
+    if (!code || code.length < 3) {
+      setReferralValid(null);
+      setReferralDiscount(null);
+      return;
+    }
+    setCheckingReferral(true);
+    try {
+      const res = await fetch(
+        `${API}/referrals/validate/${encodeURIComponent(code)}`,
+      );
+      const data = await res.json();
+      if (data.valid) {
+        setReferralValid(true);
+        setReferralDiscount({
+          type: data.discountType,
+          value: data.discountValue,
+          name: data.referrerName,
+        });
+      } else {
+        setReferralValid(false);
+        setReferralDiscount(null);
+      }
+    } catch {
+      setReferralValid(false);
+      setReferralDiscount(null);
+    } finally {
+      setCheckingReferral(false);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!cart?.items?.length) return;
     const form = e.currentTarget;
-    const payload: CreateOrderDto = {
+    const payload: CreateOrderDto & {
+      referralCode?: string;
+      affiliateRef?: string;
+      userId?: string;
+    } = {
       email: (form.email as HTMLInputElement).value.trim(),
       shippingAddress: {
         fullName: (form.fullName as HTMLInputElement).value.trim(),
@@ -74,6 +126,17 @@ export function CheckoutForm() {
       }),
       note: (form.note as HTMLInputElement).value.trim() || undefined,
     };
+
+    // Add referral & affiliate data
+    if (referralValid && referralCode && user) {
+      payload.referralCode = referralCode.toUpperCase();
+      payload.userId = user.id;
+    }
+    if (affiliateRef) {
+      payload.affiliateRef = affiliateRef;
+      if (user) payload.userId = user.id;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -162,6 +225,41 @@ export function CheckoutForm() {
       <div className="mb-4">
         <label className="mb-1 block text-sm">Ghi chú</label>
         <input type="text" name="note" className={inputClass} />
+      </div>
+
+      {/* Referral Code */}
+      <div className="mb-4">
+        <label className="mb-1 block text-sm">Mã giới thiệu (nếu có)</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+            placeholder="VD: NGHIA4821"
+            className={inputClass}
+            style={{ textTransform: "uppercase" }}
+          />
+          <button
+            type="button"
+            onClick={() => validateReferral(referralCode)}
+            disabled={checkingReferral || !referralCode}
+            className="rounded border border-border bg-surface px-4 py-2 text-sm font-semibold text-text transition-colors hover:bg-border disabled:opacity-50"
+          >
+            {checkingReferral ? "..." : "Áp dụng"}
+          </button>
+        </div>
+        {referralValid === true && referralDiscount && (
+          <p className="mt-1 text-sm" style={{ color: "#22c55e" }}>
+            ✓ Mã hợp lệ! Giảm {referralDiscount.value}
+            {referralDiscount.type === "percent" ? "%" : "đ"} từ{" "}
+            {referralDiscount.name}
+          </p>
+        )}
+        {referralValid === false && (
+          <p className="mt-1 text-sm" style={{ color: "#ef4444" }}>
+            ✗ Mã không hợp lệ
+          </p>
+        )}
       </div>
       <div className="mb-4 rounded-lg bg-surface p-4">
         <p className="mb-2 text-muted">
