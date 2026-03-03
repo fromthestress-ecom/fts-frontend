@@ -22,6 +22,7 @@ function isNavItemActive(
   if (!searchParams) return false;
   const value = searchParams.get("danh_muc");
   if (!value) return false;
+  if (value.toLowerCase() === item.label.toLowerCase()) return true;
   return item.children.some((c) => c.slug === value);
 }
 
@@ -135,11 +136,25 @@ function NavItems({
               <div key={key} className="flex flex-col gap-1">
                 <button
                   type="button"
-                  onClick={() => onToggleNav?.(key)}
+                  onClick={(e) => {
+                    // If they click the label but it's not the arrow, maybe route them to the group instead of just expanding?
+                    // But in accordion, usually the whole row expands it.
+                    // Let's keep it expanding for now.
+                    onToggleNav?.(key);
+                  }}
                   className={`flex w-full items-center justify-between ${linkBase} text-left ${itemActiveClass}`}
                   aria-expanded={isOpen}
                 >
-                  {item.label}
+                  <Link
+                    href={`/san-pham?danh_muc=${encodeURIComponent(item.label.toLowerCase())}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose?.();
+                    }}
+                    className="hover:text-accent"
+                  >
+                    {item.label}
+                  </Link>
                   <span
                     className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                   >
@@ -178,7 +193,7 @@ function NavItems({
           return (
             <div key={key} className="relative group">
               <Link
-                href="/san-pham"
+                href={`/san-pham?danh_muc=${encodeURIComponent(item.label.toLowerCase())}`}
                 className={`${linkBase} ${itemActiveClass}`}
               >
                 {item.label}

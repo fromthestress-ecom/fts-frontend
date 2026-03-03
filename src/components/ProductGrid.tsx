@@ -50,6 +50,10 @@ export function ProductGrid({
             className="rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base"
           >
             <option value="">Tất cả</option>
+            <option disabled>── Loại ──</option>
+            <option value="tops">Tops (Áo)</option>
+            <option value="bottoms">Bottoms (Quần)</option>
+            <option disabled>── Danh mục ──</option>
             {categories.map((c) => (
               <option key={c._id} value={c.slug}>
                 {c.name}

@@ -35,6 +35,8 @@ function resolveCategoryId(
 ): string | undefined {
   const v = params.danh_muc;
   if (!v) return undefined;
+  if (v.toLowerCase() === "tops" || v.toLowerCase() === "bottoms")
+    return undefined; // Special nav groups handled separately
   if (OBJECT_ID_REGEX.test(v)) return v;
   let cat = categories.find((c) => c.slug === v);
   if (cat) return cat._id;
@@ -50,6 +52,8 @@ function resolveCategorySlug(
 ): string | undefined {
   const v = params.danh_muc;
   if (!v) return undefined;
+  if (v.toLowerCase() === "tops") return "tops";
+  if (v.toLowerCase() === "bottoms") return "bottoms";
   if (OBJECT_ID_REGEX.test(v)) {
     const cat = categories.find((c) => c._id === v);
     return cat?.slug;
@@ -64,10 +68,16 @@ async function getProducts(
 ): Promise<ProductListResult> {
   const page = searchParams.page ?? "1";
   const categoryId = resolveCategoryId(searchParams, categories);
+  const v = searchParams.danh_muc;
+  let navGroup = "";
+  if (v && (v.toLowerCase() === "tops" || v.toLowerCase() === "bottoms")) {
+    navGroup = v.toLowerCase() === "tops" ? "Tops" : "Bottoms";
+  }
   const q = (searchParams.q ?? "").trim();
   const sort = searchParams.sap_xep ?? "";
   const params = new URLSearchParams({ page, limit: "12" });
   if (categoryId) params.set("category", categoryId);
+  if (navGroup) params.set("navGroup", navGroup);
   if (q) params.set("q", q);
   if (sort) params.set("sort", sort);
   try {
