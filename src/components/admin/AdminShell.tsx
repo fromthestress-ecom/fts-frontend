@@ -77,6 +77,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             Thẻ phân loại (Tags)
           </Link>
           <Link
+            href="/admin/users"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/users" || pathname?.startsWith("/admin/users/") ? "text-accent" : "text-muted"}`}
+          >
+            Người dùng (Users)
+          </Link>
+          <Link
+            href="/admin/affiliates"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/affiliates" || pathname?.startsWith("/admin/affiliates/") ? "text-accent" : "text-muted"}`}
+          >
+            Affiliate
+          </Link>
+          <Link
             href="/"
             className="mt-4 px-6 py-2 text-accent text-sm sm:text-base"
           >

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function TaiKhoanPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/");
@@ -23,6 +24,20 @@ export default function TaiKhoanPage() {
   }
 
   if (!user) return null;
+
+  const referralCode = user.referralCode;
+  const canCopyReferral = Boolean(referralCode);
+
+  const handleCopyReferral = async () => {
+    if (!referralCode) return;
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <div className="account-page">
@@ -41,6 +56,23 @@ export default function TaiKhoanPage() {
               Thành viên từ{" "}
               {new Date(user.createdAt || "").toLocaleDateString("vi-VN")}
             </p>
+            {canCopyReferral && (
+              <div className="account-page__referral-row">
+                <span className="account-page__referral-label">
+                  Mã giới thiệu:{"  "}
+                </span>
+                <span className="account-page__referral-code">
+                  {referralCode}{" "}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyReferral}
+                  className="account-page__referral-copy"
+                >
+                  {copied ? "Đã copy" : "Copy"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
