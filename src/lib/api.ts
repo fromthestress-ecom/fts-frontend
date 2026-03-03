@@ -12,6 +12,10 @@ export async function fetchApi<T>(path: string, init?: RequestInit): Promise<T> 
   return res.json() as Promise<T>;
 }
 
+export async function fetchBestSellingProducts(limit = 8): Promise<Product[]> {
+  return fetchApi<Product[]>(`/products/best-selling?limit=${limit}`);
+}
+
 export interface Category {
   _id: string;
   slug: string;
@@ -23,6 +27,15 @@ export interface Category {
   groupOrder?: number;
 }
 
+export interface ProductTemplate {
+  _id: string;
+  name: string;
+  description?: string;
+  sizeChart?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Product {
   _id: string;
   slug: string;
@@ -31,7 +44,9 @@ export interface Product {
   price: number;
   compareAtPrice?: number;
   images: string[];
+  sizeChart?: string;
   categoryId: Category | string;
+  templateId?: ProductTemplate | string;
   inStock: boolean;
   stockQuantity: number;
   sizes: string[];
@@ -123,3 +138,23 @@ export interface BlogItem {
   ogImage?: string;
 }
 
+export interface Order {
+  _id: string;
+  orderNumber: string;
+  email: string;
+  items: OrderItemDto[];
+  shippingAddress: ShippingAddressDto;
+  subtotal: number;
+  shippingFee: number;
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled" | string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderListResult {
+  orders: Order[];
+  total: number;
+  page: number;
+  totalPages: number;
+}

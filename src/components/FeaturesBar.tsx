@@ -3,7 +3,7 @@
 const FEATURES = [
   {
     title: "MIỄN PHÍ GIAO HÀNG",
-    description: "Với hóa đơn từ 500.000 VNĐ",
+    description: "Với hóa đơn từ 400.000 VNĐ",
     darkSrc: "/icon/delivery-xxl-white.png",
     lightSrc: "/icon/delivery-xxl-black.png",
     alt: "free-shipping-icon",

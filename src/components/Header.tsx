@@ -101,6 +101,13 @@ function NavItems({
 
   const aboutActiveClass =
     pathname === "/ve-chung-toi" ? activeClass : inactiveClass;
+  const bestSellerActiveClass =
+    pathname === "/best-selling" ? activeClass : inactiveClass;
+  const contactActiveClass =
+    pathname === "/lien-he" ? activeClass : inactiveClass;
+  const blogsActiveClass = pathname?.startsWith("/blogs")
+    ? activeClass
+    : inactiveClass;
 
   return (
     <>
@@ -200,6 +207,18 @@ function NavItems({
       )}
 
       <Link
+        href="/best-selling"
+        onClick={onClose}
+        className={
+          isMobile
+            ? `${linkBase} ${bestSellerActiveClass}`
+            : `${linkBase} ${bestSellerActiveClass}`
+        }
+      >
+        Best Sellers
+      </Link>
+
+      <Link
         href="/ve-chung-toi"
         onClick={onClose}
         className={
@@ -216,8 +235,8 @@ function NavItems({
         onClick={onClose}
         className={
           isMobile
-            ? `${linkBase} ${aboutActiveClass}`
-            : `${linkBase} ${aboutActiveClass}`
+            ? `${linkBase} ${contactActiveClass}`
+            : `${linkBase} ${contactActiveClass}`
         }
       >
         Contact
@@ -228,8 +247,8 @@ function NavItems({
         onClick={onClose}
         className={
           isMobile
-            ? `${linkBase} ${aboutActiveClass}`
-            : `${linkBase} ${aboutActiveClass}`
+            ? `${linkBase} ${blogsActiveClass}`
+            : `${linkBase} ${blogsActiveClass}`
         }
       >
         Blogs
@@ -387,7 +406,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
 
           {/* Desktop right actions */}
           <div className="hidden md:flex items-center gap-3">
-            <button
+            {/* <button
               type="button"
               aria-label="Tìm kiếm"
               className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
@@ -406,7 +425,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-            </button>
+            </button> */}
             <ThemeToggle />
             <CartLink />
             <Link href="/san-pham" className="header-shop-btn">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   fetchApi,
+  fetchBestSellingProducts,
   type Product,
   type ProductListResult,
   type BlogItem,
@@ -23,6 +24,14 @@ async function getFeaturedProducts(): Promise<ProductListResult> {
   }
 }
 
+async function getBestSelling(): Promise<Product[]> {
+  try {
+    return await fetchBestSellingProducts(8);
+  } catch {
+    return [];
+  }
+}
+
 async function getLatestBlogs(): Promise<{ blogs: BlogItem[] }> {
   try {
     return await fetchApi<{ blogs: BlogItem[] }>("/blogs?limit=4");
@@ -38,6 +47,33 @@ function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
       <h2 className="font-display mb-6 text-xl tracking-wide sm:mb-8 sm:text-2xl">
         SẢN PHẨM MỚI
+      </h2>
+      <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
+        {items.map((p) => (
+          <li key={p._id}>
+            <ProductCard product={p} headingLevel="h3" />
+          </li>
+        ))}
+      </ul>
+      <div className="mt-8 text-center">
+        <a
+          href="/san-pham"
+          className="font-semibold text-accent hover:underline"
+        >
+          Xem tất cả →
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function BestSellingProductsSection({ items }: { items: readonly Product[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
+      <h2 className="font-display mb-6 text-xl tracking-wide sm:mb-8 sm:text-2xl text-accent">
+        BEST SELLING ITEMS
       </h2>
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
@@ -164,6 +200,7 @@ function buildPromoSlides(items: readonly Product[]): readonly PromoSlide[] {
 
 export default async function HomePage() {
   const { items } = await getFeaturedProducts();
+  const bestSellers = await getBestSelling();
   const { blogs } = await getLatestBlogs();
   const promoSlides = buildPromoSlides(items);
 
@@ -176,6 +213,7 @@ export default async function HomePage() {
       <BannerSlider />
 
       <PromoSection slides={promoSlides} />
+      <BestSellingProductsSection items={bestSellers} />
       <FeaturedProductsSection items={items} />
       <CollectionsSection />
       <LatestStoriesSection blogs={blogs} />

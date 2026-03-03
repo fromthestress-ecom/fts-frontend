@@ -40,9 +40,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) return { title: "Sản phẩm" };
+  const template =
+    typeof product.templateId === "object" && product.templateId !== null
+      ? product.templateId
+      : null;
+  const description = template?.description || product.description;
+
   const title = `${product.name} | STREETWEAR`;
   const desc =
-    product.description?.slice(0, 160) ??
+    description?.slice(0, 160) ??
     `Mua ${product.name} - ${new Intl.NumberFormat("vi-VN").format(product.price)}₫`;
   const image = product.images?.[0];
   return {
@@ -71,6 +77,13 @@ export default async function ProductPage({ params }: Props) {
   const categoryName = category?.name ?? null;
   const navGroup = category?.navGroup ?? "";
 
+  const template =
+    typeof product.templateId === "object" && product.templateId !== null
+      ? product.templateId
+      : null;
+  const description = template?.description || product.description;
+  const sizeChart = template?.sizeChart || product.sizeChart;
+
   const otherProducts =
     navGroup.trim() !== ""
       ? await getOtherProductsByNavGroup(navGroup, slug)
@@ -80,7 +93,7 @@ export default async function ProductPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description ?? undefined,
+    description: description ?? undefined,
     image: product.images,
     offers: {
       "@type": "Offer",
@@ -133,14 +146,34 @@ export default async function ProductPage({ params }: Props) {
                   </span>
                 )}
             </p>
-            {product.description && (
-              <p className="mb-6 leading-relaxed text-muted">
-                {product.description}
-              </p>
-            )}
             <AddToCartForm product={product} />
           </div>
         </div>
+
+        {/* Description & Size Chart full width below the fold */}
+        {(description || sizeChart) && (
+          <div className="mx-auto mt-16 max-w-[800px] border-t border-border pt-10">
+            {description && (
+              <div className="mb-10 text-muted leading-relaxed">
+                {description.split("\n").map((line, i) => (
+                  <p key={i} className="mb-4 min-h-[1em]">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {sizeChart && (
+              <div className="mt-8 text-center">
+                <img
+                  src={sizeChart}
+                  alt={`Size Chart - ${product.name}`}
+                  className="mx-auto max-w-full h-auto rounded-lg shadow-sm"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <OtherProductsSection products={otherProducts} />

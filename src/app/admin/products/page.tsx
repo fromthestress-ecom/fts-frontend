@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { getAdminKey } from '@/components/admin/AdminGuard';
-import type { Category } from '@/lib/api';
-import type Sortable from 'sortablejs';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getAdminKey } from "@/components/admin/AdminGuard";
+import type { Category, ProductTemplate } from "@/lib/api";
+import type Sortable from "sortablejs";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 type Product = {
   _id: string;
@@ -16,10 +16,12 @@ type Product = {
   compareAtPrice?: number;
   images: string[];
   categoryId?: Category | null;
+  templateId?: ProductTemplate | null;
   inStock: boolean;
   stockQuantity: number;
   sizes: string[];
   colors: string[];
+  sizeChart?: string;
   order: number;
 };
 
@@ -28,8 +30,8 @@ function adminFetch(path: string, init?: RequestInit) {
   return fetch(`${API}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
-      'x-admin-key': key ?? '',
+      "Content-Type": "application/json",
+      "x-admin-key": key ?? "",
       ...init?.headers,
     },
   });
@@ -38,17 +40,17 @@ function adminFetch(path: string, init?: RequestInit) {
 function adminUploadFile(file: File): Promise<{ url: string; key: string }> {
   const key = getAdminKey();
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
   return fetch(`${API}/admin/upload`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'x-admin-key': key ?? '',
+      "x-admin-key": key ?? "",
     },
     body: formData,
   }).then((res) => {
     if (!res.ok) {
       return res.json().then((data) => {
-        throw new Error(data.message || 'Upload thất bại');
+        throw new Error(data.message || "Upload thất bại");
       });
     }
     return res.json();
@@ -58,22 +60,23 @@ function adminUploadFile(file: File): Promise<{ url: string; key: string }> {
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [templates, setTemplates] = useState<ProductTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [orderDirty, setOrderDirty] = useState(false);
   const [orderSaving, setOrderSaving] = useState(false);
   const [form, setForm] = useState({
-    slug: '',
-    name: '',
-    description: '',
-    price: '',
-    compareAtPrice: '',
-    categoryId: '',
+    slug: "",
+    name: "",
+    price: "",
+    compareAtPrice: "",
+    categoryId: "",
+    templateId: "",
     images: [] as string[],
-    sizes: '',
-    colors: '',
-    stockQuantity: '0',
+    sizes: "",
+    colors: "",
+    stockQuantity: "0",
     inStock: true,
   });
   const [uploading, setUploading] = useState(false);
@@ -83,16 +86,21 @@ export default function AdminProductsPage() {
   const productsTbodyRef = useRef<HTMLTableSectionElement>(null);
   const productsSortableRef = useRef<Sortable | null>(null);
 
-  const productIdSet = useMemo(() => new Set(products.map((p) => p._id)), [products]);
+  const productIdSet = useMemo(
+    () => new Set(products.map((p) => p._id)),
+    [products],
+  );
 
   const load = async () => {
     setLoading(true);
-    const [resP, resC] = await Promise.all([
-      adminFetch('/admin/products'),
-      adminFetch('/admin/categories'),
+    const [resP, resC, resT] = await Promise.all([
+      adminFetch("/admin/products"),
+      adminFetch("/admin/categories"),
+      adminFetch("/admin/templates"),
     ]);
     if (resP.ok) setProducts(await resP.json());
     if (resC.ok) setCategories(await resC.json());
+    if (resT.ok) setTemplates(await resT.json());
     setLoading(false);
     setOrderDirty(false);
   };
@@ -103,16 +111,20 @@ export default function AdminProductsPage() {
 
   // Initialize SortableJS for image reordering
   useEffect(() => {
-    if (typeof window === 'undefined' || !imagesContainerRef.current || form.images.length === 0) {
+    if (
+      typeof window === "undefined" ||
+      !imagesContainerRef.current ||
+      form.images.length === 0
+    ) {
       if (sortableInstanceRef.current) {
         sortableInstanceRef.current.destroy();
         sortableInstanceRef.current = null;
       }
       return;
     }
-    
+
     // Dynamically import SortableJS
-    import('sortablejs').then((SortableModule) => {
+    import("sortablejs").then((SortableModule) => {
       const Sortable = SortableModule.default || SortableModule;
       if (sortableInstanceRef.current) {
         sortableInstanceRef.current.destroy();
@@ -120,14 +132,18 @@ export default function AdminProductsPage() {
       if (imagesContainerRef.current) {
         sortableInstanceRef.current = new Sortable(imagesContainerRef.current, {
           animation: 150,
-          ghostClass: 'sortable-ghost',
-          dragClass: 'sortable-drag',
+          ghostClass: "sortable-ghost",
+          dragClass: "sortable-drag",
           onEnd: () => {
-            const items = Array.from(imagesContainerRef.current?.children || []);
-            const newOrder = items.map((item) => {
-              const div = item as HTMLElement;
-              return div.getAttribute('data-url') || '';
-            }).filter(Boolean);
+            const items = Array.from(
+              imagesContainerRef.current?.children || [],
+            );
+            const newOrder = items
+              .map((item) => {
+                const div = item as HTMLElement;
+                return div.getAttribute("data-url") || "";
+              })
+              .filter(Boolean);
             if (newOrder.length === form.images.length) {
               setForm((f) => ({ ...f, images: newOrder }));
             }
@@ -146,7 +162,11 @@ export default function AdminProductsPage() {
 
   // Initialize SortableJS for product row reordering
   useEffect(() => {
-    if (typeof window === 'undefined' || !productsTbodyRef.current || products.length === 0) {
+    if (
+      typeof window === "undefined" ||
+      !productsTbodyRef.current ||
+      products.length === 0
+    ) {
       if (productsSortableRef.current) {
         productsSortableRef.current.destroy();
         productsSortableRef.current = null;
@@ -154,10 +174,11 @@ export default function AdminProductsPage() {
       return;
     }
 
-    import('sortablejs').then((SortableModule) => {
-      const SortableCtor = (SortableModule.default ?? SortableModule) as unknown as new (
+    import("sortablejs").then((SortableModule) => {
+      const SortableCtor = (SortableModule.default ??
+        SortableModule) as unknown as new (
         el: HTMLElement,
-        options: Record<string, unknown>
+        options: Record<string, unknown>,
       ) => Sortable;
 
       if (productsSortableRef.current) productsSortableRef.current.destroy();
@@ -165,13 +186,15 @@ export default function AdminProductsPage() {
       if (!productsTbodyRef.current) return;
       productsSortableRef.current = new SortableCtor(productsTbodyRef.current, {
         animation: 150,
-        ghostClass: 'sortable-ghost',
-        dragClass: 'sortable-drag',
-        handle: '.drag-handle',
+        ghostClass: "sortable-ghost",
+        dragClass: "sortable-drag",
+        handle: ".drag-handle",
         onEnd: () => {
-          const rows = Array.from(productsTbodyRef.current?.querySelectorAll('tr[data-id]') ?? []);
+          const rows = Array.from(
+            productsTbodyRef.current?.querySelectorAll("tr[data-id]") ?? [],
+          );
           const ids = rows
-            .map((r) => (r as HTMLElement).getAttribute('data-id') ?? '')
+            .map((r) => (r as HTMLElement).getAttribute("data-id") ?? "")
             .filter(Boolean);
           if (ids.length !== products.length) return;
           if (!ids.every((id) => productIdSet.has(id))) return;
@@ -193,22 +216,22 @@ export default function AdminProductsPage() {
   }, [products.length, productIdSet]);
 
   const saveProductOrder = async () => {
-    setMessage('');
+    setMessage("");
     setOrderSaving(true);
     try {
       const items = products.map((p, index) => ({ id: p._id, order: index }));
-      const res = await adminFetch('/admin/products/reorder', {
-        method: 'PUT',
+      const res = await adminFetch("/admin/products/reorder", {
+        method: "PUT",
         body: JSON.stringify({ items }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message ?? 'Lỗi lưu thứ tự');
+      if (!res.ok) throw new Error(data.message ?? "Lỗi lưu thứ tự");
       setOrderDirty(false);
-      setMessage('Đã lưu thứ tự sản phẩm.');
+      setMessage("Đã lưu thứ tự sản phẩm.");
       // reload to ensure consistent ordering
       await load();
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Lỗi lưu thứ tự');
+      setMessage(err instanceof Error ? err.message : "Lỗi lưu thứ tự");
     } finally {
       setOrderSaving(false);
     }
@@ -216,16 +239,16 @@ export default function AdminProductsPage() {
 
   const resetForm = () => {
     setForm({
-      slug: '',
-      name: '',
-      description: '',
-      price: '',
-      compareAtPrice: '',
-      categoryId: '',
+      slug: "",
+      name: "",
+      price: "",
+      compareAtPrice: "",
+      categoryId: "",
+      templateId: "",
       images: [],
-      sizes: '',
-      colors: '',
-      stockQuantity: '0',
+      sizes: "",
+      colors: "",
+      stockQuantity: "0",
       inStock: true,
     });
     setEditingId(null);
@@ -236,46 +259,64 @@ export default function AdminProductsPage() {
     setForm({
       slug: p.slug,
       name: p.name,
-      description: p.description ?? '',
       price: String(p.price),
-      compareAtPrice: p.compareAtPrice != null ? String(p.compareAtPrice) : '',
-      categoryId: p.categoryId && typeof p.categoryId === 'object' ? p.categoryId._id : '',
+      compareAtPrice: p.compareAtPrice != null ? String(p.compareAtPrice) : "",
+      categoryId:
+        p.categoryId && typeof p.categoryId === "object"
+          ? p.categoryId._id
+          : "",
+      templateId:
+        p.templateId && typeof p.templateId === "object"
+          ? p.templateId._id
+          : "",
       images: p.images ?? [],
-      sizes: (p.sizes ?? []).join(', '),
-      colors: (p.colors ?? []).join(', '),
+      sizes: (p.sizes ?? []).join(", "),
+      colors: (p.colors ?? []).join(", "),
       stockQuantity: String(p.stockQuantity ?? 0),
       inStock: p.inStock ?? true,
     });
-    setMessage('');
+    setMessage("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage('');
+    setMessage("");
     setSaving(true);
     const payload = {
       slug: form.slug.trim(),
       name: form.name.trim(),
-      description: form.description.trim() || undefined,
       price: Number(form.price) || 0,
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : 0,
       categoryId: form.categoryId || undefined,
+      templateId: form.templateId || undefined,
       images: form.images,
-      sizes: form.sizes.split(',').map((s) => s.trim()).filter(Boolean),
-      colors: form.colors.split(',').map((s) => s.trim()).filter(Boolean),
+      sizes: form.sizes
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      colors: form.colors
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
       stockQuantity: Number(form.stockQuantity) || 0,
       inStock: form.inStock,
     };
     const isEdit = Boolean(editingId);
     const res = await adminFetch(
-      isEdit ? `/admin/products/${editingId}` : '/admin/products',
+      isEdit ? `/admin/products/${editingId}` : "/admin/products",
       {
-        method: isEdit ? 'PUT' : 'POST',
+        method: isEdit ? "PUT" : "POST",
         body: JSON.stringify(payload),
-      }
+      },
     );
     const data = await res.json().catch(() => ({}));
-    setMessage(res.ok ? (isEdit ? 'Đã cập nhật.' : 'Đã thêm sản phẩm.') : (data.message ?? 'Lỗi'));
+    setMessage(
+      res.ok
+        ? isEdit
+          ? "Đã cập nhật."
+          : "Đã thêm sản phẩm."
+        : (data.message ?? "Lỗi"),
+    );
     setSaving(false);
     if (res.ok) {
       resetForm();
@@ -284,8 +325,8 @@ export default function AdminProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Xóa sản phẩm này?')) return;
-    await adminFetch(`/admin/products/${id}`, { method: 'DELETE' });
+    if (!confirm("Xóa sản phẩm này?")) return;
+    await adminFetch(`/admin/products/${id}`, { method: "DELETE" });
     load();
   };
 
@@ -298,9 +339,9 @@ export default function AdminProductsPage() {
       const results = await Promise.all(uploads);
       const urls = results.map((r) => r.url);
       setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
-      e.target.value = '';
+      e.target.value = "";
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Upload thất bại');
+      setMessage(err instanceof Error ? err.message : "Upload thất bại");
     } finally {
       setUploading(false);
     }
@@ -357,7 +398,9 @@ export default function AdminProductsPage() {
             <input
               type="number"
               value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, price: e.target.value }))
+              }
               placeholder="450000"
               required
               className={inputClass}
@@ -368,35 +411,51 @@ export default function AdminProductsPage() {
             <input
               type="number"
               value={form.compareAtPrice}
-              onChange={(e) => setForm((f) => ({ ...f, compareAtPrice: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, compareAtPrice: e.target.value }))
+              }
               placeholder="550000"
               className={inputClass}
             />
           </div>
         </div>
-        <div className="mb-4">
-          <label className={labelClass}>Danh mục</label>
-          <select
-            value={form.categoryId}
-            onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
-            className={inputClass}
-          >
-            <option value="">-- Chọn --</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className={labelClass}>Mô tả</label>
-          <textarea
-            value={form.description}
-            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            rows={2}
-            className={inputClass}
-          />
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelClass}>Danh mục</label>
+            <select
+              value={form.categoryId}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, categoryId: e.target.value }))
+              }
+              className={inputClass}
+            >
+              <option value="">-- Chọn Danh mục --</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>
+              Mẫu Thông tin (Mô tả & Size Chart)
+            </label>
+            <select
+              value={form.templateId}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, templateId: e.target.value }))
+              }
+              className={inputClass}
+            >
+              <option value="">-- Không dùng Mẫu --</option>
+              {templates.map((t) => (
+                <option key={t._id} value={t._id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="mb-4">
           <label className={labelClass}>Ảnh</label>
@@ -409,7 +468,9 @@ export default function AdminProductsPage() {
               disabled={uploading}
               className="text-sm"
             />
-            {uploading && <span className="text-sm text-muted">Đang upload...</span>}
+            {uploading && (
+              <span className="text-sm text-muted">Đang upload...</span>
+            )}
           </div>
           {form.images.length > 0 && (
             <>
@@ -456,7 +517,9 @@ export default function AdminProductsPage() {
             <label className={labelClass}>Size (cách nhau dấu phẩy)</label>
             <input
               value={form.sizes}
-              onChange={(e) => setForm((f) => ({ ...f, sizes: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, sizes: e.target.value }))
+              }
               placeholder="S,M,L,XL"
               className={inputClass}
             />
@@ -465,7 +528,9 @@ export default function AdminProductsPage() {
             <label className={labelClass}>Màu (cách nhau dấu phẩy)</label>
             <input
               value={form.colors}
-              onChange={(e) => setForm((f) => ({ ...f, colors: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, colors: e.target.value }))
+              }
               placeholder="Đen,Trắng"
               className={inputClass}
             />
@@ -475,13 +540,21 @@ export default function AdminProductsPage() {
             <input
               type="number"
               value={form.stockQuantity}
-              onChange={(e) => setForm((f) => ({ ...f, stockQuantity: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, stockQuantity: e.target.value }))
+              }
               className={`${inputClass} w-24`}
             />
           </div>
         </div>
         <button type="submit" disabled={saving} className={btnPrimaryClass}>
-          {saving ? (editingId ? "Đang cập nhật..." : "Đang thêm...") : (editingId ? "Cập nhật sản phẩm" : "Thêm sản phẩm")}
+          {saving
+            ? editingId
+              ? "Đang cập nhật..."
+              : "Đang thêm..."
+            : editingId
+              ? "Cập nhật sản phẩm"
+              : "Thêm sản phẩm"}
         </button>
         {message && <span className="ml-4 text-sm text-muted">{message}</span>}
       </form>
@@ -515,7 +588,11 @@ export default function AdminProductsPage() {
             </thead>
             <tbody ref={productsTbodyRef}>
               {products.map((p) => (
-                <tr key={p._id} data-id={p._id} className="border-b border-border">
+                <tr
+                  key={p._id}
+                  data-id={p._id}
+                  className="border-b border-border"
+                >
                   <td className="p-2">
                     <span
                       className="drag-handle inline-flex h-7 w-7 cursor-grab select-none items-center justify-center rounded-md border border-border bg-bg text-muted"
@@ -560,6 +637,8 @@ export default function AdminProductsPage() {
   );
 }
 
-const labelClass = 'mb-1 block text-xs text-muted';
-const inputClass = 'w-full rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base';
-const btnPrimaryClass = 'cursor-pointer rounded border-none bg-accent px-4 py-2 font-semibold text-bg';
+const labelClass = "mb-1 block text-xs text-muted";
+const inputClass =
+  "w-full rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base";
+const btnPrimaryClass =
+  "cursor-pointer rounded border-none bg-accent px-4 py-2 font-semibold text-bg";

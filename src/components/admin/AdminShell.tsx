@@ -29,26 +29,50 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             Dashboard
           </Link>
           <Link
+            href="/admin/orders"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/orders" || pathname?.startsWith("/admin/orders/") ? "text-accent" : "text-muted"}`}
+          >
+            Đơn hàng (Orders)
+          </Link>
+          <Link
             href="/admin/categories"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/categories") ? "text-accent" : "text-muted"}`}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/categories" || pathname?.startsWith("/admin/categories/") ? "text-accent" : "text-muted"}`}
           >
             Danh mục
           </Link>
           <Link
             href="/admin/products"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/products") ? "text-accent" : "text-muted"}`}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/products" || pathname?.startsWith("/admin/products/") ? "text-accent" : "text-muted"}`}
           >
             Sản phẩm
           </Link>
           <Link
+            href="/admin/templates"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/templates" || pathname?.startsWith("/admin/templates/") ? "text-accent" : "text-muted"}`}
+          >
+            Mẫu mô tả (Templates)
+          </Link>
+          <Link
             href="/admin/blogs"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/blogs") ? "text-accent" : "text-muted"}`}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/blogs" || pathname?.startsWith("/admin/blogs/") ? "text-accent" : "text-muted"}`}
           >
             Bài viết (Blogs)
           </Link>
           <Link
+            href="/admin/blog-categories"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/blog-categories" || pathname?.startsWith("/admin/blog-categories/") ? "text-accent" : "text-muted"}`}
+          >
+            DM Bài viết
+          </Link>
+          <Link
+            href="/admin/authors"
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/authors" || pathname?.startsWith("/admin/authors/") ? "text-accent" : "text-muted"}`}
+          >
+            Tác giả (Authors)
+          </Link>
+          <Link
             href="/admin/tags"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname?.startsWith("/admin/tags") ? "text-accent" : "text-muted"}`}
+            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/tags" || pathname?.startsWith("/admin/tags/") ? "text-accent" : "text-muted"}`}
           >
             Thẻ phân loại (Tags)
           </Link>
