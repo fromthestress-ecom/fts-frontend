@@ -384,18 +384,22 @@ export function Header({ navGroups = [] }: HeaderProps) {
     };
   }, [isMenuOpen, closeMenu]);
 
+  const isAdminRoute = pathname?.startsWith("/admin");
+
   return (
     <>
       {/* Announcement bar */}
-      <div className="announcement-bar">
-        <div className="announcement-bar__track">
-          {[...Array(6)].map((_, i) => (
-            <span key={i} className="announcement-bar__item">
-              Women's Day Sale 10% off
-            </span>
-          ))}
+      {!isAdminRoute && (
+        <div className="announcement-bar">
+          <div className="announcement-bar__track">
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="announcement-bar__item">
+                Women's Day Sale 10% off
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md">
         <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-0 sm:px-6 max-sm:py-4">
@@ -404,9 +408,11 @@ export function Header({ navGroups = [] }: HeaderProps) {
             <Link href="/" className="hidden sm:inline-block">
               <Logo className="w-[100px] max-md:w-24 object-contain aspect-square" />
             </Link>
-            <div className="sm:hidden">
-              <CartLink iconOnly />
-            </div>
+            {!isAdminRoute && (
+              <div className="sm:hidden">
+                <CartLink iconOnly />
+              </div>
+            )}
           </div>
 
           {/* Center: mobile logo */}
@@ -415,84 +421,98 @@ export function Header({ navGroups = [] }: HeaderProps) {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-6 md:flex md:gap-8">
-            <NavItems
-              navGroups={navGroups}
-              pathname={pathname}
-              searchParams={searchParams}
-              variant="desktop"
-            />
-          </nav>
+          {!isAdminRoute && (
+            <nav className="hidden items-center gap-6 md:flex md:gap-8">
+              <NavItems
+                navGroups={navGroups}
+                pathname={pathname}
+                searchParams={searchParams}
+                variant="desktop"
+              />
+            </nav>
+          )}
 
           {/* Desktop right actions */}
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
-            {!authLoading &&
-              (user ? (
-                <UserDropdown />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsAuthOpen(true)}
-                  aria-label="Đăng nhập"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </button>
-              ))}
-            <CartLink />
-            <Link href="/san-pham" className="header-shop-btn">
-              Shop all items
-            </Link>
+            {!isAdminRoute && (
+              <>
+                {!authLoading &&
+                  (user ? (
+                    <UserDropdown />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsAuthOpen(true)}
+                      aria-label="Đăng nhập"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </button>
+                  ))}
+                {!isAdminRoute && (
+                  <>
+                    <CartLink />
+                    <Link href="/san-pham" className="header-shop-btn">
+                      Shop all items
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
           </div>
 
           {/* Mobile right: theme + hamburger */}
           <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
             <ThemeToggle />
-            {!authLoading &&
-              (user ? (
-                <UserDropdown />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsAuthOpen(true)}
-                  aria-label="Đăng nhập"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </button>
-              ))}
-            <div className="hidden sm:block">
-              <CartLink />
-            </div>
-            <HamburgerButton
-              isOpen={isMenuOpen}
-              onToggle={() => setIsMenuOpen((prev) => !prev)}
-            />
+            {!isAdminRoute && (
+              <>
+                {!authLoading &&
+                  (user ? (
+                    <UserDropdown />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsAuthOpen(true)}
+                      aria-label="Đăng nhập"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </button>
+                  ))}
+                <div className="hidden sm:block">
+                  <CartLink />
+                </div>
+                <HamburgerButton
+                  isOpen={isMenuOpen}
+                  onToggle={() => setIsMenuOpen((prev) => !prev)}
+                />
+              </>
+            )}
           </div>
         </div>
       </header>
