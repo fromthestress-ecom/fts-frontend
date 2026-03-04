@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { fetchApi, type BlogCategory } from "@/lib/api";
+import { fetchApi, type BlogCategory, type Tag } from "@/lib/api";
 import { BlogGrid } from "@/components/BlogGrid";
 
 export const metadata: Metadata = {
@@ -16,6 +16,14 @@ async function getCategories() {
   }
 }
 
+async function getTags() {
+  try {
+    return await fetchApi<Tag[]>("/blogs/tags");
+  } catch {
+    return [];
+  }
+}
+
 async function getBlogs(
   searchParams: Record<string, string | string[] | undefined>,
 ) {
@@ -23,6 +31,7 @@ async function getBlogs(
 
   if (typeof searchParams.category === "string")
     query.set("category", searchParams.category);
+  if (typeof searchParams.tag === "string") query.set("tag", searchParams.tag);
   if (typeof searchParams.search === "string")
     query.set("search", searchParams.search);
   if (typeof searchParams.page === "string")
@@ -46,8 +55,9 @@ export default async function BlogsPage({
     if (typeof v === "string") currentParams[k] = v;
   }
 
-  const [categories, blogsData] = await Promise.all([
+  const [categories, tags, blogsData] = await Promise.all([
     getCategories(),
+    getTags(),
     getBlogs(currentParams),
   ]);
 
@@ -68,6 +78,7 @@ export default async function BlogsPage({
       <BlogGrid
         initialData={blogsData}
         categories={categories}
+        tags={tags}
         currentParams={currentParams}
         basePath="/blogs"
       />

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BlogCard } from "./BlogCard";
-import type { BlogItem, BlogCategory } from "@/lib/api";
+import type { BlogItem, BlogCategory, Tag } from "@/lib/api";
 
 type BlogListResult = {
   blogs: BlogItem[];
@@ -15,6 +15,7 @@ type BlogListResult = {
 type BlogGridProps = {
   initialData: BlogListResult;
   categories: BlogCategory[];
+  tags: Tag[];
   currentParams: Record<string, string | undefined>;
   basePath: string;
 };
@@ -22,6 +23,7 @@ type BlogGridProps = {
 export function BlogGrid({
   initialData,
   categories,
+  tags,
   currentParams,
   basePath,
 }: BlogGridProps) {
@@ -127,6 +129,27 @@ export function BlogGrid({
           </button>
         </form>
       </div>
+
+      {tags.length > 0 && (
+        <div className="mb-10 flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <Link
+              key={t._id}
+              href={buildUrl({
+                tag: currentParams.tag === t.slug ? null : t.slug,
+                page: null,
+              })}
+              className={`px-3 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider transition-colors ${
+                currentParams.tag === t.slug
+                  ? "bg-text text-bg border-text"
+                  : "bg-surface text-muted border-border hover:border-text hover:text-text"
+              }`}
+            >
+              #{t.name}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Grid */}
       {blogs.length === 0 ? (

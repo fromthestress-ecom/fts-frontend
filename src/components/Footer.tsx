@@ -19,6 +19,7 @@ const POLICY_LINKS = [
     label: "Chính sách vận chuyển & Giao nhận",
   },
   { href: "/chinh-sach-doi-tra", label: "Chính sách đổi trả và hoàn tiền" },
+  { href: "/chinh-sach-gioi-thieu", label: "Chính sách Affiliate" },
 ] as const;
 
 export function Footer() {
