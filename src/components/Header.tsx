@@ -7,6 +7,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { CartLink } from "./CartLink";
 import { ThemeAwareImg } from "./ThemeAwareImg";
 import { ThemeToggle } from "./ThemeToggle";
+import { AuthDrawer } from "./AuthDrawer";
+import { UserDropdown } from "./UserDropdown";
+import { useAuth } from "@/contexts/AuthContext";
 import type { NavGroupItem } from "@/lib/navGroups";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -340,9 +343,11 @@ type HeaderProps = {
 export function Header({ navGroups = [] }: HeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openNavKey, setOpenNavKey] = useState<string | null>(null);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
@@ -421,27 +426,32 @@ export function Header({ navGroups = [] }: HeaderProps) {
 
           {/* Desktop right actions */}
           <div className="hidden md:flex items-center gap-3">
-            {/* <button
-              type="button"
-              aria-label="Tìm kiếm"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button> */}
             <ThemeToggle />
+            {!authLoading &&
+              (user ? (
+                <UserDropdown />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAuthOpen(true)}
+                  aria-label="Đăng nhập"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </button>
+              ))}
             <CartLink />
             <Link href="/san-pham" className="header-shop-btn">
               Shop all items
@@ -451,6 +461,31 @@ export function Header({ navGroups = [] }: HeaderProps) {
           {/* Mobile right: theme + hamburger */}
           <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
             <ThemeToggle />
+            {!authLoading &&
+              (user ? (
+                <UserDropdown />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsAuthOpen(true)}
+                  aria-label="Đăng nhập"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </button>
+              ))}
             <div className="hidden sm:block">
               <CartLink />
             </div>
@@ -477,6 +512,9 @@ export function Header({ navGroups = [] }: HeaderProps) {
           />,
           document.body,
         )}
+
+      {/* Auth Drawer */}
+      <AuthDrawer isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </>
   );
 }

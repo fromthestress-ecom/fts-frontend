@@ -4,6 +4,184 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { setAdminKey } from "./AdminGuard";
 
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  isActive: (pathname: string) => boolean;
+  badge?: string;
+};
+
+type NavSection = {
+  label: string;
+  items: NavItem[];
+};
+
+const navSections: NavSection[] = [
+  {
+    label: "Navigation",
+    items: [
+      {
+        href: "/admin",
+        label: "Dashboard",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-accent/10 text-accent">
+            ⌂
+          </span>
+        ),
+        isActive: (pathname) => pathname === "/admin",
+      },
+      {
+        href: "/admin/orders",
+        label: "Đơn hàng",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-sky-500/10 text-sky-400">
+            ⇄
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/orders" ||
+          pathname.startsWith("/admin/orders/"),
+      },
+      {
+        href: "/admin/users",
+        label: "Người dùng",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-emerald-500/10 text-emerald-400">
+            👤
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/users" ||
+          pathname.startsWith("/admin/users/"),
+      },
+    ],
+  },
+  {
+    label: "Catalog",
+    items: [
+      {
+        href: "/admin/categories",
+        label: "Danh mục",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-amber-500/10 text-amber-400">
+            #
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/categories" ||
+          pathname.startsWith("/admin/categories/"),
+      },
+      {
+        href: "/admin/products",
+        label: "Sản phẩm",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-indigo-500/10 text-indigo-400">
+            ☐
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/products" ||
+          pathname.startsWith("/admin/products/"),
+      },
+      {
+        href: "/admin/templates",
+        label: "Mẫu mô tả",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-fuchsia-500/10 text-fuchsia-400">
+            T
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/templates" ||
+          pathname.startsWith("/admin/templates/"),
+      },
+    ],
+  },
+  {
+    label: "Nội dung",
+    items: [
+      {
+        href: "/admin/blogs",
+        label: "Bài viết",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-cyan-500/10 text-cyan-400">
+            ✎
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/blogs" ||
+          pathname.startsWith("/admin/blogs/"),
+      },
+      {
+        href: "/admin/blog-categories",
+        label: "DM Bài viết",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-rose-500/10 text-rose-400">
+            ☰
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/blog-categories" ||
+          pathname.startsWith("/admin/blog-categories/"),
+      },
+      {
+        href: "/admin/authors",
+        label: "Tác giả",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-lime-500/10 text-lime-400">
+            ✹
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/authors" ||
+          pathname.startsWith("/admin/authors/"),
+      },
+      {
+        href: "/admin/tags",
+        label: "Thẻ phân loại",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-slate-500/10 text-slate-300">
+            ⌗
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/tags" || pathname.startsWith("/admin/tags/"),
+      },
+    ],
+  },
+  {
+    label: "Affiliate & Referral",
+    items: [
+      {
+        href: "/admin/affiliates",
+        label: "Affiliate",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-orange-500/10 text-orange-400">
+            %
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/affiliates" ||
+          pathname.startsWith("/admin/affiliates/"),
+      },
+      {
+        href: "/admin/referrals",
+        label: "Mã giới thiệu",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-teal-500/10 text-teal-400">
+            ↻
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/referrals" ||
+          pathname.startsWith("/admin/referrals/"),
+        badge: "NEW",
+      },
+    ],
+  },
+];
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -20,75 +198,58 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-[60vh] border-t border-border bg-surface">
-      <aside className="w-52 shrink-0 border-r border-border py-6 sm:w-56">
-        <nav className="flex flex-col gap-1">
-          <Link
-            href="/admin"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin" ? "text-accent" : "text-muted"}`}
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/admin/orders"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/orders" || pathname?.startsWith("/admin/orders/") ? "text-accent" : "text-muted"}`}
-          >
-            Đơn hàng (Orders)
-          </Link>
-          <Link
-            href="/admin/categories"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/categories" || pathname?.startsWith("/admin/categories/") ? "text-accent" : "text-muted"}`}
-          >
-            Danh mục
-          </Link>
-          <Link
-            href="/admin/products"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/products" || pathname?.startsWith("/admin/products/") ? "text-accent" : "text-muted"}`}
-          >
-            Sản phẩm
-          </Link>
-          <Link
-            href="/admin/templates"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/templates" || pathname?.startsWith("/admin/templates/") ? "text-accent" : "text-muted"}`}
-          >
-            Mẫu mô tả (Templates)
-          </Link>
-          <Link
-            href="/admin/blogs"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/blogs" || pathname?.startsWith("/admin/blogs/") ? "text-accent" : "text-muted"}`}
-          >
-            Bài viết (Blogs)
-          </Link>
-          <Link
-            href="/admin/blog-categories"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/blog-categories" || pathname?.startsWith("/admin/blog-categories/") ? "text-accent" : "text-muted"}`}
-          >
-            DM Bài viết
-          </Link>
-          <Link
-            href="/admin/authors"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/authors" || pathname?.startsWith("/admin/authors/") ? "text-accent" : "text-muted"}`}
-          >
-            Tác giả (Authors)
-          </Link>
-          <Link
-            href="/admin/tags"
-            className={`px-6 py-2 text-sm sm:text-base ${pathname === "/admin/tags" || pathname?.startsWith("/admin/tags/") ? "text-accent" : "text-muted"}`}
-          >
-            Thẻ phân loại (Tags)
-          </Link>
-          <Link
-            href="/"
-            className="mt-4 px-6 py-2 text-accent text-sm sm:text-base"
-          >
-            ← Về trang chủ
-          </Link>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="mx-6 mt-2 w-[calc(100%-3rem)] rounded border border-border bg-transparent px-2 py-2 text-left text-sm text-muted sm:text-base"
-          >
-            Đăng xuất
-          </button>
+      <aside className="w-60 shrink-0 border-r border-border bg-bg py-6 text-text">
+        <div className="px-6 pb-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+          Admin Panel
+        </div>
+        <nav className="flex flex-col gap-4 text-[13px]">
+          {navSections.map((section) => (
+            <div key={section.label}>
+              <div className="px-6 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                {section.label}
+              </div>
+              <ul className="m-0 list-none p-0">
+                {section.items.map((item) => {
+                  const active = item.isActive(pathname || "");
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`group flex items-center gap-3 px-6 py-2.5 text-[13px] transition-colors ${
+                          active
+                            ? "bg-surface text-text font-semibold"
+                            : "text-muted hover:bg-surface hover:text-text"
+                        }`}
+                      >
+                        {item.icon}
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {item.badge && (
+                          <span className="rounded-full bg-accent text-[9px] font-semibold uppercase tracking-wide text-bg px-1.5 py-0.5">
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+          <div className="mt-4 border-t border-border pt-3">
+            <Link
+              href="/"
+              className="block px-6 py-2 text-[13px] text-accent hover:underline"
+            >
+              ← Về trang chủ
+            </Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mx-6 mt-2 w-[calc(100%-3rem)] rounded border border-border bg-transparent px-2 py-2 text-left text-[13px] text-muted hover:text-text"
+            >
+              Đăng xuất
+            </button>
+          </div>
         </nav>
       </aside>
       <main className="min-w-0 flex-1 p-6 sm:p-8">{children}</main>

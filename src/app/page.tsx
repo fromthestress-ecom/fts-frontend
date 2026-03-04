@@ -26,7 +26,7 @@ async function getFeaturedProducts(): Promise<ProductListResult> {
 
 async function getBestSelling(): Promise<Product[]> {
   try {
-    return await fetchBestSellingProducts(8);
+    return await fetchBestSellingProducts(4);
   } catch {
     return [];
   }

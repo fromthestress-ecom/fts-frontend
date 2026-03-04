@@ -72,7 +72,7 @@ export async function CollectionsSection() {
               href="/san-pham?preOrder=true"
               className="collections-section__shop-btn"
             >
-              Xem tất cả Pre-order
+              Xem tất cả
             </Link>
           </div>
         </div>

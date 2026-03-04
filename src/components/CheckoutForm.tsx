@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Cart, CreateOrderDto } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -19,10 +20,37 @@ const inputClass =
 
 export function CheckoutForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, token } = useAuth();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Referral code state
+  const [referralCode, setReferralCode] = useState("");
+  const [referralValid, setReferralValid] = useState<boolean | null>(null);
+  const [referralDiscount, setReferralDiscount] = useState<{
+    type: string;
+    value: number;
+    name: string;
+  } | null>(null);
+  const [checkingReferral, setCheckingReferral] = useState(false);
+
+  // Affiliate ref from URL or LocalStorage
+  const urlRef = searchParams?.get("ref") || "";
+  const [affiliateRef, setAffiliateRef] = useState(urlRef);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      let lsRef = localStorage.getItem("streetwear-affiliate-ref") || "";
+      if (urlRef) {
+        localStorage.setItem("streetwear-affiliate-ref", urlRef);
+        lsRef = urlRef;
+      }
+      setAffiliateRef(lsRef);
+    }
+  }, [urlRef]);
 
   useEffect(() => {
     const guestId = getGuestId();
@@ -39,11 +67,47 @@ export function CheckoutForm() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Validate referral code
+  const validateReferral = useCallback(async (code: string) => {
+    if (!code || code.length < 3) {
+      setReferralValid(null);
+      setReferralDiscount(null);
+      return;
+    }
+    setCheckingReferral(true);
+    try {
+      const res = await fetch(
+        `${API}/referrals/validate/${encodeURIComponent(code)}`,
+      );
+      const data = await res.json();
+      if (data.valid) {
+        setReferralValid(true);
+        setReferralDiscount({
+          type: data.discountType,
+          value: data.discountValue,
+          name: data.referrerName,
+        });
+      } else {
+        setReferralValid(false);
+        setReferralDiscount(null);
+      }
+    } catch {
+      setReferralValid(false);
+      setReferralDiscount(null);
+    } finally {
+      setCheckingReferral(false);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!cart?.items?.length) return;
     const form = e.currentTarget;
-    const payload: CreateOrderDto = {
+    const payload: CreateOrderDto & {
+      referralCode?: string;
+      affiliateRef?: string;
+      userId?: string;
+    } = {
       email: (form.email as HTMLInputElement).value.trim(),
       shippingAddress: {
         fullName: (form.fullName as HTMLInputElement).value.trim(),
@@ -74,6 +138,17 @@ export function CheckoutForm() {
       }),
       note: (form.note as HTMLInputElement).value.trim() || undefined,
     };
+
+    // Add referral & affiliate data
+    if (referralValid && referralCode && user) {
+      payload.referralCode = referralCode.toUpperCase();
+      payload.userId = user.id;
+    }
+    if (affiliateRef) {
+      payload.affiliateRef = affiliateRef;
+      if (user) payload.userId = user.id;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
@@ -117,8 +192,18 @@ export function CheckoutForm() {
     const p = i.productId as { price?: number };
     return s + (p?.price ?? 0) * i.quantity;
   }, 0);
+
+  let discountAmount = 0;
+  if (referralValid === true && referralDiscount) {
+    if (referralDiscount.type === "percent") {
+      discountAmount = (subtotal * referralDiscount.value) / 100;
+    } else {
+      discountAmount = referralDiscount.value;
+    }
+  }
+
   const shippingFee = subtotal >= 500000 ? 0 : 30000;
-  const total = subtotal + shippingFee;
+  const total = Math.max(0, subtotal - discountAmount) + shippingFee;
 
   const hasPreOrder = cart.items.some((i) => {
     const p = i.productId as { preOrder?: boolean };
@@ -131,15 +216,33 @@ export function CheckoutForm() {
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Email *</label>
-        <input type="email" name="email" required className={inputClass} />
+        <input
+          type="email"
+          name="email"
+          required
+          defaultValue={user?.email}
+          className={inputClass}
+        />
       </div>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Họ tên *</label>
-        <input type="text" name="fullName" required className={inputClass} />
+        <input
+          type="text"
+          name="fullName"
+          required
+          defaultValue={user?.fullName}
+          className={inputClass}
+        />
       </div>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Số điện thoại *</label>
-        <input type="tel" name="phone" required className={inputClass} />
+        <input
+          type="tel"
+          name="phone"
+          required
+          defaultValue={user?.phone}
+          className={inputClass}
+        />
       </div>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Địa chỉ *</label>
@@ -163,10 +266,58 @@ export function CheckoutForm() {
         <label className="mb-1 block text-sm">Ghi chú</label>
         <input type="text" name="note" className={inputClass} />
       </div>
+
+      {/* Referral Code */}
+      <div className="mb-4">
+        <label className="mb-1 block text-sm">Mã giới thiệu (nếu có)</label>
+        {!user ? (
+          <p className="text-sm italic text-muted">
+            Vui lòng đăng nhập / đăng ký để có thể sử dụng mã giới thiệu.
+          </p>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                placeholder="VD: NGHIA4821"
+                className={inputClass}
+                style={{ textTransform: "uppercase" }}
+              />
+              <button
+                type="button"
+                onClick={() => validateReferral(referralCode)}
+                disabled={checkingReferral || !referralCode}
+                className="rounded border border-border bg-surface px-4 py-2 text-sm font-semibold text-text transition-colors hover:bg-border disabled:opacity-50"
+              >
+                {checkingReferral ? "..." : "Áp dụng"}
+              </button>
+            </div>
+            {referralValid === true && referralDiscount && (
+              <p className="mt-1 text-sm" style={{ color: "#22c55e" }}>
+                ✓ Mã hợp lệ! Giảm {referralDiscount.value}
+                {referralDiscount.type === "percent" ? "%" : "đ"} từ{" "}
+                {referralDiscount.name}
+              </p>
+            )}
+            {referralValid === false && (
+              <p className="mt-1 text-sm" style={{ color: "#ef4444" }}>
+                ✗ Mã không hợp lệ
+              </p>
+            )}
+          </>
+        )}
+      </div>
       <div className="mb-4 rounded-lg bg-surface p-4">
         <p className="mb-2 text-muted">
           Tạm tính: {new Intl.NumberFormat("vi-VN").format(subtotal)}₫
         </p>
+        {discountAmount > 0 && (
+          <p className="mb-2 text-accent">
+            Giảm giá: -{new Intl.NumberFormat("vi-VN").format(discountAmount)}₫
+          </p>
+        )}
         <p className="mb-2 text-muted">
           Phí ship:{" "}
           {shippingFee === 0

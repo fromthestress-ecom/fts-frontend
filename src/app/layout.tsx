@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { SocialButtons } from "@/components/SocialButtons";
 import { ThemeScript } from "@/components/ThemeScript";
 import { CartDrawerProvider } from "@/contexts/CartDrawerContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import type { Category } from "@/lib/api";
 import { fetchApi } from "@/lib/api";
@@ -74,22 +75,24 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
         <ThemeProvider>
-          <CartDrawerProvider>
-            <Suspense fallback={null}>
-              <Header navGroups={navGroups} />
-            </Suspense>
-            <main>{children}</main>
-            <Footer />
-            <CartDrawer />
-            {/* <PurchaseToast /> */}
-            <SocialButtons />
-          </CartDrawerProvider>
+          <AuthProvider>
+            <CartDrawerProvider>
+              <Suspense fallback={null}>
+                <Header navGroups={navGroups} />
+              </Suspense>
+              <main>{children}</main>
+              <Footer />
+              <CartDrawer />
+              {/* <PurchaseToast /> */}
+              <SocialButtons />
+            </CartDrawerProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
