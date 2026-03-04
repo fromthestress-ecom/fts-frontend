@@ -2,10 +2,10 @@ const LoadingIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="1080"
+      width="100%"
+      height="100%"
       zoomAndPan="magnify"
       viewBox="0 0 810 809.999993"
-      height="1080"
       preserveAspectRatio="xMidYMid meet"
       version="1.0"
     >
