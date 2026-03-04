@@ -226,7 +226,11 @@ export default function AdminOrdersPage() {
                     </div>
                   </td>
                   <td className="p-4 font-semibold text-accent">
-                    {formatCurrency((o.subtotal || 0) + (o.shippingFee || 0))}
+                    {formatCurrency(
+                      (o.subtotal || 0) -
+                        (o.discount || 0) +
+                        (o.shippingFee || 0),
+                    )}
                   </td>
                   <td className="p-4">
                     <StatusBadge status={o.status || "pending"} />

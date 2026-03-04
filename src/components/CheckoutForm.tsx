@@ -180,8 +180,18 @@ export function CheckoutForm() {
     const p = i.productId as { price?: number };
     return s + (p?.price ?? 0) * i.quantity;
   }, 0);
+
+  let discountAmount = 0;
+  if (referralValid === true && referralDiscount) {
+    if (referralDiscount.type === "percent") {
+      discountAmount = (subtotal * referralDiscount.value) / 100;
+    } else {
+      discountAmount = referralDiscount.value;
+    }
+  }
+
   const shippingFee = subtotal >= 500000 ? 0 : 30000;
-  const total = subtotal + shippingFee;
+  const total = Math.max(0, subtotal - discountAmount) + shippingFee;
 
   const hasPreOrder = cart.items.some((i) => {
     const p = i.productId as { preOrder?: boolean };
@@ -194,15 +204,33 @@ export function CheckoutForm() {
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Email *</label>
-        <input type="email" name="email" required className={inputClass} />
+        <input
+          type="email"
+          name="email"
+          required
+          defaultValue={user?.email}
+          className={inputClass}
+        />
       </div>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Họ tên *</label>
-        <input type="text" name="fullName" required className={inputClass} />
+        <input
+          type="text"
+          name="fullName"
+          required
+          defaultValue={user?.fullName}
+          className={inputClass}
+        />
       </div>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Số điện thoại *</label>
-        <input type="tel" name="phone" required className={inputClass} />
+        <input
+          type="tel"
+          name="phone"
+          required
+          defaultValue={user?.phone}
+          className={inputClass}
+        />
       </div>
       <div className="mb-4">
         <label className="mb-1 block text-sm">Địa chỉ *</label>
@@ -230,41 +258,54 @@ export function CheckoutForm() {
       {/* Referral Code */}
       <div className="mb-4">
         <label className="mb-1 block text-sm">Mã giới thiệu (nếu có)</label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={referralCode}
-            onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-            placeholder="VD: NGHIA4821"
-            className={inputClass}
-            style={{ textTransform: "uppercase" }}
-          />
-          <button
-            type="button"
-            onClick={() => validateReferral(referralCode)}
-            disabled={checkingReferral || !referralCode}
-            className="rounded border border-border bg-surface px-4 py-2 text-sm font-semibold text-text transition-colors hover:bg-border disabled:opacity-50"
-          >
-            {checkingReferral ? "..." : "Áp dụng"}
-          </button>
-        </div>
-        {referralValid === true && referralDiscount && (
-          <p className="mt-1 text-sm" style={{ color: "#22c55e" }}>
-            ✓ Mã hợp lệ! Giảm {referralDiscount.value}
-            {referralDiscount.type === "percent" ? "%" : "đ"} từ{" "}
-            {referralDiscount.name}
+        {!user ? (
+          <p className="text-sm italic text-muted">
+            Vui lòng đăng nhập / đăng ký để có thể sử dụng mã giới thiệu.
           </p>
-        )}
-        {referralValid === false && (
-          <p className="mt-1 text-sm" style={{ color: "#ef4444" }}>
-            ✗ Mã không hợp lệ
-          </p>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                placeholder="VD: NGHIA4821"
+                className={inputClass}
+                style={{ textTransform: "uppercase" }}
+              />
+              <button
+                type="button"
+                onClick={() => validateReferral(referralCode)}
+                disabled={checkingReferral || !referralCode}
+                className="rounded border border-border bg-surface px-4 py-2 text-sm font-semibold text-text transition-colors hover:bg-border disabled:opacity-50"
+              >
+                {checkingReferral ? "..." : "Áp dụng"}
+              </button>
+            </div>
+            {referralValid === true && referralDiscount && (
+              <p className="mt-1 text-sm" style={{ color: "#22c55e" }}>
+                ✓ Mã hợp lệ! Giảm {referralDiscount.value}
+                {referralDiscount.type === "percent" ? "%" : "đ"} từ{" "}
+                {referralDiscount.name}
+              </p>
+            )}
+            {referralValid === false && (
+              <p className="mt-1 text-sm" style={{ color: "#ef4444" }}>
+                ✗ Mã không hợp lệ
+              </p>
+            )}
+          </>
         )}
       </div>
       <div className="mb-4 rounded-lg bg-surface p-4">
         <p className="mb-2 text-muted">
           Tạm tính: {new Intl.NumberFormat("vi-VN").format(subtotal)}₫
         </p>
+        {discountAmount > 0 && (
+          <p className="mb-2 text-accent">
+            Giảm giá: -{new Intl.NumberFormat("vi-VN").format(discountAmount)}₫
+          </p>
+        )}
         <p className="mb-2 text-muted">
           Phí ship:{" "}
           {shippingFee === 0

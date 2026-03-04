@@ -286,10 +286,18 @@ export default function AdminOrderDetailPage({
                     : formatCurrency(order.shippingFee)}
                 </span>
               </div>
+              {order.discount && order.discount > 0 ? (
+                <div className="flex justify-between text-accent">
+                  <span>Giảm giá</span>
+                  <span>-{formatCurrency(order.discount)}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between font-bold text-accent text-lg pt-3 border-t border-border">
                 <span>Tổng cộng</span>
                 <span>
-                  {formatCurrency(order.subtotal + order.shippingFee)}
+                  {formatCurrency(
+                    order.subtotal - (order.discount || 0) + order.shippingFee,
+                  )}
                 </span>
               </div>
             </div>

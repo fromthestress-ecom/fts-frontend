@@ -148,6 +148,8 @@ export interface Order {
   shippingAddress: ShippingAddressDto;
   subtotal: number;
   shippingFee: number;
+  discount?: number;
+  referralCode?: string;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled" | string;
   note?: string;
   createdAt: string;

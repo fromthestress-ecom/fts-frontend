@@ -22,6 +22,7 @@ interface Order {
   };
   subtotal: number;
   shippingFee: number;
+  discount?: number;
   status: string;
 }
 
@@ -45,7 +46,7 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await getOrder(orderNumber);
   if (!order) notFound();
 
-  const total = order.subtotal + order.shippingFee;
+  const total = order.subtotal - (order.discount || 0) + order.shippingFee;
   const hasPreOrder = order.items.some((item) => item.preOrder);
   const depositAmount = hasPreOrder ? total / 2 : 0;
 
@@ -95,6 +96,12 @@ export default async function OrderDetailPage({ params }: Props) {
         <p className="my-1 text-muted">
           Tạm tính: {new Intl.NumberFormat("vi-VN").format(order.subtotal)}₫
         </p>
+        {(order.discount || 0) > 0 && (
+          <p className="my-1 text-accent">
+            Giảm giá: -
+            {new Intl.NumberFormat("vi-VN").format(order.discount || 0)}₫
+          </p>
+        )}
         <p className="my-1 text-muted">
           Phí ship:{" "}
           {order.shippingFee === 0

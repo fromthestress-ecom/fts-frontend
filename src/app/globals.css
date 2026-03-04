@@ -2127,7 +2127,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .profile-name {
   font-size: 1.25rem;
@@ -2289,3 +2289,484 @@
   cursor: not-allowed;
 }
 
+/* =============================================
+   Order History Page (/don-hang)
+   ============================================= */
+.order-page {
+  padding: 3rem 1.5rem 6rem;
+  background: var(--bg);
+  min-height: 80vh;
+}
+.order-page__inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.order-page__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  text-align: center;
+}
+.order-page__subtitle {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0 0 3rem;
+  text-align: center;
+}
+
+/* Empty state */
+.order-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+}
+.order-empty__icon {
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+.order-empty__title {
+  font-size: 1.25rem;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+.order-empty__text {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin: 0 0 2rem;
+}
+.order-empty__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 2rem;
+  border-radius: 9999px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.order-empty__btn:hover {
+  opacity: 0.85;
+}
+
+/* Order List & Cards */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.order-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.order-card__header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+@media (max-width: 480px) {
+  .order-card__header {
+    flex-direction: column;
+  }
+}
+.order-card__number {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.03em;
+}
+.order-card__date {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.order-badge {
+  display: inline-flex;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.order-badge--neutral {
+  background: var(--border);
+  color: var(--text);
+}
+.order-badge--warning {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.5);
+}
+.order-badge--info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6; /* blue-500 */
+  border: 1px solid rgba(59, 130, 246, 0.5);
+}
+.order-badge--success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e; /* green-500 */
+  border: 1px solid rgba(34, 197, 94, 0.5);
+}
+.order-badge--danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444; /* red-500 */
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.order-card__body {
+  padding: 1.5rem;
+}
+.order-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+.order-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.order-item__name {
+  font-weight: 500;
+  color: var(--text);
+}
+.order-item__variant {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.order-item__qty {
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.order-item--more {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  justify-content: flex-start;
+  padding-top: 0.5rem;
+}
+
+.order-card__footer {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+@media (max-width: 480px) {
+  .order-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.order-card__total {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+.order-card__total strong {
+  font-size: 1.15rem;
+  color: var(--text);
+  font-weight: 700;
+}
+.order-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 1.5px solid var(--text);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.order-view-btn:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+/* =============================================
+   Referral & Rewards Page (/ma-gioi-thieu)
+   ============================================= */
+.referral-page {
+  padding: 3rem 1.5rem 6rem;
+  background: var(--bg);
+  min-height: 80vh;
+}
+.referral-page__inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Header */
+.referral-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.referral-header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  margin-bottom: 1.5rem;
+}
+.referral-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+.referral-subtitle {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Bento Box Grid */
+.referral-bento {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 768px) {
+  .referral-bento {
+    grid-template-columns: 1fr;
+  }
+}
+
+.referral-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.referral-card--accent {
+  background: var(--text);
+  color: var(--bg);
+}
+.referral-card--accent .referral-card__title {
+  color: var(--bg);
+  opacity: 0.8;
+}
+.referral-card--full {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+.referral-card__title {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 1.5rem;
+}
+
+/* Code Display */
+.referral-code-display {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.referral-code {
+  font-family: monospace;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  word-break: break-all;
+}
+.referral-copy-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.1s;
+}
+.referral-copy-btn:hover {
+  opacity: 0.9;
+}
+.referral-copy-btn:active {
+  transform: scale(0.98);
+}
+.referral-copy-btn--success {
+  background: #22c55e;
+  color: white;
+}
+
+/* Stats */
+.referral-card--stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.referral-stat-bignum {
+  display: flex;
+  flex-direction: column;
+}
+.referral-number {
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--accent);
+}
+.referral-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 0.5rem;
+}
+
+/* Sharing Box */
+.referral-link-box {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+}
+.referral-link-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 1rem 1.2rem;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+}
+.referral-link-copy {
+  padding: 0 1.5rem;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.referral-link-copy:hover {
+  opacity: 0.9;
+}
+
+.referral-socials {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+}
+.referral-socials-text {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+.referral-social-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.social-btn:hover {
+  opacity: 0.9;
+}
+.social-btn--facebook {
+  background: #1877f2;
+}
+.social-btn--messenger {
+  background: #00b2ff;
+}
+.social-btn--twitter {
+  background: #1da1f2;
+}
+
+/* Footer Link */
+.referral-footer {
+  text-align: center;
+}
+.referral-policy-link {
+  display: inline-block;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--muted);
+  padding-bottom: 2px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.referral-policy-link:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
