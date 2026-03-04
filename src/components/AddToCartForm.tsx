@@ -73,6 +73,16 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
     setStatus("loading");
     try {
       const guestId = getGuestId();
+
+      // Save affiliate ref if present in the URL
+      if (typeof window !== "undefined") {
+        const queryParams = new URLSearchParams(window.location.search);
+        const refParam = queryParams.get("ref");
+        if (refParam) {
+          localStorage.setItem("streetwear-affiliate-ref", refParam);
+        }
+      }
+
       const res = await fetch(`${API}/cart/items`, {
         method: "POST",
         headers: {

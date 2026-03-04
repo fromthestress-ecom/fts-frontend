@@ -37,8 +37,20 @@ export function CheckoutForm() {
   } | null>(null);
   const [checkingReferral, setCheckingReferral] = useState(false);
 
-  // Affiliate ref from URL
-  const affiliateRef = searchParams?.get("ref") || "";
+  // Affiliate ref from URL or LocalStorage
+  const urlRef = searchParams?.get("ref") || "";
+  const [affiliateRef, setAffiliateRef] = useState(urlRef);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      let lsRef = localStorage.getItem("streetwear-affiliate-ref") || "";
+      if (urlRef) {
+        localStorage.setItem("streetwear-affiliate-ref", urlRef);
+        lsRef = urlRef;
+      }
+      setAffiliateRef(lsRef);
+    }
+  }, [urlRef]);
 
   useEffect(() => {
     const guestId = getGuestId();
