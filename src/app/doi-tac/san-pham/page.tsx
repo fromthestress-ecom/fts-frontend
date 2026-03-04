@@ -61,41 +61,44 @@ export default function SanPhamAffiliatePage() {
 
   return (
     <>
-      <h1 className="affiliate-content__title">Sản phẩm & Link Affiliate</h1>
+      <h1 className="affiliate-content__title">Sản phẩm & Link giới thiệu</h1>
 
       {!data ? (
         <p className="text-muted">Đang tải...</p>
       ) : data.items.length === 0 ? (
         <p className="text-muted">Không có sản phẩm nào.</p>
       ) : (
-        <>
+        <div className="flex flex-col gap-4">
           {data.items.map((p) => {
             const imgSrc = p.images?.[0] || "/placeholder.png";
             return (
-              <div key={p._id} className="affiliate-product-card">
+              <div
+                key={p._id}
+                className="flex flex-col sm:flex-row gap-4 p-4 border border-border rounded-xl bg-surface items-center"
+              >
                 <img
                   src={imgSrc}
                   alt={p.name}
-                  className="affiliate-product-card__img"
+                  className="w-20 h-20 object-cover rounded-md"
                 />
-                <div className="affiliate-product-card__info">
-                  <p className="affiliate-product-card__name">{p.name}</p>
-                  <p className="affiliate-product-card__price">
+                <div className="flex-1">
+                  <p className="font-semibold text-text">{p.name}</p>
+                  <p className="text-accent font-bold mt-1">
                     {formatVND(p.price)}
                   </p>
                 </div>
-                <div className="affiliate-product-card__actions">
+                <div className="flex gap-2 w-full sm:w-auto mt-4 sm:mt-0">
                   <button
                     type="button"
                     onClick={() => copyLink(p._id, p.affiliateLink)}
-                    className="affiliate-product-card__copy-btn"
+                    className="flex-1 sm:flex-none px-4 py-2 border border-border bg-bg text-sm font-semibold rounded-lg hover:bg-text hover:text-bg transition-colors"
                   >
-                    {copiedId === p._id ? "✓ Copied" : "Copy Link"}
+                    {copiedId === p._id ? "✓ Đã copy" : "Copy Link"}
                   </button>
                   <button
                     type="button"
                     onClick={() => shareFB(p.affiliateLink)}
-                    className="affiliate-product-card__copy-btn"
+                    className="px-3 py-2 border border-blue-500 text-blue-500 text-sm font-semibold rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
                     title="Share Facebook"
                   >
                     FB
@@ -103,7 +106,7 @@ export default function SanPhamAffiliatePage() {
                   <button
                     type="button"
                     onClick={() => shareMsg(p.affiliateLink)}
-                    className="affiliate-product-card__copy-btn"
+                    className="px-3 py-2 border border-blue-400 text-blue-400 text-sm font-semibold rounded-lg hover:bg-blue-400 hover:text-white transition-colors"
                     title="Share Messenger"
                   >
                     MSG
@@ -114,18 +117,15 @@ export default function SanPhamAffiliatePage() {
           })}
 
           {data.totalPages > 1 && (
-            <div className="affiliate-pagination">
+            <div className="affiliate-pagination mt-6">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
               >
                 ← Trước
               </button>
-              <span
-                className="text-muted"
-                style={{ padding: "0.4rem 0.5rem", fontSize: "0.8rem" }}
-              >
-                {page} / {data.totalPages}
+              <span className="text-muted px-4 py-2 text-sm flex items-center">
+                Trang {page} / {data.totalPages}
               </span>
               <button
                 disabled={page >= data.totalPages}
@@ -135,7 +135,7 @@ export default function SanPhamAffiliatePage() {
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
     </>
   );

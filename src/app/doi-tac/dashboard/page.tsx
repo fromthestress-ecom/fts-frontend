@@ -52,24 +52,22 @@ export default function AffiliateDashboardPage() {
     <>
       <h1 className="affiliate-content__title">Tổng quan</h1>
 
-      <div className="affiliate-stats">
+      <div className="affiliate-grid">
         {stats.map((s) => (
-          <div key={s.label} className="affiliate-stat-card">
+          <div
+            key={s.label}
+            className={`affiliate-stat-card ${s.accent ? "affiliate-stat-card--accent" : ""}`}
+          >
             <p className="affiliate-stat-card__label">{s.label}</p>
-            <p
-              className={`affiliate-stat-card__value ${s.accent ? "affiliate-stat-card__value--accent" : ""}`}
-            >
-              {s.value}
-            </p>
+            <p className="affiliate-stat-card__value">{s.value}</p>
           </div>
         ))}
-      </div>
-
-      <div className="affiliate-stat-card" style={{ marginBottom: "1rem" }}>
-        <p className="affiliate-stat-card__label">Tỷ lệ hoa hồng của bạn</p>
-        <p className="affiliate-stat-card__value affiliate-stat-card__value--accent">
-          {data.commissionRate}%
-        </p>
+        <div className="affiliate-stat-card">
+          <p className="affiliate-stat-card__label">Tỷ lệ hoa hồng của bạn</p>
+          <p className="affiliate-stat-card__value text-accent">
+            {data.commissionRate}%
+          </p>
+        </div>
       </div>
     </>
   );
