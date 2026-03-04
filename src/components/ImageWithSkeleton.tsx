@@ -11,6 +11,8 @@ type ImageWithSkeletonProps = Omit<
   src: string;
   skeletonClassName?: string;
   priority?: boolean;
+  unoptimized?: boolean;
+  quality?: number;
 };
 
 export function ImageWithSkeleton({
@@ -19,6 +21,8 @@ export function ImageWithSkeleton({
   className = "",
   skeletonClassName = "",
   priority = false, // defaults to false
+  unoptimized,
+  quality,
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
   ...rest
 }: ImageWithSkeletonProps) {
@@ -53,6 +57,8 @@ export function ImageWithSkeleton({
         fill
         sizes={sizes}
         priority={priority}
+        unoptimized={unoptimized}
+        quality={quality}
         onLoad={() => setLoaded(true)}
         className={`object-cover transition-opacity duration-300 ${
           loaded ? "opacity-100" : "opacity-0"
