@@ -271,6 +271,18 @@ function NavItems({
       >
         Blogs
       </Link>
+
+      <Link
+        href="/vouchers-collector"
+        onClick={onClose}
+        className={
+          isMobile
+            ? `${linkBase} ${blogsActiveClass}`
+            : `${linkBase} ${blogsActiveClass}`
+        }
+      >
+        Vouchers
+      </Link>
     </>
   );
 }
@@ -309,7 +321,7 @@ function MobileMenu({
       />
       {/* Slide-in panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-[101] w-[min(100vw,320px)] flex flex-col bg-bg shadow-xl transition-all duration-300 ease-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"} ${isAtTop ? "top-[106px]" : "top-[72px]"}`}
+        className={`fixed inset-y-0 right-0 z-[101] w-[min(100vw)] flex flex-col bg-bg shadow-xl transition-all duration-300 ease-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"} ${isAtTop ? "top-[106px]" : "top-[72px]"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <nav className="flex flex-col gap-1 px-4 pt-0 pb-6">
@@ -412,7 +424,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
         </div>
       )}
 
-      <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md py-4">
+      <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md py-4 max-sm:py-0">
         <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-0 sm:px-6 max-sm:py-4">
           {/* Left: desktop logo / mobile cart */}
           <div className="flex w-1/3 justify-start sm:w-auto sm:flex-initial">
@@ -570,6 +582,43 @@ export function Header({ navGroups = [] }: HeaderProps) {
             )}
           </div>
         </div>
+
+        {/* Mobile Search Bar */}
+        {!isAdminRoute && (
+          <div className="md:hidden px-4 pb-4">
+            <form
+              onSubmit={handleSearch}
+              className="flex w-full items-center rounded-sm overflow-hidden bg-[#f5f5f5] dark:bg-surface border border-transparent transition-colors focus-within:border-accent"
+            >
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                className="flex-1 bg-transparent px-4 py-2 text-sm text-text outline-none placeholder:text-muted h-[40px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                aria-label="Tìm kiếm"
+                className="flex h-[40px] w-[50px] items-center justify-center text-muted transition-colors hover:text-text"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        )}
         {!isAdminRoute && (
           <nav className="hidden items-center gap-6 md:flex md:gap-8 justify-center pt-4">
             <NavItems
