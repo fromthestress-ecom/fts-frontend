@@ -434,9 +434,18 @@ export function Header({ navGroups = [] }: HeaderProps) {
 
           {/* Desktop right actions */}
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
             {!isAdminRoute && (
               <>
+                {!isAdminRoute && (
+                  <>
+                    <Link href="/san-pham" className="header-shop-btn">
+                      Shop all items
+                    </Link>
+                    <CartLink />
+                  </>
+                )}
+                <ThemeToggle />
+
                 {!authLoading &&
                   (user ? (
                     <UserDropdown />
@@ -462,14 +471,6 @@ export function Header({ navGroups = [] }: HeaderProps) {
                       </svg>
                     </button>
                   ))}
-                {!isAdminRoute && (
-                  <>
-                    <CartLink />
-                    <Link href="/san-pham" className="header-shop-btn">
-                      Shop all items
-                    </Link>
-                  </>
-                )}
               </>
             )}
           </div>
