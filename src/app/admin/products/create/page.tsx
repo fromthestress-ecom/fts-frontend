@@ -8,6 +8,13 @@ import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+/**
+ * Performs a fetch against the configured admin API, automatically adding a JSON Content-Type header and the admin key.
+ *
+ * @param path - The request path to append to the API base URL (e.g., `/admin/products`)
+ * @param init - Optional fetch init; any provided headers are merged with the added `Content-Type` and `x-admin-key` headers
+ * @returns The fetch `Response` promise
+ */
 function adminFetch(path: string, init?: RequestInit) {
   const key = getAdminKey();
   return fetch(`${API}${path}`, {
@@ -20,6 +27,15 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
+/**
+ * Render the admin "Create Product" page and manage its form lifecycle.
+ *
+ * Fetches categories and product templates when mounted, displays a product creation form,
+ * posts the new product to the admin API on submit, and navigates back to the products list
+ * on successful creation or when the user cancels.
+ *
+ * @returns The admin product creation page UI.
+ */
 export default function CreateProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -95,14 +111,25 @@ export default function CreateProductPage() {
           onClick={handleCancel}
           className="p-2 hover:bg-surface rounded-full transition-colors text-muted hover:text-text"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text">Thêm sản phẩm mới</h1>
-          <p className="text-sm text-muted">Điền thông tin để tạo sản phẩm mới</p>
+          <p className="text-sm text-muted">
+            Điền thông tin để tạo sản phẩm mới
+          </p>
         </div>
       </div>
 

@@ -32,6 +32,20 @@ type ProductFormProps = {
   submitText: string;
 };
 
+/**
+ * Render a product creation/edit form for managing product details, images, pricing, inventory, variants, and submit/cancel actions.
+ *
+ * Renders a multi-section UI that manages local form state (name, slug, category, template, images, sizes, colors, price, compareAtPrice, stockQuantity, preOrder) and handles image uploads, drag-and-drop reordering, dynamic variant entry, and form submission.
+ *
+ * @param initialData - Optional initial values to prefill the form when editing an existing product
+ * @param categories - Available product categories for the category selector
+ * @param templates - Available product templates for the template selector
+ * @param onSubmit - Callback invoked with the current form values when the form is submitted
+ * @param onCancel - Callback invoked when the user cancels the form
+ * @param isSaving - When true, disables actions and shows a saving state on submit
+ * @param submitText - Text to display on the submit button
+ * @returns The rendered product form React element
+ */
 export default function ProductForm({
   initialData,
   categories,
@@ -89,7 +103,9 @@ export default function ProductForm({
           ghostClass: "sortable-ghost",
           dragClass: "sortable-drag",
           onEnd: () => {
-            const items = Array.from(imagesContainerRef.current?.children || []);
+            const items = Array.from(
+              imagesContainerRef.current?.children || [],
+            );
             const newOrder = items
               .map((item) => {
                 const div = item as HTMLElement;
@@ -205,7 +221,9 @@ export default function ProductForm({
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-text">Tên sản phẩm *</label>
+            <label className="mb-2 block text-sm font-medium text-text">
+              Tên sản phẩm *
+            </label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -215,7 +233,9 @@ export default function ProductForm({
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-text">Đường dẫn tĩnh (Slug) *</label>
+            <label className="mb-2 block text-sm font-medium text-text">
+              Đường dẫn tĩnh (Slug) *
+            </label>
             <input
               value={form.slug}
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
@@ -226,7 +246,9 @@ export default function ProductForm({
           </div>
           <div className="hidden md:block"></div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-text">Danh mục</label>
+            <label className="mb-2 block text-sm font-medium text-text">
+              Danh mục
+            </label>
             <select
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
@@ -241,7 +263,9 @@ export default function ProductForm({
             </select>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium text-text">Mẫu Thông tin (Mô tả & Size Chart)</label>
+            <label className="mb-2 block text-sm font-medium text-text">
+              Mẫu Thông tin (Mô tả & Size Chart)
+            </label>
             <select
               value={form.templateId}
               onChange={(e) => setForm({ ...form, templateId: e.target.value })}
@@ -262,7 +286,10 @@ export default function ProductForm({
       <div className="rounded-xl border border-border bg-surface shadow-sm overflow-hidden">
         <div className="border-b border-border bg-bg/50 px-6 py-4">
           <h2 className="text-lg font-semibold text-text">Hình ảnh sản phẩm</h2>
-          <p className="text-sm text-muted mt-1">Định dạng JPG, PNG, WEBP. Kéo thả để sắp xếp lại thứ tự (Hình đầu tiên là hình chính).</p>
+          <p className="text-sm text-muted mt-1">
+            Định dạng JPG, PNG, WEBP. Kéo thả để sắp xếp lại thứ tự (Hình đầu
+            tiên là hình chính).
+          </p>
         </div>
         <div className="p-6">
           <div className="mb-4">
@@ -275,7 +302,17 @@ export default function ProductForm({
                 disabled={uploading}
                 className="hidden"
               />
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2"
+              >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
@@ -283,7 +320,7 @@ export default function ProductForm({
               {uploading ? "Đang tải ảnh lên..." : "Tải ảnh từ máy tính"}
             </label>
           </div>
-          
+
           {form.images.length > 0 ? (
             <div ref={imagesContainerRef} className="flex flex-wrap gap-4 mt-6">
               {form.images.map((url, idx) => (
@@ -293,11 +330,16 @@ export default function ProductForm({
                   className="relative group h-32 w-32 cursor-move overflow-hidden rounded-lg border-2 border-border bg-bg transition-all hover:border-accent hover:shadow-md"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Ảnh ${idx + 1}`} data-url={url} className="h-full w-full object-cover pointer-events-none" />
+                  <img
+                    src={url}
+                    alt={`Ảnh ${idx + 1}`}
+                    data-url={url}
+                    className="h-full w-full object-cover pointer-events-none"
+                  />
                   {idx === 0 && (
-                     <div className="absolute bottom-0 left-0 right-0 bg-accent/90 py-1 text-center text-[10px] uppercase font-bold text-bg pointer-events-none">
-                       Ảnh chính
-                     </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-accent/90 py-1 text-center text-[10px] uppercase font-bold text-bg pointer-events-none">
+                      Ảnh chính
+                    </div>
                   )}
                   <button
                     type="button"
@@ -307,7 +349,16 @@ export default function ProductForm({
                     }}
                     className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-sm"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <line x1="18" y1="6" x2="6" y2="18" />
                       <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
@@ -318,12 +369,24 @@ export default function ProductForm({
           ) : (
             <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-border p-12 text-center mt-2">
               <div className="text-muted">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3 opacity-50">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mx-auto mb-3 opacity-50"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
-                <p className="text-sm">Chưa có hình ảnh nào. Hãy tải ảnh lên!</p>
+                <p className="text-sm">
+                  Chưa có hình ảnh nào. Hãy tải ảnh lên!
+                </p>
               </div>
             </div>
           )}
@@ -333,14 +396,20 @@ export default function ProductForm({
       {/* Card 3: Thông tin bán hàng */}
       <div className="rounded-xl border border-border bg-surface shadow-sm overflow-hidden">
         <div className="border-b border-border bg-bg/50 px-6 py-4">
-          <h2 className="text-lg font-semibold text-text">Thông tin bán hàng</h2>
-          <p className="text-sm text-muted mt-1">Cấu hình giá cả, tồn kho và các biến thể phân loại hàng.</p>
+          <h2 className="text-lg font-semibold text-text">
+            Thông tin bán hàng
+          </h2>
+          <p className="text-sm text-muted mt-1">
+            Cấu hình giá cả, tồn kho và các biến thể phân loại hàng.
+          </p>
         </div>
-        
+
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div>
-              <label className="mb-2 block text-sm font-medium text-text">Giá bán (VNĐ) *</label>
+              <label className="mb-2 block text-sm font-medium text-text">
+                Giá bán (VNĐ) *
+              </label>
               <div className="relative">
                 <input
                   type="number"
@@ -351,29 +420,41 @@ export default function ProductForm({
                   min="0"
                   className="w-full rounded-md border border-border bg-bg pl-4 pr-10 py-2.5 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">₫</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">
+                  ₫
+                </span>
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-text">Giá bán gốc (Chưa giảm)</label>
+              <label className="mb-2 block text-sm font-medium text-text">
+                Giá bán gốc (Chưa giảm)
+              </label>
               <div className="relative">
                 <input
                   type="number"
                   value={form.compareAtPrice}
-                  onChange={(e) => setForm({ ...form, compareAtPrice: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, compareAtPrice: e.target.value })
+                  }
                   placeholder="0"
                   min="0"
                   className="w-full rounded-md border border-border bg-bg pl-4 pr-10 py-2.5 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">₫</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">
+                  ₫
+                </span>
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-text">Tồn kho chung</label>
+              <label className="mb-2 block text-sm font-medium text-text">
+                Tồn kho chung
+              </label>
               <input
                 type="number"
                 value={form.stockQuantity}
-                onChange={(e) => setForm({ ...form, stockQuantity: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, stockQuantity: e.target.value })
+                }
                 placeholder="0"
                 min="0"
                 className="w-full rounded-md border border-border bg-bg px-4 py-2.5 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
@@ -385,14 +466,32 @@ export default function ProductForm({
 
           {/* Biến thể Size */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-text mb-3">Tuỳ chọn Size</h3>
+            <h3 className="text-sm font-medium text-text mb-3">
+              Tuỳ chọn Size
+            </h3>
             <div className="bg-bg border border-border rounded-lg p-4">
               <div className="flex flex-wrap gap-2 mb-3">
                 {form.sizes.map((s) => (
-                  <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-bg text-sm font-medium">
+                  <span
+                    key={s}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-bg text-sm font-medium"
+                  >
                     {s}
-                    <button type="button" onClick={() => handleRemoveSize(s)} className="hover:text-black/50 transition-colors">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSize(s)}
+                      className="hover:text-black/50 transition-colors"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
@@ -413,14 +512,32 @@ export default function ProductForm({
 
           {/* Biến thể Màu sắc */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-text mb-3">Tuỳ chọn Màu sắc</h3>
-             <div className="bg-bg border border-border rounded-lg p-4">
+            <h3 className="text-sm font-medium text-text mb-3">
+              Tuỳ chọn Màu sắc
+            </h3>
+            <div className="bg-bg border border-border rounded-lg p-4">
               <div className="flex flex-wrap gap-2 mb-3">
                 {form.colors.map((c) => (
-                  <span key={c} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-border text-text text-sm font-medium border border-[rgba(0,0,0,0.1)]">
+                  <span
+                    key={c}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-border text-text text-sm font-medium border border-[rgba(0,0,0,0.1)]"
+                  >
                     {c}
-                    <button type="button" onClick={() => handleRemoveColor(c)} className="hover:text-black/50 transition-colors">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveColor(c)}
+                      className="hover:text-black/50 transition-colors"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
@@ -445,16 +562,30 @@ export default function ProductForm({
                 <input
                   type="checkbox"
                   checked={form.preOrder}
-                  onChange={(e) => setForm({ ...form, preOrder: e.target.checked })}
+                  onChange={(e) =>
+                    setForm({ ...form, preOrder: e.target.checked })
+                  }
                   className="peer sr-only"
                 />
                 <div className="h-5 w-5 rounded border-2 border-border bg-bg peer-checked:bg-accent peer-checked:border-accent transition-colors flex items-center justify-center group-hover:border-accent">
-                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 peer-checked:opacity-100 transition-opacity absolute">
-                      <polyline points="20 6 9 17 4 12" />
-                   </svg>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="opacity-0 peer-checked:opacity-100 transition-opacity absolute"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 </div>
               </div>
-              <span className="text-sm font-medium text-text select-none group-hover:text-accent transition-colors">Sản phẩm Pre-order (Hàng đặt trước)</span>
+              <span className="text-sm font-medium text-text select-none group-hover:text-accent transition-colors">
+                Sản phẩm Pre-order (Hàng đặt trước)
+              </span>
             </label>
           </div>
         </div>
@@ -476,9 +607,25 @@ export default function ProductForm({
           className="px-8 py-2.5 rounded-md border border-transparent bg-accent text-bg font-medium text-sm hover:bg-accent/90 focus:ring-2 focus:ring-offset-2 focus:ring-accent transition-all disabled:opacity-75 flex items-center gap-2"
         >
           {isSaving && (
-            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-bg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="animate-spin -ml-1 mr-2 h-4 w-4 text-bg"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
           )}
           {submitText}

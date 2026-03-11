@@ -8,6 +8,13 @@ import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+/**
+ * Performs a fetch request to the application's admin API with the admin key and JSON content type header applied.
+ *
+ * @param path - The path to append to the configured API base URL (e.g., "/admin/products")
+ * @param init - Optional fetch init overrides (method, body, additional headers, etc.)
+ * @returns The fetch Response from the requested admin endpoint
+ */
 function adminFetch(path: string, init?: RequestInit) {
   const key = getAdminKey();
   return fetch(`${API}${path}`, {
@@ -20,14 +27,23 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
+/**
+ * Admin page component for editing an existing product.
+ *
+ * Loads product data, categories, and templates for the given route id, presents a prefilled product form,
+ * and handles update and cancel actions with appropriate loading and error states.
+ *
+ * @returns The JSX element rendering the edit-product UI, including loading and error views and the product form.
+ */
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [templates, setTemplates] = useState<ProductTemplate[]>([]);
-  const [initialData, setInitialData] = useState<Partial<ProductFormValues> | null>(null);
+  const [initialData, setInitialData] =
+    useState<Partial<ProductFormValues> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -40,19 +56,28 @@ export default function EditProductPage() {
           adminFetch("/admin/categories"),
           adminFetch("/admin/templates"),
         ]);
-        
+
         if (resC.ok) setCategories(await resC.json());
         if (resT.ok) setTemplates(await resT.json());
-        
+
         if (resP.ok) {
           const product = await resP.json();
           setInitialData({
             slug: product.slug,
             name: product.name,
             price: String(product.price),
-            compareAtPrice: product.compareAtPrice != null ? String(product.compareAtPrice) : "",
-            categoryId: product.categoryId && typeof product.categoryId === "object" ? product.categoryId._id : (product.categoryId || ""),
-            templateId: product.templateId && typeof product.templateId === "object" ? product.templateId._id : (product.templateId || ""),
+            compareAtPrice:
+              product.compareAtPrice != null
+                ? String(product.compareAtPrice)
+                : "",
+            categoryId:
+              product.categoryId && typeof product.categoryId === "object"
+                ? product.categoryId._id
+                : product.categoryId || "",
+            templateId:
+              product.templateId && typeof product.templateId === "object"
+                ? product.templateId._id
+                : product.templateId || "",
             images: product.images ?? [],
             sizes: product.sizes ?? [],
             colors: product.colors ?? [],
@@ -115,7 +140,11 @@ export default function EditProductPage() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center text-muted">Đang tải thông tin sản phẩm...</div>;
+    return (
+      <div className="p-4 text-center text-muted">
+        Đang tải thông tin sản phẩm...
+      </div>
+    );
   }
 
   if (error || !initialData) {
@@ -139,14 +168,25 @@ export default function EditProductPage() {
           onClick={handleCancel}
           className="p-2 hover:bg-surface rounded-full transition-colors text-muted hover:text-text"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text">Sửa sản phẩm</h1>
-          <p className="text-sm text-muted">Cập nhật thông tin cho sản phẩm hiện tại</p>
+          <p className="text-sm text-muted">
+            Cập nhật thông tin cho sản phẩm hiện tại
+          </p>
         </div>
       </div>
 
