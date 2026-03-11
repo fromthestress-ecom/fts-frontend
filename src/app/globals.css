@@ -153,11 +153,60 @@
 .other-products-slider .slick-next:hover:before {
   color: var(--accent);
 }
-.other-products-slider .slick-dots li button:before {
-  color: var(--muted);
+/* Custom slick-dots with pill expanding animation */
+.slick-dots {
+  position: absolute;
+  bottom: 20px;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
-.other-products-slider .slick-dots li.slick-active button:before {
-  color: var(--accent);
+.slick-dots li {
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex;
+  align-items: center;
+}
+.slick-dots li button {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 9999px !important;
+  background-color: var(--muted) !important;
+  opacity: 0.6;
+  padding: 0 !important;
+  font-size: 0;
+  color: transparent;
+  border: none !important;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  cursor: pointer;
+}
+.slick-dots li button:before {
+  display: none !important;
+}
+.slick-dots li.slick-active button {
+  width: 24px !important;
+  background-color: var(--text) !important;
+  opacity: 1;
+}
+
+/* For images and hero backgrounds where dots should be white */
+.banner-slider-hero .slick-dots li button,
+.product-image-slider__main .slick-dots li button {
+  background-color: #ffffff !important;
+  opacity: 0.5;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.banner-slider-hero .slick-dots li.slick-active button,
+.product-image-slider__main .slick-dots li.slick-active button {
+  background-color: #ffffff !important;
+  opacity: 1;
 }
 
 /* SortableJS styles for admin image reordering */
