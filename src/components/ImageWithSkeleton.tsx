@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import LoadingIcon from "@/components/icons/LoadingIcon";
 
-type ImageWithSkeletonProps = React.ImgHTMLAttributes<HTMLImageElement> & {
+type ImageWithSkeletonProps = Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  "src"
+> & {
+  src: string;
   skeletonClassName?: string;
   priority?: boolean;
+  unoptimized?: boolean;
+  quality?: number;
 };
 
 export function ImageWithSkeleton({
@@ -14,17 +21,12 @@ export function ImageWithSkeleton({
   className = "",
   skeletonClassName = "",
   priority = false, // defaults to false
+  unoptimized,
+  quality,
+  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
   ...rest
 }: ImageWithSkeletonProps) {
   const [loaded, setLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  // If the image is already cached / complete, set loaded immediately
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      setLoaded(true);
-    }
-  }, []);
 
   return (
     <span className="relative block h-full w-full">
@@ -49,17 +51,19 @@ export function ImageWithSkeleton({
           </span>
         </span>
       )}
-      <img
-        ref={imgRef}
+      <Image
         src={src}
         alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        fill
+        sizes={sizes}
+        priority={priority}
+        unoptimized={unoptimized}
+        quality={quality}
         onLoad={() => setLoaded(true)}
-        className={`block h-full w-full object-cover transition-opacity duration-300 ${
+        className={`object-cover transition-opacity duration-300 ${
           loaded ? "opacity-100" : "opacity-0"
         } ${className}`}
-        {...rest}
+        {...(rest as any)}
       />
     </span>
   );

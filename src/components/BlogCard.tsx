@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { BlogItem } from "@/lib/api";
+import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 
 type BlogCardProps = {
   blog: BlogItem;
@@ -26,10 +27,10 @@ export function BlogCard({ blog, headingLevel = "h2" }: BlogCardProps) {
       <Link href={`/blogs/${blog.slug}`} className="block flex-1 group pb-4">
         <div className="relative aspect-4/3 overflow-hidden bg-border">
           {blog.thumbnail ? (
-            <img
+            <ImageWithSkeleton
               src={blog.thumbnail}
               alt={blog.title}
-              className="product-card__image-inner object-cover w-full h-full block"
+              className="product-card__image-inner block"
             />
           ) : (
             <div className="w-full h-full product-card__image-inner flex items-center justify-center bg-border text-muted">

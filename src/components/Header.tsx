@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { CartLink } from "./CartLink";
 import { ThemeAwareImg } from "./ThemeAwareImg";
 import { ThemeToggle } from "./ThemeToggle";
@@ -271,6 +271,18 @@ function NavItems({
       >
         Blogs
       </Link>
+
+      <Link
+        href="/vouchers-collector"
+        onClick={onClose}
+        className={
+          isMobile
+            ? `${linkBase} ${blogsActiveClass}`
+            : `${linkBase} ${blogsActiveClass}`
+        }
+      >
+        Vouchers
+      </Link>
     </>
   );
 }
@@ -309,7 +321,7 @@ function MobileMenu({
       />
       {/* Slide-in panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-[101] w-[min(100vw,320px)] flex flex-col bg-bg shadow-xl transition-all duration-300 ease-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"} ${isAtTop ? "top-[106px]" : "top-[72px]"}`}
+        className={`fixed inset-y-0 right-0 z-[101] w-[min(100vw)] flex flex-col bg-bg shadow-xl transition-all duration-300 ease-out md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"} ${isAtTop ? "top-[106px]" : "top-[72px]"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <nav className="flex flex-col gap-1 px-4 pt-0 pb-6">
@@ -348,6 +360,17 @@ export function Header({ navGroups = [] }: HeaderProps) {
   const [openNavKey, setOpenNavKey] = useState<string | null>(null);
   const [isAtTop, setIsAtTop] = useState(true);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/san-pham?q=${encodeURIComponent(searchQuery.trim())}`);
+      closeMenu();
+    }
+  };
 
   const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
@@ -384,38 +407,220 @@ export function Header({ navGroups = [] }: HeaderProps) {
     };
   }, [isMenuOpen, closeMenu]);
 
+  const isAdminRoute = pathname?.startsWith("/admin");
+
   return (
     <>
       {/* Announcement bar */}
-      <div className="announcement-bar">
-        <div className="announcement-bar__track">
-          {[...Array(6)].map((_, i) => (
-            <span key={i} className="announcement-bar__item">
-              Women's Day Sale 10% off
-            </span>
-          ))}
+      {!isAdminRoute && (
+        <div className="announcement-bar">
+          <div className="announcement-bar__track">
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="announcement-bar__item">
+                Welcome to From the Stress
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md">
+      <header className="header-bar sticky top-0 z-[101] border-b border-border backdrop-blur-md py-4 max-sm:py-0">
         <div className="relative z-[60] mx-auto flex max-w-[1280px] items-center justify-between px-4 py-0 sm:px-6 max-sm:py-4">
           {/* Left: desktop logo / mobile cart */}
           <div className="flex w-1/3 justify-start sm:w-auto sm:flex-initial">
             <Link href="/" className="hidden sm:inline-block">
-              <Logo className="w-[100px] max-md:w-24 object-contain aspect-square" />
+              <Logo className="w-[100px] max-md:w-24 object-contain aspect-[2/1]" />
             </Link>
-            <div className="sm:hidden">
-              <CartLink iconOnly />
-            </div>
+            {!isAdminRoute && (
+              <div className="sm:hidden">
+                <CartLink iconOnly />
+              </div>
+            )}
           </div>
 
-          {/* Center: mobile logo */}
+          {/* Center: mobile logo. Desktop: Search bar */}
           <Link href="/" className="flex flex-1 justify-center sm:hidden">
             <Logo className="h-8 w-24 max-md:w-16 object-contain sm:h-9 sm:w-[100px]" />
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-6 md:flex md:gap-8">
+          {!isAdminRoute && (
+            <div className="hidden flex-1 md:flex items-center justify-center px-4 md:px-8 xl:px-12">
+              <form
+                onSubmit={handleSearch}
+                className="flex w-full max-w-2xl items-center rounded-sm border border-border overflow-hidden bg-surface transition-colors focus-within:border-accent"
+              >
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="flex-1 bg-transparent px-4 py-2 text-sm text-text outline-none placeholder:text-muted h-[40px]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  aria-label="Tìm kiếm"
+                  className="flex h-[40px] w-[50px] items-center justify-center bg-[#333] text-white transition-colors hover:bg-black"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Desktop right actions */}
+          <div className="hidden md:flex items-center gap-5">
+            {!isAdminRoute && (
+              <>
+                {!authLoading && (
+                  <div className="flex items-center">
+                    {user ? (
+                      <UserDropdown />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsAuthOpen(true)}
+                        aria-label="Đăng nhập"
+                        className="flex items-center gap-2 group text-left"
+                      >
+                        <div className="flex items-center justify-center text-muted transition-colors group-hover:text-text">
+                          <svg
+                            width="22"
+                            height="22"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                          </svg>
+                        </div>
+                        <div className="flex flex-col text-sm leading-tight">
+                          <span className="text-muted text-xs">
+                            Đăng nhập / Đăng ký
+                          </span>
+                          <span className="font-semibold text-text flex items-center gap-1">
+                            Tài khoản của tôi{" "}
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="opacity-50"
+                            >
+                              <path d="m6 9 6 6 6-6" />
+                            </svg>
+                          </span>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                <CartLink showText />
+              </>
+            )}
+            <ThemeToggle />
+          </div>
+
+          {/* Mobile right: theme + hamburger */}
+          <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
+            <ThemeToggle />
+            {!isAdminRoute && (
+              <>
+                {!authLoading &&
+                  (user ? (
+                    <UserDropdown />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsAuthOpen(true)}
+                      aria-label="Đăng nhập"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </button>
+                  ))}
+                <div className="hidden sm:block">
+                  <CartLink />
+                </div>
+                <HamburgerButton
+                  isOpen={isMenuOpen}
+                  onToggle={() => setIsMenuOpen((prev) => !prev)}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Search Bar */}
+        {!isAdminRoute && (
+          <div className="md:hidden px-4 pb-4">
+            <form
+              onSubmit={handleSearch}
+              className="flex w-full items-center rounded-sm overflow-hidden bg-[#f5f5f5] dark:bg-surface border border-transparent transition-colors focus-within:border-accent"
+            >
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                className="flex-1 bg-transparent px-4 py-2 text-sm text-text outline-none placeholder:text-muted h-[40px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                aria-label="Tìm kiếm"
+                className="flex h-[40px] w-[50px] items-center justify-center text-muted transition-colors hover:text-text"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        )}
+        {!isAdminRoute && (
+          <nav className="hidden items-center gap-6 md:flex md:gap-8 justify-center pt-4">
             <NavItems
               navGroups={navGroups}
               pathname={pathname}
@@ -423,78 +628,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
               variant="desktop"
             />
           </nav>
-
-          {/* Desktop right actions */}
-          <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
-            {!authLoading &&
-              (user ? (
-                <UserDropdown />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsAuthOpen(true)}
-                  aria-label="Đăng nhập"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </button>
-              ))}
-            <CartLink />
-            <Link href="/san-pham" className="header-shop-btn">
-              Shop all items
-            </Link>
-          </div>
-
-          {/* Mobile right: theme + hamburger */}
-          <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
-            <ThemeToggle />
-            {!authLoading &&
-              (user ? (
-                <UserDropdown />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsAuthOpen(true)}
-                  aria-label="Đăng nhập"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:text-text hover:border-text"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </button>
-              ))}
-            <div className="hidden sm:block">
-              <CartLink />
-            </div>
-            <HamburgerButton
-              isOpen={isMenuOpen}
-              onToggle={() => setIsMenuOpen((prev) => !prev)}
-            />
-          </div>
-        </div>
+        )}
       </header>
 
       {/* Mobile menu: portal into body so overlay is above everything */}

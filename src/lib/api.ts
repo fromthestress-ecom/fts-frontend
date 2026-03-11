@@ -1,10 +1,12 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 export async function fetchApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const mergedInit: RequestInit = {
+    next: { revalidate: 60 },
     ...init,
     headers: { 'Content-Type': 'application/json', ...init?.headers },
-  });
+  };
+  const res = await fetch(`${BASE}${path}`, mergedInit);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error((err as { message?: string }).message ?? res.statusText);

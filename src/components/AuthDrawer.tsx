@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
-type Tab = "login" | "register";
+type Tab = "login" | "register" | "forgot_password";
 
 interface AuthDrawerProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
   const [tab, setTab] = useState<Tab>("login");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState("");
 
   // Login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -23,6 +24,9 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
   // Register form
   const [regFullName, setRegFullName] = useState("");
   const [regEmail, setRegEmail] = useState("");
+
+  // Forgot password form
+  const [forgotEmail, setForgotEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regPhone, setRegPhone] = useState("");
   const [regReferralCode, setRegReferralCode] = useState("");
@@ -31,6 +35,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
   useEffect(() => {
     if (!isOpen) {
       setError("");
+      setForgotMessage("");
       setLoading(false);
     }
   }, [isOpen]);
@@ -91,6 +96,30 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setForgotMessage("");
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Có lỗi xảy ra");
+      setForgotMessage(data.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -107,7 +136,11 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
           <h2 className="auth-drawer__title m-0">
-            {tab === "login" ? "Đăng nhập" : "Đăng ký"}
+            {tab === "login"
+              ? "Đăng nhập"
+              : tab === "register"
+                ? "Đăng ký"
+                : "Quên mật khẩu"}
           </h2>
           <button
             type="button"
@@ -127,28 +160,32 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
         </div>
 
         {/* Tabs */}
-        <div className="auth-drawer__tabs">
-          <button
-            type="button"
-            className={`auth-drawer__tab ${tab === "login" ? "auth-drawer__tab--active" : ""}`}
-            onClick={() => {
-              setTab("login");
-              setError("");
-            }}
-          >
-            Đăng nhập
-          </button>
-          <button
-            type="button"
-            className={`auth-drawer__tab ${tab === "register" ? "auth-drawer__tab--active" : ""}`}
-            onClick={() => {
-              setTab("register");
-              setError("");
-            }}
-          >
-            Đăng ký
-          </button>
-        </div>
+        {tab !== "forgot_password" && (
+          <div className="auth-drawer__tabs">
+            <button
+              type="button"
+              className={`auth-drawer__tab ${tab === "login" ? "auth-drawer__tab--active" : ""}`}
+              onClick={() => {
+                setTab("login");
+                setError("");
+                setForgotMessage("");
+              }}
+            >
+              Đăng nhập
+            </button>
+            <button
+              type="button"
+              className={`auth-drawer__tab ${tab === "register" ? "auth-drawer__tab--active" : ""}`}
+              onClick={() => {
+                setTab("register");
+                setError("");
+                setForgotMessage("");
+              }}
+            >
+              Đăng ký
+            </button>
+          </div>
+        )}
 
         {/* Error */}
         {error && <div className="auth-drawer__error">{error}</div>}
@@ -183,12 +220,70 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                 />
               </div>
 
+              <div className="mb-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTab("forgot_password");
+                    setError("");
+                    setForgotMessage("");
+                  }}
+                  className="text-sm text-accent hover:underline"
+                >
+                  Quên mật khẩu?
+                </button>
+              </div>
+
               <button
                 type="submit"
                 className="auth-drawer__submit"
                 disabled={loading}
               >
                 {loading ? "Đang xử lý..." : "Đăng nhập"}
+              </button>
+            </form>
+          ) : tab === "forgot_password" ? (
+            <form onSubmit={handleForgotPassword} className="auth-drawer__form">
+              <p className="mb-4 text-sm text-text/70">
+                Nhập email của bạn, chúng tôi sẽ gửi thông tin để khôi phục mật
+                khẩu.
+              </p>
+              <div className="auth-drawer__field">
+                <label htmlFor="forgot-email">Email</label>
+                <input
+                  id="forgot-email"
+                  type="email"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              {forgotMessage && (
+                <div className="mb-4 text-sm text-green-500">
+                  {forgotMessage}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="auth-drawer__submit"
+                disabled={loading}
+              >
+                {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
+              </button>
+
+              <button
+                type="button"
+                className="mt-4 w-full text-center text-sm text-text/70 hover:text-text"
+                onClick={() => {
+                  setTab("login");
+                  setError("");
+                  setForgotMessage("");
+                }}
+              >
+                Quay lại đăng nhập
               </button>
             </form>
           ) : (
@@ -254,7 +349,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                   onChange={(e) =>
                     setRegReferralCode(e.target.value.toUpperCase())
                   }
-                  placeholder="VD: FTS_YOUR_NAME"
+                  placeholder="VD: FTS2812"
                   style={{ textTransform: "uppercase" }}
                 />
               </div>

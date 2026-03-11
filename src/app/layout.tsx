@@ -11,6 +11,7 @@ import { fetchApi } from "@/lib/api";
 import { groupCategoriesForNav } from "@/lib/navGroups";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { NavigationOverlay } from "@/components/NavigationOverlay";
 import "./globals.css";
 
 const SITE_NAME = "FROM THE STRESS";
@@ -85,6 +86,9 @@ export default async function RootLayout({
             <CartDrawerProvider>
               <Suspense fallback={null}>
                 <Header navGroups={navGroups} />
+              </Suspense>
+              <Suspense fallback={null}>
+                <NavigationOverlay />
               </Suspense>
               <main>{children}</main>
               <Footer />
