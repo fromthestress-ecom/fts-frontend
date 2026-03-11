@@ -417,7 +417,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
           <div className="announcement-bar__track">
             {[...Array(6)].map((_, i) => (
               <span key={i} className="announcement-bar__item">
-                Women's Day Sale 10% off
+                Welcome to From the Stress
               </span>
             ))}
           </div>
