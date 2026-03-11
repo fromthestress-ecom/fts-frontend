@@ -111,14 +111,25 @@ export default function CreateProductPage() {
           onClick={handleCancel}
           className="p-2 hover:bg-surface rounded-full transition-colors text-muted hover:text-text"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text">Thêm sản phẩm mới</h1>
-          <p className="text-sm text-muted">Điền thông tin để tạo sản phẩm mới</p>
+          <p className="text-sm text-muted">
+            Điền thông tin để tạo sản phẩm mới
+          </p>
         </div>
       </div>
 
