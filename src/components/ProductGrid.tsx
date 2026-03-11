@@ -92,25 +92,136 @@ export function ProductGrid({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <nav className="mt-8 flex justify-center gap-2">
-          {page > 1 && (
+        <nav className="mt-12 flex justify-center items-center gap-2">
+          {page > 1 ? (
             <Link
               href={buildUrl({ page: String(page - 1) })}
-              className="rounded border border-border px-4 py-2 text-sm sm:text-base"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-text hover:bg-border transition-colors mr-2"
+              aria-label="Previous page"
             >
-              Trước
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </Link>
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bg text-muted opacity-50 cursor-not-allowed mr-2">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </div>
           )}
-          <span className="px-4 py-2 text-sm text-muted sm:text-base">
-            {page} / {totalPages}
-          </span>
-          {page < totalPages && (
+
+          <div className="flex items-center rounded-full bg-surface p-1 shadow-sm border border-border/50">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+              const isCurrent = p === page;
+
+              // Logic based on the screenshot:
+              // Show first 4 pages, then ellipsis, then last 4 pages when totalPages is large
+              let shouldShow = false;
+              let isEllipsis = false;
+
+              if (totalPages <= 9) {
+                // If 9 or fewer pages, show all
+                shouldShow = true;
+              } else {
+                // More than 9 pages
+                if (page <= 5) {
+                  // If near the start: show 1 2 3 4 5 ... last 2
+                  if (p <= 5 || p >= totalPages - 1) shouldShow = true;
+                  else if (p === 6) isEllipsis = true;
+                } else if (page >= totalPages - 4) {
+                  // If near the end: show first 2 ... last 5
+                  if (p <= 2 || p >= totalPages - 4) shouldShow = true;
+                  else if (p === 3) isEllipsis = true;
+                } else {
+                  // Somewhere in the middle: show first 2 ... current-1, current, current+1 ... last 2
+                  if (p <= 2 || p >= totalPages - 1 || Math.abs(p - page) <= 1)
+                    shouldShow = true;
+                  else if (p === 3 || p === totalPages - 2) isEllipsis = true;
+                }
+              }
+
+              if (isEllipsis) {
+                return (
+                  <span
+                    key={`ellipsis-${p}`}
+                    className="flex h-10 w-8 items-center justify-center text-muted font-medium"
+                  >
+                    ...
+                  </span>
+                );
+              }
+
+              if (!shouldShow) return null;
+
+              return (
+                <Link
+                  key={p}
+                  href={buildUrl({ page: String(p) })}
+                  className={`flex h-10 min-w-[40px] items-center justify-center rounded-full px-2 text-[15px] font-semibold transition-all duration-200 ${
+                    isCurrent
+                      ? "bg-[#eab308] text-white shadow-md transform scale-[1.05]"
+                      : "text-text hover:bg-border/60 hover:text-text"
+                  }`}
+                >
+                  {p}
+                </Link>
+              );
+            })}
+          </div>
+
+          {page < totalPages ? (
             <Link
               href={buildUrl({ page: String(page + 1) })}
-              className="rounded border border-border px-4 py-2 text-sm sm:text-base"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-text hover:bg-border transition-colors ml-2"
+              aria-label="Next page"
             >
-              Sau
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </Link>
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bg text-muted opacity-50 cursor-not-allowed ml-2">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
           )}
         </nav>
       )}
