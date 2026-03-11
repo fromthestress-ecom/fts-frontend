@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 import type { Category, ProductTemplate } from "@/lib/api";
 import type Sortable from "sortablejs";
@@ -11,19 +12,8 @@ type Product = {
   _id: string;
   slug: string;
   name: string;
-  description?: string;
   price: number;
-  compareAtPrice?: number;
-  images: string[];
   categoryId?: Category | null;
-  templateId?: ProductTemplate | null;
-  inStock: boolean;
-  stockQuantity: number;
-  sizes: string[];
-  colors: string[];
-  sizeChart?: string;
-  order: number;
-  preOrder?: boolean;
 };
 
 function adminFetch(path: string, init?: RequestInit) {
@@ -38,53 +28,13 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
-function adminUploadFile(file: File): Promise<{ url: string; key: string }> {
-  const key = getAdminKey();
-  const formData = new FormData();
-  formData.append("file", file);
-  return fetch(`${API}/admin/upload`, {
-    method: "POST",
-    headers: {
-      "x-admin-key": key ?? "",
-    },
-    body: formData,
-  }).then((res) => {
-    if (!res.ok) {
-      return res.json().then((data) => {
-        throw new Error(data.message || "Upload thất bại");
-      });
-    }
-    return res.json();
-  });
-}
-
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [templates, setTemplates] = useState<ProductTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [saving, setSaving] = useState(false);
   const [orderDirty, setOrderDirty] = useState(false);
   const [orderSaving, setOrderSaving] = useState(false);
-  const [form, setForm] = useState({
-    slug: "",
-    name: "",
-    price: "",
-    compareAtPrice: "",
-    categoryId: "",
-    templateId: "",
-    images: [] as string[],
-    sizes: "",
-    colors: "",
-    stockQuantity: "0",
-    inStock: true,
-    preOrder: false,
-  });
-  const [uploading, setUploading] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const imagesContainerRef = useRef<HTMLDivElement>(null);
-  const sortableInstanceRef = useRef<Sortable | null>(null);
+  
   const productsTbodyRef = useRef<HTMLTableSectionElement>(null);
   const productsSortableRef = useRef<Sortable | null>(null);
 
@@ -95,72 +45,20 @@ export default function AdminProductsPage() {
 
   const load = async () => {
     setLoading(true);
-    const [resP, resC, resT] = await Promise.all([
-      adminFetch("/admin/products"),
-      adminFetch("/admin/categories"),
-      adminFetch("/admin/templates"),
-    ]);
-    if (resP.ok) setProducts(await resP.json());
-    if (resC.ok) setCategories(await resC.json());
-    if (resT.ok) setTemplates(await resT.json());
-    setLoading(false);
-    setOrderDirty(false);
+    try {
+      const res = await adminFetch("/admin/products");
+      if (res.ok) setProducts(await res.json());
+    } catch (err) {
+      setMessage("Lỗi tải danh sách sản phẩm");
+    } finally {
+      setLoading(false);
+      setOrderDirty(false);
+    }
   };
 
   useEffect(() => {
     load();
   }, []);
-
-  // Initialize SortableJS for image reordering
-  useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      !imagesContainerRef.current ||
-      form.images.length === 0
-    ) {
-      if (sortableInstanceRef.current) {
-        sortableInstanceRef.current.destroy();
-        sortableInstanceRef.current = null;
-      }
-      return;
-    }
-
-    // Dynamically import SortableJS
-    import("sortablejs").then((SortableModule) => {
-      const Sortable = SortableModule.default || SortableModule;
-      if (sortableInstanceRef.current) {
-        sortableInstanceRef.current.destroy();
-      }
-      if (imagesContainerRef.current) {
-        sortableInstanceRef.current = new Sortable(imagesContainerRef.current, {
-          animation: 150,
-          ghostClass: "sortable-ghost",
-          dragClass: "sortable-drag",
-          onEnd: () => {
-            const items = Array.from(
-              imagesContainerRef.current?.children || [],
-            );
-            const newOrder = items
-              .map((item) => {
-                const div = item as HTMLElement;
-                return div.getAttribute("data-url") || "";
-              })
-              .filter(Boolean);
-            if (newOrder.length === form.images.length) {
-              setForm((f) => ({ ...f, images: newOrder }));
-            }
-          },
-        });
-      }
-    });
-
-    return () => {
-      if (sortableInstanceRef.current) {
-        sortableInstanceRef.current.destroy();
-        sortableInstanceRef.current = null;
-      }
-    };
-  }, [form.images]);
 
   // Initialize SortableJS for product row reordering
   useEffect(() => {
@@ -205,6 +103,7 @@ export default function AdminProductsPage() {
             return ids.map((id) => byId.get(id)).filter(Boolean) as Product[];
           });
           setOrderDirty(true);
+          setMessage(""); // clear previous messages
         },
       });
     });
@@ -230,7 +129,6 @@ export default function AdminProductsPage() {
       if (!res.ok) throw new Error(data.message ?? "Lỗi lưu thứ tự");
       setOrderDirty(false);
       setMessage("Đã lưu thứ tự sản phẩm.");
-      // reload to ensure consistent ordering
       await load();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Lỗi lưu thứ tự");
@@ -239,457 +137,159 @@ export default function AdminProductsPage() {
     }
   };
 
-  const resetForm = () => {
-    setForm({
-      slug: "",
-      name: "",
-      price: "",
-      compareAtPrice: "",
-      categoryId: "",
-      templateId: "",
-      images: [],
-      sizes: "",
-      colors: "",
-      stockQuantity: "0",
-      inStock: true,
-      preOrder: false,
-    });
-    setEditingId(null);
-  };
-
-  const handleEdit = (p: Product) => {
-    setEditingId(p._id);
-    setForm({
-      slug: p.slug,
-      name: p.name,
-      price: String(p.price),
-      compareAtPrice: p.compareAtPrice != null ? String(p.compareAtPrice) : "",
-      categoryId:
-        p.categoryId && typeof p.categoryId === "object"
-          ? p.categoryId._id
-          : "",
-      templateId:
-        p.templateId && typeof p.templateId === "object"
-          ? p.templateId._id
-          : "",
-      images: p.images ?? [],
-      sizes: (p.sizes ?? []).join(", "),
-      colors: (p.colors ?? []).join(", "),
-      stockQuantity: String(p.stockQuantity ?? 0),
-      inStock: p.inStock ?? true,
-      preOrder: p.preOrder ?? false,
-    });
-    setMessage("");
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage("");
-    setSaving(true);
-    const payload = {
-      slug: form.slug.trim(),
-      name: form.name.trim(),
-      price: Number(form.price) || 0,
-      compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : 0,
-      categoryId: form.categoryId || undefined,
-      templateId: form.templateId || undefined,
-      images: form.images,
-      sizes: form.sizes
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      colors: form.colors
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      stockQuantity: Number(form.stockQuantity) || 0,
-      inStock: form.inStock,
-      preOrder: form.preOrder,
-    };
-    const isEdit = Boolean(editingId);
-    const res = await adminFetch(
-      isEdit ? `/admin/products/${editingId}` : "/admin/products",
-      {
-        method: isEdit ? "PUT" : "POST",
-        body: JSON.stringify(payload),
-      },
-    );
-    const data = await res.json().catch(() => ({}));
-    setMessage(
-      res.ok
-        ? isEdit
-          ? "Đã cập nhật."
-          : "Đã thêm sản phẩm."
-        : (data.message ?? "Lỗi"),
-    );
-    setSaving(false);
-    if (res.ok) {
-      resetForm();
-      load();
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Xóa sản phẩm này?")) return;
-    await adminFetch(`/admin/products/${id}`, { method: "DELETE" });
-    load();
-  };
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    setUploading(true);
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"?`)) return;
     try {
-      const uploads = Array.from(files).map((file) => adminUploadFile(file));
-      const results = await Promise.all(uploads);
-      const urls = results.map((r) => r.url);
-      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
-      e.target.value = "";
+      const res = await adminFetch(`/admin/products/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Xoá thất bại");
+      await load();
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Upload thất bại");
-    } finally {
-      setUploading(false);
+      setMessage("Lỗi xoá sản phẩm");
     }
-  };
-
-  const removeImage = (index: number) => {
-    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
   };
 
   return (
-    <>
-      <h1 className="font-display mb-4 text-xl sm:text-2xl">Sản phẩm</h1>
-      {editingId && (
-        <p className="mb-4 text-sm text-accent">
-          Đang sửa sản phẩm.{" "}
-          <button
-            type="button"
-            onClick={resetForm}
-            className="cursor-pointer rounded border border-border bg-transparent px-4 py-2 font-semibold text-muted"
-          >
-            Hủy
-          </button>
-        </p>
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="font-display text-xl sm:text-2xl text-text">Sản phẩm</h1>
+        <Link
+          href="/admin/products/create"
+          className="cursor-pointer rounded-md bg-accent px-4 py-2 text-sm font-semibold text-bg flex items-center gap-2 hover:bg-accent/90 transition-colors shadow-sm"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Thêm sản phẩm mới
+        </Link>
+      </div>
+
+      {message && (
+        <div className={`mb-4 px-4 py-3 rounded text-sm ${message.includes("Lỗi") ? "bg-red-50 text-red-600 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
+          {message}
+        </div>
       )}
-      <form
-        onSubmit={handleSubmit}
-        className="mb-6 rounded-lg border border-border bg-bg p-4"
-      >
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Slug *</label>
-            <input
-              value={form.slug}
-              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-              placeholder="hoodie-black"
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Tên *</label>
-            <input
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Hoodie Black"
-              required
-              className={inputClass}
-            />
-          </div>
-        </div>
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Giá (VNĐ) *</label>
-            <input
-              type="number"
-              value={form.price}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, price: e.target.value }))
-              }
-              placeholder="450000"
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Giá so sánh (VNĐ)</label>
-            <input
-              type="number"
-              value={form.compareAtPrice}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, compareAtPrice: e.target.value }))
-              }
-              placeholder="550000"
-              className={inputClass}
-            />
-          </div>
-        </div>
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Danh mục</label>
-            <select
-              value={form.categoryId}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, categoryId: e.target.value }))
-              }
-              className={inputClass}
-            >
-              <option value="">-- Chọn Danh mục --</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelClass}>
-              Mẫu Thông tin (Mô tả & Size Chart)
-            </label>
-            <select
-              value={form.templateId}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, templateId: e.target.value }))
-              }
-              className={inputClass}
-            >
-              <option value="">-- Không dùng Mẫu --</option>
-              {templates.map((t) => (
-                <option key={t._id} value={t._id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className={labelClass}>Ảnh</label>
-          <div className="mb-2 flex items-center gap-2">
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              multiple
-              onChange={handleFileSelect}
-              disabled={uploading}
-              className="text-sm"
-            />
-            {uploading && (
-              <span className="text-sm text-muted">Đang upload...</span>
-            )}
-          </div>
-          {form.images.length > 0 && (
-            <>
-              <p className="mb-1 mt-2 text-xs text-accent">
-                💡 Kéo thả ảnh để sắp xếp thứ tự
-              </p>
-              <div
-                ref={imagesContainerRef}
-                className="mt-2 flex flex-wrap gap-2"
-              >
-                {form.images.map((url, idx) => (
-                  <div
-                    key={`${url}-${idx}`}
-                    data-url={url}
-                    className="relative h-[100px] w-[100px] cursor-move overflow-hidden rounded border-2 border-border bg-surface transition-colors hover:border-accent"
-                  >
-                    <img
-                      src={url}
-                      alt=""
-                      data-url={url}
-                      className="h-full w-full object-cover pointer-events-none"
-                    />
-                    <div className="pointer-events-none absolute left-0.5 top-0.5 rounded bg-black/80 px-1 py-0.5 text-[10px] text-white select-none">
-                      ⋮⋮
-                    </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeImage(idx);
-                      }}
-                      className="absolute right-0.5 top-0.5 z-10 flex h-6 w-6 items-center justify-center rounded border-none bg-red-600/90 text-xs text-white cursor-pointer"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-        <div className="mb-4 flex flex-wrap gap-4">
-          <div>
-            <label className={labelClass}>Size (cách nhau dấu phẩy)</label>
-            <input
-              value={form.sizes}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, sizes: e.target.value }))
-              }
-              placeholder="S,M,L,XL"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Màu (cách nhau dấu phẩy)</label>
-            <input
-              value={form.colors}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, colors: e.target.value }))
-              }
-              placeholder="Đen,Trắng"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Tồn kho</label>
-            <input
-              type="number"
-              value={form.stockQuantity}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, stockQuantity: e.target.value }))
-              }
-              className={`${inputClass} w-24`}
-            />
-          </div>
-          <div className="flex items-center gap-2 pt-6">
-            <input
-              type="checkbox"
-              id="preOrder"
-              checked={form.preOrder}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, preOrder: e.target.checked }))
-              }
-              className="h-4 w-4 rounded border-border text-accent mt-0.5"
-            />
-            <label
-              htmlFor="preOrder"
-              className="text-sm font-medium text-text cursor-pointer select-none"
-            >
-              Hàng Pre-order
-            </label>
-          </div>
-        </div>
-        <button type="submit" disabled={saving} className={btnPrimaryClass}>
-          {saving
-            ? editingId
-              ? "Đang cập nhật..."
-              : "Đang thêm..."
-            : editingId
-              ? "Cập nhật sản phẩm"
-              : "Thêm sản phẩm"}
-        </button>
-        {message && <span className="ml-4 text-sm text-muted">{message}</span>}
-      </form>
+
       {loading ? (
-        <p className="text-muted">Đang tải...</p>
+        <div className="flex justify-center p-8">
+          <p className="text-muted text-sm">Đang tải danh sách...</p>
+        </div>
       ) : (
-        <>
-          <div className="mb-3 flex items-center gap-3">
-            <span className="text-sm text-muted">
-              💡 Kéo biểu tượng ↕ để sắp xếp thứ tự sản phẩm
+        <div className="rounded-xl border border-border bg-surface shadow-sm overflow-hidden">
+          <div className="border-b border-border bg-bg/50 px-6 py-3 flex items-center justify-between">
+            <span className="text-xs text-muted flex items-center gap-1.5 font-medium">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              Kéo biểu tượng ↕ để sắp xếp thứ tự
             </span>
             <button
               type="button"
               disabled={!orderDirty || orderSaving}
               onClick={saveProductOrder}
-              className={`rounded border-none px-4 py-2 font-semibold text-bg ${orderDirty ? "cursor-pointer bg-accent" : "cursor-not-allowed bg-border"} ${orderSaving ? "opacity-80" : ""}`}
+              className={`rounded-md px-4 py-1.5 text-xs font-semibold ${
+                orderDirty
+                  ? "cursor-pointer bg-accent text-bg hover:bg-accent/90"
+                  : "cursor-not-allowed bg-border text-muted"
+              } transition-colors flex items-center gap-1.5`}
             >
+              {orderSaving && (
+                <svg className="animate-spin h-3 w-3 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
               {orderSaving ? "Đang lưu..." : "Lưu thứ tự"}
             </button>
           </div>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="w-11 p-2"></th>
-                <th className="p-2 text-left">Slug</th>
-                <th className="p-2 text-left">Tên</th>
-                <th className="p-2 text-right">Giá</th>
-                <th className="p-2 text-left">Danh mục</th>
-                <th className="p-2 text-right"></th>
-              </tr>
-            </thead>
-            <tbody ref={productsTbodyRef}>
-              {products.map((p) => (
-                <tr
-                  key={p._id}
-                  data-id={p._id}
-                  className="border-b border-border"
-                >
-                  <td className="p-2">
-                    <span
-                      className="drag-handle inline-flex h-7 w-7 cursor-grab select-none items-center justify-center rounded-md border border-border bg-bg text-muted"
-                      title="Kéo để sắp xếp"
-                    >
-                      ↕
-                    </span>
-                  </td>
-                  <td className="p-2">{p.slug}</td>
-                  <td className="p-2">{p.name}</td>
-                  <td className="p-2 text-right">
-                    {new Intl.NumberFormat("vi-VN").format(p.price)}₫
-                  </td>
-                  <td className="p-2">
-                    {p.categoryId && typeof p.categoryId === "object"
-                      ? p.categoryId.name
-                      : "-"}
-                  </td>
-                  <td className="p-2 text-right">
-                    <button
-                      type="button"
-                      onClick={() => handleEdit(p)}
-                      title="Sửa"
-                      className="mr-2 inline-flex items-center justify-center rounded p-1.5 text-blue-500 hover:bg-blue-500/10 transition-colors"
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(p._id)}
-                      title="Xóa"
-                      className="inline-flex items-center justify-center rounded p-1.5 text-red-500 hover:bg-red-500/10 transition-colors"
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                        <line x1="10" y1="11" x2="10" y2="17" />
-                        <line x1="14" y1="11" x2="14" y2="17" />
-                      </svg>
-                    </button>
-                  </td>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="text-xs text-muted uppercase bg-bg/30">
+                <tr className="border-b border-border">
+                  <th scope="col" className="w-12 px-6 py-3 font-medium"></th>
+                  <th scope="col" className="px-6 py-3 font-medium">Sản phẩm</th>
+                  <th scope="col" className="px-6 py-3 font-medium text-right">Giá</th>
+                  <th scope="col" className="px-6 py-3 font-medium">Danh mục</th>
+                  <th scope="col" className="px-6 py-3 font-medium text-right">Thao tác</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody ref={productsTbodyRef} className="divide-y divide-border">
+                {products.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-muted">Không có sản phẩm nào.</td>
+                  </tr>
+                ) : (
+                  products.map((p) => (
+                    <tr
+                      key={p._id}
+                      data-id={p._id}
+                      className="hover:bg-bg/50 transition-colors group"
+                    >
+                      <td className="px-6 py-4">
+                        <span
+                          className="drag-handle inline-flex h-8 w-8 cursor-grab select-none items-center justify-center rounded border border-transparent text-muted hover:border-border hover:bg-bg transition-colors"
+                          title="Kéo để sắp xếp"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="15 18 9 12 15 6" />
+                            <polyline points="21 18 15 12 21 6" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <polyline points="9 18 3 12 9 6" className="hidden" />
+                          </svg>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft: '-8px'}}>
+                            <polyline points="9 18 3 12 9 6" />
+                          </svg>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-text">
+                        <div className="flex flex-col">
+                          <span>{p.name}</span>
+                          <span className="text-xs font-normal text-muted truncate max-w-[200px]">{p.slug}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+                      </td>
+                      <td className="px-6 py-4 text-muted">
+                        {p.categoryId && typeof p.categoryId === "object"
+                          ? (p.categoryId as Category).name
+                          : "-"}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          href={`/admin/products/${p._id}`}
+                          title="Sửa"
+                          className="inline-flex items-center justify-center rounded p-2 text-blue-500 hover:bg-blue-500/10 transition-colors mr-2"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(p._id, p.name)}
+                          title="Xóa"
+                          className="inline-flex items-center justify-center rounded p-2 text-red-500 hover:bg-red-500/10 transition-colors"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
-    </>
+    </div>
   );
 }
-
-const labelClass = "mb-1 block text-xs text-muted";
-const inputClass =
-  "w-full rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base";
-const btnPrimaryClass =
-  "cursor-pointer rounded border-none bg-accent px-4 py-2 font-semibold text-bg";
