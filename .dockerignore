@@ -16,7 +16,6 @@ Dockerfile
 README.md
 migrate_error.txt
 test_token.txt
-scripts
 prisma/dev.db
 prisma/dev.db-journal
 techs/
