@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Product } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
+import { trackAddToCart } from "@/lib/gtag";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -102,6 +103,12 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
       const data = (await res.json()) as { items?: { quantity: number }[] };
       const total = data.items?.reduce((s, i) => s + i.quantity, 0) ?? quantity;
       setCartCount(total);
+      trackAddToCart({
+        item_id: product._id,
+        item_name: product.name,
+        price: product.finalPrice ?? product.price,
+        quantity,
+      });
       setStatus("done");
     } catch {
       setStatus("error");

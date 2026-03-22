@@ -7,6 +7,7 @@ import { CountdownPrice } from "@/components/CountdownPrice";
 import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { setCartCount } from "@/hooks/useCartCount";
 import type { Product } from "@/lib/api";
+import { trackAddToCart } from "@/lib/gtag";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -60,6 +61,12 @@ export function ProductCard({
         const data = (await res.json()) as { items?: { quantity: number }[] };
         const total = data.items?.reduce((s, i) => s + i.quantity, 0) ?? 1;
         setCartCount(total);
+        trackAddToCart({
+          item_id: p._id,
+          item_name: p.name,
+          price: p.finalPrice ?? p.price,
+          quantity: 1,
+        });
         setStatus("done");
         openDrawer();
         setTimeout(() => setStatus("idle"), 2500);

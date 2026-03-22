@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { Cart, CreateOrderDto } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
 import { useAuth } from "@/contexts/AuthContext";
+import { trackBeginCheckout, trackPurchase } from "@/lib/gtag";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -61,8 +62,22 @@ export function CheckoutForm() {
     }
     fetch(`${API}/cart`, { headers: { "x-guest-id": guestId } })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        setCart(data ?? { _id: "", items: [] });
+      .then((data: Cart | null) => {
+        const c = data ?? { _id: "", items: [] };
+        setCart(c);
+        if (c.items?.length) {
+          const gaItems = c.items.map((i) => {
+            const prod = i.productId as { _id: string; name: string; price: number; finalPrice?: number };
+            return {
+              item_id: prod._id,
+              item_name: prod.name,
+              price: prod.finalPrice ?? prod.price,
+              quantity: i.quantity,
+            };
+          });
+          const total = gaItems.reduce((s, it) => s + it.price * (it.quantity ?? 1), 0);
+          trackBeginCheckout(gaItems, total);
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -158,11 +173,22 @@ export function CheckoutForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await res.json()) as { orderNumber?: string };
+      const data = (await res.json()) as { orderNumber?: string; subtotal?: number; shippingFee?: number };
       if (!res.ok)
         throw new Error(
           (data as { message?: string }).message ?? "Lỗi đặt hàng",
         );
+      trackPurchase(
+        data.orderNumber ?? "",
+        payload.items.map((it) => ({
+          item_id: it.productId,
+          item_name: it.name,
+          price: it.price,
+          quantity: it.quantity,
+        })),
+        data.subtotal ?? subtotal,
+        data.shippingFee ?? shippingFee,
+      );
       setCartCount(0);
       localStorage.removeItem("streetwear-guest-id");
       router.push(`/don-hang/${data.orderNumber ?? ""}`);

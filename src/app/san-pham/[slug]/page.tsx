@@ -3,6 +3,7 @@ import Link from "next/link";
 import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import dynamic from "next/dynamic";
 import { AddToCartForm } from "@/components/AddToCartForm";
+import { TrackViewItem } from "@/components/TrackViewItem";
 
 const CountdownPrice = dynamic(
   () => import("@/components/CountdownPrice").then((m) => m.CountdownPrice),
@@ -125,6 +126,12 @@ export default async function ProductPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <TrackViewItem
+        itemId={product._id}
+        itemName={product.name}
+        price={product.finalPrice ?? product.price}
+        category={categoryName ?? undefined}
       />
       <div className="mx-auto max-w-[960px] px-4 py-8 sm:px-6">
         <nav className="mb-4 text-sm text-muted sm:text-base">

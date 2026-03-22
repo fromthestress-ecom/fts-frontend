@@ -1,5 +1,6 @@
 import { fetchApi, type ProductListResult, type Category } from "@/lib/api";
 import { ProductGrid } from "@/components/ProductGrid";
+import { TrackViewItemList } from "@/components/TrackViewItemList";
 import type { Metadata } from "next";
 
 /** Normalize searchParams: Next.js may give string | string[]; use single string. */
@@ -120,6 +121,7 @@ export default async function ProductsPage({
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+      <TrackViewItemList products={result.items} listName="Sản phẩm" />
       <h1 className="font-display mb-6 text-2xl tracking-wide sm:text-3xl">
         SẢN PHẨM
       </h1>
