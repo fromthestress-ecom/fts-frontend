@@ -15,8 +15,12 @@ import { BlogCard } from "@/components/BlogCard";
 import type { PromoSlide } from "@/components/PromoSlider";
 import { CollectionsSection } from "@/components/CollectionsSection";
 
-const BannerSlider = dynamic(
-  () => import("@/components/BannerSlider").then((m) => m.BannerSlider),
+// const BannerSlider = dynamic(
+//   () => import("@/components/BannerSlider").then((m) => m.BannerSlider),
+// );
+
+const HeroBanner = dynamic(
+  () => import("@/components/HeroBanner").then((m) => m.HeroBanner),
 );
 
 const PromoSlider = dynamic(
@@ -218,7 +222,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
       />
-      <BannerSlider />
+      <HeroBanner />
 
       <PromoSection slides={promoSlides} />
       <BestSellingProductsSection items={bestSellers} />
