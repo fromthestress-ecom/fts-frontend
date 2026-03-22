@@ -10,9 +10,12 @@ import type { Category } from "@/lib/api";
 import { fetchApi } from "@/lib/api";
 import { groupCategoriesForNav } from "@/lib/navGroups";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Suspense } from "react";
 import { NavigationOverlay } from "@/components/NavigationOverlay";
 import { Oswald, DM_Sans } from "next/font/google";
+
+const GA_ID = "G-HWRRD05NNB";
 import "./globals.css";
 
 const oswald = Oswald({
@@ -80,6 +83,13 @@ export default async function RootLayout({
     <html lang="vi" className={`${oswald.variable} ${dmSans.variable}`}>
       <head>
         <ThemeScript />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
+        </Script>
       </head>
       <body>
         <ThemeProvider>
