@@ -84,6 +84,7 @@ export default function EditProductPage() {
             stockQuantity: String(product.stockQuantity ?? "0"),
             inStock: product.inStock ?? true,
             preOrder: product.preOrder ?? false,
+            isSoldOut: product.isSoldOut ?? false,
           });
         } else {
           setError("Không tải được thông tin sản phẩm");
@@ -116,6 +117,7 @@ export default function EditProductPage() {
         stockQuantity: Number(data.stockQuantity) || 0,
         inStock: data.inStock,
         preOrder: data.preOrder,
+        isSoldOut: data.isSoldOut,
       };
 
       const res = await adminFetch(`/admin/products/${id}`, {

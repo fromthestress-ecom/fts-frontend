@@ -68,6 +68,8 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
     "idle",
   );
 
+  const isSoldOut = product.isSoldOut || !product.inStock;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
@@ -133,20 +135,20 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
       </div>
       <button
         type="submit"
-        disabled={status === "loading" || !product.inStock}
+        disabled={status === "loading" || isSoldOut}
         className={`rounded border-none px-8 py-3.5 font-bold text-bg ${
-          product.inStock ? "bg-accent" : "bg-border"
+          isSoldOut ? "bg-border" : "bg-accent"
         }`}
       >
         {status === "loading"
           ? "Đang thêm..."
           : status === "done"
             ? "Đã thêm vào giỏ"
-            : product.inStock
-              ? product.preOrder
+            : isSoldOut
+              ? "Hết hàng"
+              : product.preOrder
                 ? "Đặt trước (Pre-order)"
-                : "Thêm vào giỏ"
-              : "Hết hàng"}
+                : "Thêm vào giỏ"}
       </button>
       {status === "error" && (
         <p className="mt-2 text-sm text-red-500">Có lỗi, vui lòng thử lại.</p>

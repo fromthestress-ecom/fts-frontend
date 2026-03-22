@@ -89,6 +89,8 @@ export default async function ProductPage({ params }: Props) {
       ? await getOtherProductsByNavGroup(navGroup, slug)
       : [];
 
+  const isSoldOut = product.isSoldOut || !product.inStock;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -99,9 +101,9 @@ export default async function ProductPage({ params }: Props) {
       "@type": "Offer",
       price: product.price,
       priceCurrency: "VND",
-      availability: product.inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      availability: isSoldOut
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
     },
   };
 
@@ -133,11 +135,15 @@ export default async function ProductPage({ params }: Props) {
           <div>
             <h1 className="font-display mb-2 text-2xl sm:text-3xl flex items-center gap-3">
               {product.name}
-              {product.preOrder && (
+              {isSoldOut ? (
+                <span className="rounded bg-red-600 px-2 py-1 text-sm font-bold text-white shadow-sm">
+                  Sold Out
+                </span>
+              ) : product.preOrder ? (
                 <span className="rounded bg-black/80 px-2 py-1 text-sm font-bold text-white shadow-sm">
                   Pre-order
                 </span>
-              )}
+              ) : null}
             </h1>
             <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
               {new Intl.NumberFormat("vi-VN").format(product.price)}₫

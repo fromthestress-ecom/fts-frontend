@@ -32,10 +32,13 @@ export function ProductCard({
   const { openDrawer } = useCartDrawer();
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
 
+  const isSoldOut = p.isSoldOut || !p.inStock;
+  const isDisabled = isSoldOut || status === "loading";
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!p.inStock || status === "loading") return;
+    if (isSoldOut || status === "loading") return;
 
     setStatus("loading");
     try {
@@ -66,8 +69,6 @@ export function ProductCard({
       setStatus("idle");
     }
   };
-
-  const isDisabled = !p.inStock || status === "loading";
   const Heading = headingLevel;
 
   return (
@@ -82,7 +83,14 @@ export function ProductCard({
               className="product-card__image-inner"
             />
           ) : null}
-          {p.preOrder && (
+          {isSoldOut && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40">
+              <span className="rounded bg-black/80 px-3 py-1.5 text-xs font-bold tracking-wider text-white uppercase">
+                Sold Out
+              </span>
+            </div>
+          )}
+          {p.preOrder && !isSoldOut && (
             <span className="absolute left-2 top-2 rounded bg-black/80 px-2 py-1 text-xs font-bold text-white shadow-sm z-10">
               Pre-order
             </span>
@@ -127,7 +135,7 @@ export function ProductCard({
             fontSize: "12px",
             letterSpacing: "0.06em",
             cursor: isDisabled ? "not-allowed" : "pointer",
-            opacity: !p.inStock ? 0.5 : 1,
+            opacity: isSoldOut ? 0.5 : 1,
             transition: "background 0.2s ease, color 0.2s ease",
           }}
         >
@@ -135,11 +143,11 @@ export function ProductCard({
             ? "Đang thêm..."
             : status === "done"
               ? "✓ Đã thêm"
-              : p.inStock
-                ? p.preOrder
+              : isSoldOut
+                ? "HẾT HÀNG"
+                : p.preOrder
                   ? "ĐẶT TRƯỚC (PRE-ORDER)"
-                  : "THÊM VÀO GIỎ"
-                : "HẾT HÀNG"}
+                  : "THÊM VÀO GIỎ"}
         </button>
       </div>
     </div>

@@ -55,6 +55,7 @@ export interface Product {
   colors: string[];
   order: number;
   preOrder?: boolean;
+  isSoldOut?: boolean;
 }
 
 export interface ProductListResult {

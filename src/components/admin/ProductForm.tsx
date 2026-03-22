@@ -20,6 +20,7 @@ export type ProductFormValues = {
   stockQuantity: string;
   inStock: boolean;
   preOrder: boolean;
+  isSoldOut: boolean;
 };
 
 type ProductFormProps = {
@@ -68,6 +69,7 @@ export default function ProductForm({
     stockQuantity: initialData?.stockQuantity ?? "0",
     inStock: initialData?.inStock ?? true,
     preOrder: initialData?.preOrder ?? false,
+    isSoldOut: initialData?.isSoldOut ?? false,
   });
 
   const [uploading, setUploading] = useState(false);
@@ -556,7 +558,7 @@ export default function ProductForm({
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col gap-4">
             <label className="flex items-center gap-3 cursor-pointer group">
               <div className="relative flex items-center justify-center">
                 <input
@@ -585,6 +587,37 @@ export default function ProductForm({
               </div>
               <span className="text-sm font-medium text-text select-none group-hover:text-accent transition-colors">
                 Sản phẩm Pre-order (Hàng đặt trước)
+              </span>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={form.isSoldOut}
+                  onChange={(e) =>
+                    setForm({ ...form, isSoldOut: e.target.checked })
+                  }
+                  className="peer sr-only"
+                />
+                <div className="h-5 w-5 rounded border-2 border-border bg-bg peer-checked:bg-red-500 peer-checked:border-red-500 transition-colors flex items-center justify-center group-hover:border-red-400">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="opacity-0 peer-checked:opacity-100 transition-opacity absolute"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+              </div>
+              <span className="text-sm font-medium text-text select-none group-hover:text-red-500 transition-colors">
+                Sold Out (Hết hàng)
               </span>
             </label>
           </div>

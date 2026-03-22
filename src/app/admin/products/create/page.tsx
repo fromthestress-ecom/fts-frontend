@@ -77,6 +77,7 @@ export default function CreateProductPage() {
         stockQuantity: Number(data.stockQuantity) || 0,
         inStock: data.inStock,
         preOrder: data.preOrder,
+        isSoldOut: data.isSoldOut,
       };
 
       const res = await adminFetch("/admin/products", {

@@ -14,6 +14,7 @@ type Product = {
   name: string;
   price: number;
   categoryId?: Category | null;
+  isSoldOut?: boolean;
 };
 
 /**
@@ -335,7 +336,14 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4 font-medium text-text">
                         <div className="flex flex-col">
-                          <span>{p.name}</span>
+                          <span className="flex items-center gap-2">
+                            {p.name}
+                            {p.isSoldOut && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-red-100 text-red-600 border border-red-200">
+                                Sold Out
+                              </span>
+                            )}
+                          </span>
                           <span className="text-xs font-normal text-muted truncate max-w-[200px]">
                             {p.slug}
                           </span>
