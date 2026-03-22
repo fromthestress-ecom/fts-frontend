@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Chính sách bảo mật thông tin khách hàng",
   description:
     "Chính sách bảo mật thông tin cá nhân và dữ liệu khách hàng tại FROM THE STRESS.",
+  openGraph: {
+    images: [{ url: "/images/og_baoMat.jpg", alt: "Chính sách bảo mật" }],
+  },
 };
 
 export default function ChinhSachBaoMatPage() {

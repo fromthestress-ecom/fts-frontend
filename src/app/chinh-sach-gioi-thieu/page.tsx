@@ -1,3 +1,14 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Chính sách giới thiệu",
+  description:
+    "Chương trình giới thiệu bạn bè nhận ưu đãi giảm giá tại FROM THE STRESS.",
+  openGraph: {
+    images: [{ url: "/images/og_aff.jpg", alt: "Chính sách giới thiệu" }],
+  },
+};
+
 export default function ChinhSachGioiThieuPage() {
   return (
     <div className="policy-page">

@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Chính sách vận chuyển & Giao nhận",
   description:
     "Chính sách giao hàng, phí vận chuyển và thời gian giao nhận tại FROM THE STRESS.",
+  openGraph: {
+    images: [{ url: "/images/og_vanChuyen.jpg", alt: "Chính sách vận chuyển" }],
+  },
 };
 
 export default function ChinhSachVanChuyenPage() {
