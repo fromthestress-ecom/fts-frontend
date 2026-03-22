@@ -98,41 +98,46 @@ export function ProductCard({
           )}
         </div>
         <div className="p-3 pb-0">
-          <Heading className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
-            {p.name}
+          <Heading
+            className="min-h-[42px] text-sm font-semibold m-0 sm:text-base"
+            title={p.name}
+          >
+            {p.name.length > 30 ? `${p.name.slice(0, 40)}...` : p.name}
           </Heading>
-          {p.eventDiscount?.status === "upcoming" &&
-          p.eventDiscount.discountedPrice != null &&
-          p.eventDiscount.startDate ? (
-            <div className="mt-1">
-              <p className="text-sm font-bold text-accent sm:text-base">
+          <div className="mt-1 min-h-[48px]">
+            {p.eventDiscount?.status === "upcoming" &&
+            p.eventDiscount.discountedPrice != null &&
+            p.eventDiscount.startDate ? (
+              <>
+                <p className="text-sm font-bold text-accent sm:text-base m-0">
+                  {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+                </p>
+                <CountdownPrice
+                  discountedPrice={p.eventDiscount.discountedPrice}
+                  startDate={p.eventDiscount.startDate}
+                  size="sm"
+                />
+              </>
+            ) : p.eventDiscount?.status === "active" ? (
+              <>
+                <span className="text-sm font-bold text-accent sm:text-base">
+                  {new Intl.NumberFormat("vi-VN").format(p.finalPrice ?? p.price)}₫
+                </span>
+                <span className="ml-2 text-xs text-muted line-through sm:text-sm">
+                  {new Intl.NumberFormat("vi-VN").format(p.eventDiscount.originalPrice)}₫
+                </span>
+                <span className="ml-1 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  {p.eventDiscount.discountType === "percent"
+                    ? `-${p.eventDiscount.discountValue}%`
+                    : `-${new Intl.NumberFormat("vi-VN").format(p.eventDiscount.discountValue)}₫`}
+                </span>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-accent sm:text-base m-0">
                 {new Intl.NumberFormat("vi-VN").format(p.price)}₫
               </p>
-              <CountdownPrice
-                discountedPrice={p.eventDiscount.discountedPrice}
-                startDate={p.eventDiscount.startDate}
-                size="sm"
-              />
-            </div>
-          ) : p.eventDiscount?.status === "active" ? (
-            <div className="mt-1">
-              <span className="text-sm font-bold text-accent sm:text-base">
-                {new Intl.NumberFormat("vi-VN").format(p.finalPrice ?? p.price)}₫
-              </span>
-              <span className="ml-2 text-xs text-muted line-through sm:text-sm">
-                {new Intl.NumberFormat("vi-VN").format(p.eventDiscount.originalPrice)}₫
-              </span>
-              <span className="ml-1 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                {p.eventDiscount.discountType === "percent"
-                  ? `-${p.eventDiscount.discountValue}%`
-                  : `-${new Intl.NumberFormat("vi-VN").format(p.eventDiscount.discountValue)}₫`}
-              </span>
-            </div>
-          ) : (
-            <p className="mt-1 text-sm font-bold text-accent sm:text-base">
-              {new Intl.NumberFormat("vi-VN").format(p.price)}₫
-            </p>
-          )}
+            )}
+          </div>
         </div>
       </Link>
 
