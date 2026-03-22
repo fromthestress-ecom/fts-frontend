@@ -23,8 +23,8 @@
   --accent: #eab308;
   --accent-hover: #facc15;
   --header-bg: rgba(23, 23, 25, 0.95);
-  --font-sans: "DM Sans", system-ui, sans-serif;
-  --font-display: "Oswald", "Impact", sans-serif;
+  --font-sans: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  --font-display: var(--font-oswald), "Oswald", "Impact", sans-serif;
 }
 
 /* Light theme: #F0EEE9 */

@@ -1,9 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
+import dynamic from "next/dynamic";
 import { AddToCartForm } from "@/components/AddToCartForm";
-import { ProductImageSlider } from "@/components/ProductImageSlider";
-import { OtherProductsSection } from "@/components/OtherProductsSection";
+
+const ProductImageSlider = dynamic(
+  () => import("@/components/ProductImageSlider").then((m) => m.ProductImageSlider),
+);
+
+const OtherProductsSection = dynamic(
+  () => import("@/components/OtherProductsSection").then((m) => m.OtherProductsSection),
+);
 import type { Metadata } from "next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";

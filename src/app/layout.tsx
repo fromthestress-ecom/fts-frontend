@@ -12,7 +12,22 @@ import { groupCategoriesForNav } from "@/lib/navGroups";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { NavigationOverlay } from "@/components/NavigationOverlay";
+import { Oswald, DM_Sans } from "next/font/google";
 import "./globals.css";
+
+const oswald = Oswald({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-oswald",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-dm-sans",
+});
 
 const SITE_NAME = "FROM THE STRESS";
 const DEFAULT_DESC =
@@ -52,33 +67,15 @@ export default async function RootLayout({
   }[] = [];
   try {
     const categories = await fetchApi<Category[]>("/categories");
-    console.log(
-      "🔍 ~ RootLayout ~ frontend/src/app/layout.tsx:52 ~ categories:",
-      categories,
-    );
     navGroups = groupCategoriesForNav(categories);
-    console.log(
-      "🔍 ~ RootLayout ~ frontend/src/app/layout.tsx:54 ~ navGroups:",
-      navGroups,
-    );
   } catch {
     navGroups = [];
   }
 
   return (
-    <html lang="vi">
+    <html lang="vi" className={`${oswald.variable} ${dmSans.variable}`}>
       <head>
         <ThemeScript />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body>
         <ThemeProvider>

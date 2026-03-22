@@ -6,13 +6,21 @@ import {
   type ProductListResult,
   type BlogItem,
 } from "@/lib/api";
-import { BannerSlider } from "@/components/BannerSlider";
+import dynamic from "next/dynamic";
 import { BrandsSectionLogos } from "@/components/BrandsSectionLogos";
 import { FeaturesBar } from "@/components/FeaturesBar";
 import { ProductCard } from "@/components/ProductCard";
 import { BlogCard } from "@/components/BlogCard";
-import { PromoSlider, type PromoSlide } from "@/components/PromoSlider";
+import type { PromoSlide } from "@/components/PromoSlider";
 import { CollectionsSection } from "@/components/CollectionsSection";
+
+const BannerSlider = dynamic(
+  () => import("@/components/BannerSlider").then((m) => m.BannerSlider),
+);
+
+const PromoSlider = dynamic(
+  () => import("@/components/PromoSlider").then((m) => m.PromoSlider),
+);
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
