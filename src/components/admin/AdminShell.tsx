@@ -96,6 +96,19 @@ const navSections: NavSection[] = [
           pathname === "/admin/templates" ||
           pathname.startsWith("/admin/templates/"),
       },
+      {
+        href: "/admin/events",
+        label: "Events / Khuyến mãi",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-red-500/10 text-red-400">
+            %
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/events" ||
+          pathname.startsWith("/admin/events/"),
+        badge: "NEW",
+      },
     ],
   },
   {

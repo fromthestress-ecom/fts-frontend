@@ -106,7 +106,7 @@ export default async function ProductPage({ params }: Props) {
     image: product.images,
     offers: {
       "@type": "Offer",
-      price: product.price,
+      price: product.finalPrice ?? product.price,
       priceCurrency: "VND",
       availability: isSoldOut
         ? "https://schema.org/OutOfStock"
@@ -152,18 +152,37 @@ export default async function ProductPage({ params }: Props) {
                 </span>
               ) : null}
             </h1>
-            <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
-              {new Intl.NumberFormat("vi-VN").format(product.price)}₫
-              {product.compareAtPrice != null &&
-                product.compareAtPrice > product.price && (
-                  <span className="ml-2 text-base text-muted line-through">
-                    {new Intl.NumberFormat("vi-VN").format(
-                      product.compareAtPrice,
-                    )}
-                    ₫
-                  </span>
-                )}
-            </p>
+            {product.eventDiscount ? (
+              <div className="mb-4">
+                <span className="text-lg font-bold text-accent sm:text-xl">
+                  {new Intl.NumberFormat("vi-VN").format(product.finalPrice ?? product.price)}₫
+                </span>
+                <span className="ml-2 text-base text-muted line-through">
+                  {new Intl.NumberFormat("vi-VN").format(product.eventDiscount.originalPrice)}₫
+                </span>
+                <span className="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-bold text-white">
+                  {product.eventDiscount.discountType === "percent"
+                    ? `-${product.eventDiscount.discountValue}%`
+                    : `-${new Intl.NumberFormat("vi-VN").format(product.eventDiscount.discountValue)}₫`}
+                </span>
+                <p className="mt-1 text-sm text-muted">
+                  Event: {product.eventDiscount.eventName}
+                </p>
+              </div>
+            ) : (
+              <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
+                {new Intl.NumberFormat("vi-VN").format(product.price)}₫
+                {product.compareAtPrice != null &&
+                  product.compareAtPrice > product.price && (
+                    <span className="ml-2 text-base text-muted line-through">
+                      {new Intl.NumberFormat("vi-VN").format(
+                        product.compareAtPrice,
+                      )}
+                      ₫
+                    </span>
+                  )}
+              </p>
+            )}
             <AddToCartForm product={product} />
           </div>
         </div>

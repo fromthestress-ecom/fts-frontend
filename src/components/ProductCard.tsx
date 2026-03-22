@@ -100,9 +100,25 @@ export function ProductCard({
           <Heading className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
             {p.name}
           </Heading>
-          <p className="mt-1 text-sm font-bold text-accent sm:text-base">
-            {new Intl.NumberFormat("vi-VN").format(p.price)}₫
-          </p>
+          {p.eventDiscount ? (
+            <div className="mt-1">
+              <span className="text-sm font-bold text-accent sm:text-base">
+                {new Intl.NumberFormat("vi-VN").format(p.finalPrice ?? p.price)}₫
+              </span>
+              <span className="ml-2 text-xs text-muted line-through sm:text-sm">
+                {new Intl.NumberFormat("vi-VN").format(p.eventDiscount.originalPrice)}₫
+              </span>
+              <span className="ml-1 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {p.eventDiscount.discountType === "percent"
+                  ? `-${p.eventDiscount.discountValue}%`
+                  : `-${new Intl.NumberFormat("vi-VN").format(p.eventDiscount.discountValue)}₫`}
+              </span>
+            </div>
+          ) : (
+            <p className="mt-1 text-sm font-bold text-accent sm:text-base">
+              {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+            </p>
+          )}
         </div>
       </Link>
 

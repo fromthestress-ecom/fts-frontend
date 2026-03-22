@@ -195,6 +195,17 @@ export default function AdminDashboardPage() {
             <p className="mt-1 text-sm text-muted">Xem danh sách và vai trò</p>
           </Link>
           <Link
+            href="/admin/events"
+            className="group block min-w-[160px] flex-1 rounded-xl border border-border bg-surface p-4 sm:p-5 transition hover:border-text"
+          >
+            <strong className="group-hover:text-accent transition-colors">
+              Events
+            </strong>
+            <p className="mt-1 text-sm text-muted">
+              Quản lý sự kiện khuyến mãi
+            </p>
+          </Link>
+          <Link
             href="/admin/affiliates"
             className="group block min-w-[160px] flex-1 rounded-xl border border-border bg-surface p-4 sm:p-5 transition hover:border-text"
           >

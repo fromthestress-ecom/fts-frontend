@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import type { Category, ProductTemplate } from "@/lib/api";
+import type { Category, ProductTemplate, EventItem } from "@/lib/api";
 import type Sortable from "sortablejs";
 import { getAdminKey } from "./AdminGuard";
 
@@ -14,6 +14,7 @@ export type ProductFormValues = {
   compareAtPrice: string;
   categoryId: string;
   templateId: string;
+  eventId: string;
   images: string[];
   sizes: string[];
   colors: string[];
@@ -27,6 +28,7 @@ type ProductFormProps = {
   initialData?: Partial<ProductFormValues>;
   categories: Category[];
   templates: ProductTemplate[];
+  events: EventItem[];
   onSubmit: (data: ProductFormValues) => Promise<void>;
   onCancel: () => void;
   isSaving: boolean;
@@ -51,6 +53,7 @@ export default function ProductForm({
   initialData,
   categories,
   templates,
+  events,
   onSubmit,
   onCancel,
   isSaving,
@@ -63,6 +66,7 @@ export default function ProductForm({
     compareAtPrice: initialData?.compareAtPrice ?? "",
     categoryId: initialData?.categoryId ?? "",
     templateId: initialData?.templateId ?? "",
+    eventId: initialData?.eventId ?? "",
     images: initialData?.images ?? [],
     sizes: initialData?.sizes ?? [],
     colors: initialData?.colors ?? [],
@@ -277,6 +281,23 @@ export default function ProductForm({
               {templates.map((t) => (
                 <option key={t._id} value={t._id}>
                   {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-text">
+              Event / Khuyến mãi
+            </label>
+            <select
+              value={form.eventId}
+              onChange={(e) => setForm({ ...form, eventId: e.target.value })}
+              className="w-full rounded-md border border-border bg-bg px-4 py-2.5 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+            >
+              <option value="">-- Không áp dụng Event --</option>
+              {events.map((ev) => (
+                <option key={ev._id} value={ev._id}>
+                  {ev.name} ({ev.discountType === "percent" ? `${ev.discountValue}%` : `${ev.discountValue}₫`})
                 </option>
               ))}
             </select>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
-import type { Category, ProductTemplate } from "@/lib/api";
+import type { Category, ProductTemplate, EventItem } from "@/lib/api";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -42,6 +42,7 @@ export default function EditProductPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [templates, setTemplates] = useState<ProductTemplate[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [initialData, setInitialData] =
     useState<Partial<ProductFormValues> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,14 +52,16 @@ export default function EditProductPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [resP, resC, resT] = await Promise.all([
+        const [resP, resC, resT, resE] = await Promise.all([
           adminFetch(`/admin/products/${id}`),
           adminFetch("/admin/categories"),
           adminFetch("/admin/templates"),
+          adminFetch("/admin/events"),
         ]);
 
         if (resC.ok) setCategories(await resC.json());
         if (resT.ok) setTemplates(await resT.json());
+        if (resE.ok) setEvents(await resE.json());
 
         if (resP.ok) {
           const product = await resP.json();
@@ -78,6 +81,10 @@ export default function EditProductPage() {
               product.templateId && typeof product.templateId === "object"
                 ? product.templateId._id
                 : product.templateId || "",
+            eventId:
+              product.eventId && typeof product.eventId === "object"
+                ? product.eventId._id
+                : product.eventId || "",
             images: product.images ?? [],
             sizes: product.sizes ?? [],
             colors: product.colors ?? [],
@@ -111,6 +118,7 @@ export default function EditProductPage() {
         compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : 0,
         categoryId: data.categoryId || undefined,
         templateId: data.templateId || undefined,
+        eventId: data.eventId || undefined,
         images: data.images,
         sizes: data.sizes,
         colors: data.colors,
@@ -196,6 +204,7 @@ export default function EditProductPage() {
         initialData={initialData}
         categories={categories}
         templates={templates}
+        events={events}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isSaving={saving}

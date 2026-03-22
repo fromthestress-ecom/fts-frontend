@@ -38,6 +38,29 @@ export interface ProductTemplate {
   updatedAt?: string;
 }
 
+export interface EventItem {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  bannerImage?: string;
+  discountType: 'percent' | 'fixed';
+  discountValue: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventDiscount {
+  eventId: string;
+  eventName: string;
+  discountType: 'percent' | 'fixed';
+  discountValue: number;
+  originalPrice: number;
+}
+
 export interface Product {
   _id: string;
   slug: string;
@@ -45,6 +68,9 @@ export interface Product {
   description?: string;
   price: number;
   compareAtPrice?: number;
+  finalPrice?: number;
+  eventDiscount?: EventDiscount | null;
+  eventId?: EventItem | string;
   images: string[];
   sizeChart?: string;
   categoryId: Category | string;

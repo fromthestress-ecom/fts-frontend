@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
-import type { Category, ProductTemplate } from "@/lib/api";
+import type { Category, ProductTemplate, EventItem } from "@/lib/api";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -40,18 +40,21 @@ export default function CreateProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [templates, setTemplates] = useState<ProductTemplate[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [resC, resT] = await Promise.all([
+        const [resC, resT, resE] = await Promise.all([
           adminFetch("/admin/categories"),
           adminFetch("/admin/templates"),
+          adminFetch("/admin/events"),
         ]);
         if (resC.ok) setCategories(await resC.json());
         if (resT.ok) setTemplates(await resT.json());
+        if (resE.ok) setEvents(await resE.json());
       } catch (err) {
         console.error("Lỗi tải dữ liệu", err);
       } finally {
@@ -71,6 +74,7 @@ export default function CreateProductPage() {
         compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : 0,
         categoryId: data.categoryId || undefined,
         templateId: data.templateId || undefined,
+        eventId: data.eventId || undefined,
         images: data.images,
         sizes: data.sizes,
         colors: data.colors,
@@ -137,6 +141,7 @@ export default function CreateProductPage() {
       <ProductForm
         categories={categories}
         templates={templates}
+        events={events}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isSaving={saving}
