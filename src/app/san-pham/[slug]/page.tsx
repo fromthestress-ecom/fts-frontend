@@ -4,12 +4,18 @@ import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
 import dynamic from "next/dynamic";
 import { AddToCartForm } from "@/components/AddToCartForm";
 
-const ProductImageSlider = dynamic(
-  () => import("@/components/ProductImageSlider").then((m) => m.ProductImageSlider),
+const CountdownPrice = dynamic(
+  () => import("@/components/CountdownPrice").then((m) => m.CountdownPrice),
 );
 
-const OtherProductsSection = dynamic(
-  () => import("@/components/OtherProductsSection").then((m) => m.OtherProductsSection),
+const ProductImageSlider = dynamic(() =>
+  import("@/components/ProductImageSlider").then((m) => m.ProductImageSlider),
+);
+
+const OtherProductsSection = dynamic(() =>
+  import("@/components/OtherProductsSection").then(
+    (m) => m.OtherProductsSection,
+  ),
 );
 import type { Metadata } from "next";
 
@@ -152,13 +158,35 @@ export default async function ProductPage({ params }: Props) {
                 </span>
               ) : null}
             </h1>
-            {product.eventDiscount ? (
+            {product.eventDiscount?.status === "upcoming" &&
+            product.eventDiscount.discountedPrice != null &&
+            product.eventDiscount.startDate ? (
+              <div className="mb-4">
+                <p className="text-lg font-bold text-accent sm:text-xl">
+                  {new Intl.NumberFormat("vi-VN").format(product.price)}₫
+                </p>
+                <CountdownPrice
+                  discountedPrice={product.eventDiscount.discountedPrice}
+                  startDate={product.eventDiscount.startDate}
+                  size="lg"
+                />
+                <p className="mt-1 text-sm text-muted">
+                  Event: {product.eventDiscount.eventName}
+                </p>
+              </div>
+            ) : product.eventDiscount?.status === "active" ? (
               <div className="mb-4">
                 <span className="text-lg font-bold text-accent sm:text-xl">
-                  {new Intl.NumberFormat("vi-VN").format(product.finalPrice ?? product.price)}₫
+                  {new Intl.NumberFormat("vi-VN").format(
+                    product.finalPrice ?? product.price,
+                  )}
+                  ₫
                 </span>
                 <span className="ml-2 text-base text-muted line-through">
-                  {new Intl.NumberFormat("vi-VN").format(product.eventDiscount.originalPrice)}₫
+                  {new Intl.NumberFormat("vi-VN").format(
+                    product.eventDiscount.originalPrice,
+                  )}
+                  ₫
                 </span>
                 <span className="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-bold text-white">
                   {product.eventDiscount.discountType === "percent"
@@ -193,7 +221,7 @@ export default async function ProductPage({ params }: Props) {
             {description && (
               <div className="mb-10 text-muted leading-relaxed">
                 {description.split("\n").map((line, i) => (
-                  <p key={i} className="mb-4 min-h-[1em]">
+                  <p key={i} className="mb-0 min-h-[1em]">
                     {line}
                   </p>
                 ))}

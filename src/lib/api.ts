@@ -59,6 +59,9 @@ export interface EventDiscount {
   discountType: 'percent' | 'fixed';
   discountValue: number;
   originalPrice: number;
+  status: 'active' | 'upcoming';
+  startDate?: string;
+  discountedPrice?: number;
 }
 
 export interface Product {

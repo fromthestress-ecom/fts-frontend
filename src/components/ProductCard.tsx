@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
+import { CountdownPrice } from "@/components/CountdownPrice";
 import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { setCartCount } from "@/hooks/useCartCount";
 import type { Product } from "@/lib/api";
@@ -100,7 +101,20 @@ export function ProductCard({
           <Heading className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
             {p.name}
           </Heading>
-          {p.eventDiscount ? (
+          {p.eventDiscount?.status === "upcoming" &&
+          p.eventDiscount.discountedPrice != null &&
+          p.eventDiscount.startDate ? (
+            <div className="mt-1">
+              <p className="text-sm font-bold text-accent sm:text-base">
+                {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+              </p>
+              <CountdownPrice
+                discountedPrice={p.eventDiscount.discountedPrice}
+                startDate={p.eventDiscount.startDate}
+                size="sm"
+              />
+            </div>
+          ) : p.eventDiscount?.status === "active" ? (
             <div className="mt-1">
               <span className="text-sm font-bold text-accent sm:text-base">
                 {new Intl.NumberFormat("vi-VN").format(p.finalPrice ?? p.price)}₫
