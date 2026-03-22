@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Latest Stories | STREETWEAR",
   description:
     "Read our latest streetwear drops, styling tips, and brand stories.",
+  openGraph: {
+    images: [{ url: "/images/og_blogs.jpg", alt: "Latest Stories" }],
+  },
 };
 
 async function getCategories() {

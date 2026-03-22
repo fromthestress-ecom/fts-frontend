@@ -1,26 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
+const AdminBarChart = dynamic(
+  () => import("@/components/admin/AdminBarChart").then((m) => m.AdminBarChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-accent" />
+      </div>
+    ),
+  },
 );
 
 interface BestSeller {
@@ -154,7 +148,7 @@ export default function AdminDashboardPage() {
               Top 10 Sản phẩm bán chạy nhất
             </h2>
             <div className="flex-1 min-h-0">
-              <Bar options={chartOptions} data={bestSellersData} />
+              <AdminBarChart options={chartOptions} data={bestSellersData} />
             </div>
           </div>
 
@@ -163,7 +157,7 @@ export default function AdminDashboardPage() {
               Top 10 Khách hàng chi tiêu nhiều nhất
             </h2>
             <div className="flex-1 min-h-0">
-              <Bar options={chartOptions} data={topBuyersData} />
+              <AdminBarChart options={chartOptions} data={topBuyersData} />
             </div>
           </div>
         </div>
@@ -199,6 +193,17 @@ export default function AdminDashboardPage() {
               Người dùng
             </strong>
             <p className="mt-1 text-sm text-muted">Xem danh sách và vai trò</p>
+          </Link>
+          <Link
+            href="/admin/events"
+            className="group block min-w-[160px] flex-1 rounded-xl border border-border bg-surface p-4 sm:p-5 transition hover:border-text"
+          >
+            <strong className="group-hover:text-accent transition-colors">
+              Events
+            </strong>
+            <p className="mt-1 text-sm text-muted">
+              Quản lý sự kiện khuyến mãi
+            </p>
           </Link>
           <Link
             href="/admin/affiliates"

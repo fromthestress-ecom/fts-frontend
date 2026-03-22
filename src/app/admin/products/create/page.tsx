@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
-import type { Category, ProductTemplate } from "@/lib/api";
+import type { Category, ProductTemplate, EventItem } from "@/lib/api";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -40,18 +40,21 @@ export default function CreateProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [templates, setTemplates] = useState<ProductTemplate[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [resC, resT] = await Promise.all([
+        const [resC, resT, resE] = await Promise.all([
           adminFetch("/admin/categories"),
           adminFetch("/admin/templates"),
+          adminFetch("/admin/events"),
         ]);
         if (resC.ok) setCategories(await resC.json());
         if (resT.ok) setTemplates(await resT.json());
+        if (resE.ok) setEvents(await resE.json());
       } catch (err) {
         console.error("Lỗi tải dữ liệu", err);
       } finally {
@@ -71,12 +74,14 @@ export default function CreateProductPage() {
         compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : 0,
         categoryId: data.categoryId || undefined,
         templateId: data.templateId || undefined,
+        eventId: data.eventId || undefined,
         images: data.images,
         sizes: data.sizes,
         colors: data.colors,
         stockQuantity: Number(data.stockQuantity) || 0,
         inStock: data.inStock,
         preOrder: data.preOrder,
+        isSoldOut: data.isSoldOut,
       };
 
       const res = await adminFetch("/admin/products", {
@@ -111,20 +116,32 @@ export default function CreateProductPage() {
           onClick={handleCancel}
           className="p-2 hover:bg-surface rounded-full transition-colors text-muted hover:text-text"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text">Thêm sản phẩm mới</h1>
-          <p className="text-sm text-muted">Điền thông tin để tạo sản phẩm mới</p>
+          <p className="text-sm text-muted">
+            Điền thông tin để tạo sản phẩm mới
+          </p>
         </div>
       </div>
 
       <ProductForm
         categories={categories}
         templates={templates}
+        events={events}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isSaving={saving}

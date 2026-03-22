@@ -122,13 +122,14 @@ export function CheckoutForm() {
           _id: string;
           name: string;
           price: number;
+          finalPrice?: number;
           images?: string[];
           preOrder?: boolean;
         };
         return {
           productId: p._id,
           name: p.name,
-          price: p.price,
+          price: p.finalPrice ?? p.price,
           quantity: i.quantity,
           size: i.size,
           color: i.color,

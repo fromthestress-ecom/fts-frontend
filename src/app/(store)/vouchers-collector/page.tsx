@@ -4,6 +4,9 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Vouchers Collector | STREETWEAR",
   description: "Chơi mini game để nhận thêm voucher ưu đãi mua hàng.",
+  openGraph: {
+    images: [{ url: "/images/og_voucher.jpg", alt: "Vouchers Collector" }],
+  },
 };
 
 export default function VouchersCollectorPage() {

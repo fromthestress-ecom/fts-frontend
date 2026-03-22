@@ -1,9 +1,22 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
+import dynamic from "next/dynamic";
 import { AddToCartForm } from "@/components/AddToCartForm";
-import { ProductImageSlider } from "@/components/ProductImageSlider";
-import { OtherProductsSection } from "@/components/OtherProductsSection";
+
+const CountdownPrice = dynamic(
+  () => import("@/components/CountdownPrice").then((m) => m.CountdownPrice),
+);
+
+const ProductImageSlider = dynamic(() =>
+  import("@/components/ProductImageSlider").then((m) => m.ProductImageSlider),
+);
+
+const OtherProductsSection = dynamic(() =>
+  import("@/components/OtherProductsSection").then(
+    (m) => m.OtherProductsSection,
+  ),
+);
 import type { Metadata } from "next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -89,6 +102,8 @@ export default async function ProductPage({ params }: Props) {
       ? await getOtherProductsByNavGroup(navGroup, slug)
       : [];
 
+  const isSoldOut = product.isSoldOut || !product.inStock;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -97,11 +112,11 @@ export default async function ProductPage({ params }: Props) {
     image: product.images,
     offers: {
       "@type": "Offer",
-      price: product.price,
+      price: product.finalPrice ?? product.price,
       priceCurrency: "VND",
-      availability: product.inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      availability: isSoldOut
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
     },
   };
 
@@ -133,24 +148,69 @@ export default async function ProductPage({ params }: Props) {
           <div>
             <h1 className="font-display mb-2 text-2xl sm:text-3xl flex items-center gap-3">
               {product.name}
-              {product.preOrder && (
+              {isSoldOut ? (
+                <span className="rounded bg-red-600 px-2 py-1 text-sm font-bold text-white shadow-sm">
+                  Sold Out
+                </span>
+              ) : product.preOrder ? (
                 <span className="rounded bg-black/80 px-2 py-1 text-sm font-bold text-white shadow-sm">
                   Pre-order
                 </span>
-              )}
+              ) : null}
             </h1>
-            <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
-              {new Intl.NumberFormat("vi-VN").format(product.price)}₫
-              {product.compareAtPrice != null &&
-                product.compareAtPrice > product.price && (
-                  <span className="ml-2 text-base text-muted line-through">
-                    {new Intl.NumberFormat("vi-VN").format(
-                      product.compareAtPrice,
-                    )}
-                    ₫
-                  </span>
-                )}
-            </p>
+            {product.eventDiscount?.status === "upcoming" &&
+            product.eventDiscount.discountedPrice != null &&
+            product.eventDiscount.startDate ? (
+              <div className="mb-4">
+                <p className="text-lg font-bold text-accent sm:text-xl">
+                  {new Intl.NumberFormat("vi-VN").format(product.price)}₫
+                </p>
+                <CountdownPrice
+                  discountedPrice={product.eventDiscount.discountedPrice}
+                  startDate={product.eventDiscount.startDate}
+                  size="lg"
+                />
+                <p className="mt-1 text-sm text-muted">
+                  Event: {product.eventDiscount.eventName}
+                </p>
+              </div>
+            ) : product.eventDiscount?.status === "active" ? (
+              <div className="mb-4">
+                <span className="text-lg font-bold text-accent sm:text-xl">
+                  {new Intl.NumberFormat("vi-VN").format(
+                    product.finalPrice ?? product.price,
+                  )}
+                  ₫
+                </span>
+                <span className="ml-2 text-base text-muted line-through">
+                  {new Intl.NumberFormat("vi-VN").format(
+                    product.eventDiscount.originalPrice,
+                  )}
+                  ₫
+                </span>
+                <span className="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-bold text-white">
+                  {product.eventDiscount.discountType === "percent"
+                    ? `-${product.eventDiscount.discountValue}%`
+                    : `-${new Intl.NumberFormat("vi-VN").format(product.eventDiscount.discountValue)}₫`}
+                </span>
+                <p className="mt-1 text-sm text-muted">
+                  Event: {product.eventDiscount.eventName}
+                </p>
+              </div>
+            ) : (
+              <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
+                {new Intl.NumberFormat("vi-VN").format(product.price)}₫
+                {product.compareAtPrice != null &&
+                  product.compareAtPrice > product.price && (
+                    <span className="ml-2 text-base text-muted line-through">
+                      {new Intl.NumberFormat("vi-VN").format(
+                        product.compareAtPrice,
+                      )}
+                      ₫
+                    </span>
+                  )}
+              </p>
+            )}
             <AddToCartForm product={product} />
           </div>
         </div>
@@ -161,7 +221,7 @@ export default async function ProductPage({ params }: Props) {
             {description && (
               <div className="mb-10 text-muted leading-relaxed">
                 {description.split("\n").map((line, i) => (
-                  <p key={i} className="mb-4 min-h-[1em]">
+                  <p key={i} className="mb-0 min-h-[1em]">
                     {line}
                   </p>
                 ))}

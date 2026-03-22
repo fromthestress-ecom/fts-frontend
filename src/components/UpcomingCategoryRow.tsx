@@ -1,11 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import type { Product } from "@/lib/api";
+
+function truncateWords(
+  text: string,
+  maxWords: number,
+): { truncated: string; isTruncated: boolean } {
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) return { truncated: text, isTruncated: false };
+  return { truncated: words.slice(0, maxWords).join(" "), isTruncated: true };
+}
 
 type CategoryGroup = {
   id: string;
@@ -22,8 +31,21 @@ type Props = {
 
 export function UpcomingCategoryRow({ group, imageLeft }: Props) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const productsWithImage = group.products.filter((p) => p.images?.[0]);
+  const currentProduct = productsWithImage[currentSlide] ?? group.products[0];
+
+  const productDesc = useMemo(() => {
+    const raw =
+      (currentProduct?.templateId &&
+      typeof currentProduct.templateId === "object"
+        ? currentProduct.templateId.description
+        : undefined) ??
+      currentProduct?.description ??
+      "";
+    return truncateWords(raw, 50);
+  }, [currentProduct]);
 
   const mainSliderSettings = {
     dots: false,
@@ -34,7 +56,10 @@ export function UpcomingCategoryRow({ group, imageLeft }: Props) {
     autoplaySpeed: 3000,
     slidesToShow: 1,
     slidesToScroll: 1,
-    beforeChange: (_: number, next: number) => setCurrentSlide(next),
+    beforeChange: (_: number, next: number) => {
+      setCurrentSlide(next);
+      setDescExpanded(false);
+    },
   };
 
   return (
@@ -90,13 +115,33 @@ export function UpcomingCategoryRow({ group, imageLeft }: Props) {
         <h3 className="collections-section__title text-[1.8rem] sm:text-[2.2rem] font-bold mt-2 mb-4 leading-tight uppercase font-display">
           Sản phẩm sắp ra mắt
           <br />
-          {group.name}
+          {currentProduct ? `- ${currentProduct.name}` : `- ${group.name}`}
         </h3>
-        <p className="collections-section__desc text-muted mb-6">
-          Đặt trước ngay những thiết kế mới nhất của chúng tôi để không bỏ lỡ xu
-          hướng. Bạn sẽ là một trong những người đầu tiên sở hữu những sản phẩm
-          mang đậm phong cách đường phố này! Đặt cọc trước 50% để giữ chỗ.
-        </p>
+        <div className="collections-section__desc text-muted mb-6">
+          {productDesc.truncated ? (
+            <>
+              <p className="whitespace-pre-line inline">
+                {descExpanded
+                  ? (currentProduct?.description ?? "")
+                  : productDesc.truncated}
+              </p>
+              {productDesc.isTruncated && (
+                <button
+                  type="button"
+                  onClick={() => setDescExpanded((v) => !v)}
+                  className="inline ml-1 text-accent font-semibold hover:underline text-sm"
+                >
+                  {descExpanded ? "Thu gọn" : "... xem thêm"}
+                </button>
+              )}
+            </>
+          ) : (
+            <p>
+              Đặt trước ngay những thiết kế mới nhất của chúng tôi để không bỏ
+              lỡ xu hướng. Đặt cọc trước 50% để giữ chỗ.
+            </p>
+          )}
+        </div>
 
         <div className="collections-section__pricing-row flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-auto">
           <div className="collections-section__pricing">

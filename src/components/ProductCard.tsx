@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
+import { CountdownPrice } from "@/components/CountdownPrice";
 import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { setCartCount } from "@/hooks/useCartCount";
 import type { Product } from "@/lib/api";
@@ -32,10 +33,13 @@ export function ProductCard({
   const { openDrawer } = useCartDrawer();
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
 
+  const isSoldOut = p.isSoldOut || !p.inStock;
+  const isDisabled = isSoldOut || status === "loading";
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!p.inStock || status === "loading") return;
+    if (isSoldOut || status === "loading") return;
 
     setStatus("loading");
     try {
@@ -66,8 +70,6 @@ export function ProductCard({
       setStatus("idle");
     }
   };
-
-  const isDisabled = !p.inStock || status === "loading";
   const Heading = headingLevel;
 
   return (
@@ -82,19 +84,60 @@ export function ProductCard({
               className="product-card__image-inner"
             />
           ) : null}
-          {p.preOrder && (
+          {isSoldOut && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40">
+              <span className="rounded bg-black/80 px-3 py-1.5 text-xs font-bold tracking-wider text-white uppercase">
+                Sold Out
+              </span>
+            </div>
+          )}
+          {p.preOrder && !isSoldOut && (
             <span className="absolute left-2 top-2 rounded bg-black/80 px-2 py-1 text-xs font-bold text-white shadow-sm z-10">
               Pre-order
             </span>
           )}
         </div>
         <div className="p-3 pb-0">
-          <Heading className="min-h-[42px] text-sm font-semibold m-0 sm:text-base">
-            {p.name}
+          <Heading
+            className="min-h-[42px] text-sm font-semibold m-0 sm:text-base"
+            title={p.name}
+          >
+            {p.name.length > 30 ? `${p.name.slice(0, 40)}...` : p.name}
           </Heading>
-          <p className="mt-1 text-sm font-bold text-accent sm:text-base">
-            {new Intl.NumberFormat("vi-VN").format(p.price)}₫
-          </p>
+          <div className="mt-1 min-h-[48px]">
+            {p.eventDiscount?.status === "upcoming" &&
+            p.eventDiscount.discountedPrice != null &&
+            p.eventDiscount.startDate ? (
+              <>
+                <p className="text-sm font-bold text-accent sm:text-base m-0">
+                  {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+                </p>
+                <CountdownPrice
+                  discountedPrice={p.eventDiscount.discountedPrice}
+                  startDate={p.eventDiscount.startDate}
+                  size="sm"
+                />
+              </>
+            ) : p.eventDiscount?.status === "active" ? (
+              <>
+                <span className="text-sm font-bold text-accent sm:text-base">
+                  {new Intl.NumberFormat("vi-VN").format(p.finalPrice ?? p.price)}₫
+                </span>
+                <span className="ml-2 text-xs text-muted line-through sm:text-sm">
+                  {new Intl.NumberFormat("vi-VN").format(p.eventDiscount.originalPrice)}₫
+                </span>
+                <span className="ml-1 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  {p.eventDiscount.discountType === "percent"
+                    ? `-${p.eventDiscount.discountValue}%`
+                    : `-${new Intl.NumberFormat("vi-VN").format(p.eventDiscount.discountValue)}₫`}
+                </span>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-accent sm:text-base m-0">
+                {new Intl.NumberFormat("vi-VN").format(p.price)}₫
+              </p>
+            )}
+          </div>
         </div>
       </Link>
 
@@ -127,7 +170,7 @@ export function ProductCard({
             fontSize: "12px",
             letterSpacing: "0.06em",
             cursor: isDisabled ? "not-allowed" : "pointer",
-            opacity: !p.inStock ? 0.5 : 1,
+            opacity: isSoldOut ? 0.5 : 1,
             transition: "background 0.2s ease, color 0.2s ease",
           }}
         >
@@ -135,11 +178,11 @@ export function ProductCard({
             ? "Đang thêm..."
             : status === "done"
               ? "✓ Đã thêm"
-              : p.inStock
-                ? p.preOrder
+              : isSoldOut
+                ? "HẾT HÀNG"
+                : p.preOrder
                   ? "ĐẶT TRƯỚC (PRE-ORDER)"
-                  : "THÊM VÀO GIỎ"
-                : "HẾT HÀNG"}
+                  : "THÊM VÀO GIỎ"}
         </button>
       </div>
     </div>

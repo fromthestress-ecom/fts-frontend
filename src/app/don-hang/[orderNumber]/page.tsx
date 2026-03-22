@@ -12,6 +12,7 @@ interface Order {
     quantity: number;
     size?: string;
     color?: string;
+    image?: string;
     preOrder?: boolean;
   }[];
   shippingAddress: {
@@ -38,7 +39,15 @@ type Props = { params: Promise<{ orderNumber: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { orderNumber } = await params;
-  return { title: `Đơn hàng ${orderNumber}` };
+  const order = await getOrder(orderNumber);
+  const firstImage = order?.items?.[0]?.image;
+  return {
+    title: `Đơn hàng ${orderNumber}`,
+    robots: { index: false, follow: false },
+    ...(firstImage
+      ? { openGraph: { images: [{ url: firstImage, alt: `Đơn hàng ${orderNumber}` }] } }
+      : {}),
+  };
 }
 
 export default async function OrderDetailPage({ params }: Props) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProductForm, { ProductFormValues } from "@/components/admin/ProductForm";
-import type { Category, ProductTemplate } from "@/lib/api";
+import type { Category, ProductTemplate, EventItem } from "@/lib/api";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -39,10 +39,12 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [templates, setTemplates] = useState<ProductTemplate[]>([]);
-  const [initialData, setInitialData] = useState<Partial<ProductFormValues> | null>(null);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [initialData, setInitialData] =
+    useState<Partial<ProductFormValues> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -50,30 +52,46 @@ export default function EditProductPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [resP, resC, resT] = await Promise.all([
+        const [resP, resC, resT, resE] = await Promise.all([
           adminFetch(`/admin/products/${id}`),
           adminFetch("/admin/categories"),
           adminFetch("/admin/templates"),
+          adminFetch("/admin/events"),
         ]);
-        
+
         if (resC.ok) setCategories(await resC.json());
         if (resT.ok) setTemplates(await resT.json());
-        
+        if (resE.ok) setEvents(await resE.json());
+
         if (resP.ok) {
           const product = await resP.json();
           setInitialData({
             slug: product.slug,
             name: product.name,
             price: String(product.price),
-            compareAtPrice: product.compareAtPrice != null ? String(product.compareAtPrice) : "",
-            categoryId: product.categoryId && typeof product.categoryId === "object" ? product.categoryId._id : (product.categoryId || ""),
-            templateId: product.templateId && typeof product.templateId === "object" ? product.templateId._id : (product.templateId || ""),
+            compareAtPrice:
+              product.compareAtPrice != null
+                ? String(product.compareAtPrice)
+                : "",
+            categoryId:
+              product.categoryId && typeof product.categoryId === "object"
+                ? product.categoryId._id
+                : product.categoryId || "",
+            templateId:
+              product.templateId && typeof product.templateId === "object"
+                ? product.templateId._id
+                : product.templateId || "",
+            eventId:
+              product.eventId && typeof product.eventId === "object"
+                ? product.eventId._id
+                : product.eventId || "",
             images: product.images ?? [],
             sizes: product.sizes ?? [],
             colors: product.colors ?? [],
             stockQuantity: String(product.stockQuantity ?? "0"),
             inStock: product.inStock ?? true,
             preOrder: product.preOrder ?? false,
+            isSoldOut: product.isSoldOut ?? false,
           });
         } else {
           setError("Không tải được thông tin sản phẩm");
@@ -100,12 +118,14 @@ export default function EditProductPage() {
         compareAtPrice: data.compareAtPrice ? Number(data.compareAtPrice) : 0,
         categoryId: data.categoryId || undefined,
         templateId: data.templateId || undefined,
+        eventId: data.eventId || undefined,
         images: data.images,
         sizes: data.sizes,
         colors: data.colors,
         stockQuantity: Number(data.stockQuantity) || 0,
         inStock: data.inStock,
         preOrder: data.preOrder,
+        isSoldOut: data.isSoldOut,
       };
 
       const res = await adminFetch(`/admin/products/${id}`, {
@@ -130,7 +150,11 @@ export default function EditProductPage() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center text-muted">Đang tải thông tin sản phẩm...</div>;
+    return (
+      <div className="p-4 text-center text-muted">
+        Đang tải thông tin sản phẩm...
+      </div>
+    );
   }
 
   if (error || !initialData) {
@@ -154,14 +178,25 @@ export default function EditProductPage() {
           onClick={handleCancel}
           className="p-2 hover:bg-surface rounded-full transition-colors text-muted hover:text-text"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </button>
         <div>
           <h1 className="text-2xl font-bold text-text">Sửa sản phẩm</h1>
-          <p className="text-sm text-muted">Cập nhật thông tin cho sản phẩm hiện tại</p>
+          <p className="text-sm text-muted">
+            Cập nhật thông tin cho sản phẩm hiện tại
+          </p>
         </div>
       </div>
 
@@ -169,6 +204,7 @@ export default function EditProductPage() {
         initialData={initialData}
         categories={categories}
         templates={templates}
+        events={events}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isSaving={saving}

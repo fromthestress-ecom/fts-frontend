@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Chính sách đổi trả và hoàn tiền",
   description:
     "Điều kiện đổi trả, hoàn tiền và bảo hành sản phẩm tại FROM THE STRESS.",
+  openGraph: {
+    images: [{ url: "/images/og_refund.jpg", alt: "Chính sách đổi trả" }],
+  },
 };
 
 export default function ChinhSachDoiTraPage() {

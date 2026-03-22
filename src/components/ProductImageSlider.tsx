@@ -54,6 +54,7 @@ export function ProductImageSlider({
               <ImageWithSkeleton
                 src={src}
                 alt={`${productName} - Ảnh ${index + 1}`}
+                priority={index === 0}
               />
             </div>
           ))}
