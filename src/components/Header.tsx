@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
@@ -78,11 +78,14 @@ type NavItemsProps = {
   navGroups: NavGroupItem[];
   pathname: string;
   searchParams: URLSearchParams | null;
-  /** Mobile: accordion expand/collapse; Desktop: CSS hover dropdown */
+  /** Mobile: accordion expand/collapse; Desktop: slide-down panel */
   variant: "mobile" | "desktop";
   openNavKey?: string | null;
   onToggleNav?: (key: string) => void;
   onClose?: () => void;
+  activePanel?: string | null;
+  onPanelEnter?: (key: string) => void;
+  onPanelLeave?: () => void;
 };
 
 function NavItems({
@@ -93,6 +96,9 @@ function NavItems({
   openNavKey,
   onToggleNav,
   onClose,
+  activePanel,
+  onPanelEnter,
+  onPanelLeave,
 }: NavItemsProps) {
   const isMobile = variant === "mobile";
 
@@ -192,33 +198,23 @@ function NavItems({
             );
           }
 
-          // Desktop: hover dropdown
+          // Desktop: slide-down panel trigger
           return (
-            <div key={key} className="relative group">
+            <div
+              key={key}
+              className="relative -mx-1"
+              onMouseEnter={() => onPanelEnter?.(key)}
+              onMouseLeave={() => onPanelLeave?.()}
+            >
               <Link
                 href={`/san-pham?danh_muc=${encodeURIComponent(item.label.toLowerCase())}`}
-                className={`${linkBase} ${itemActiveClass}`}
+                className={`${linkBase} ${itemActiveClass} relative block px-3 py-3 transition-colors duration-200 hover:text-accent ${activePanel === key ? "text-accent" : ""}`}
               >
                 {item.label}
+                <span
+                  className={`absolute bottom-1 left-3 right-3 h-[2px] bg-accent transition-all duration-300 ${activePanel === key ? "opacity-100" : "opacity-0"}`}
+                />
               </Link>
-              <div className="absolute left-0 top-full z-10 hidden min-w-[180px] pt-1 group-hover:block">
-                <div className="rounded-lg border border-border bg-surface py-1 shadow-lg">
-                  {item.children.map((child) => {
-                    const childActive =
-                      pathname === "/san-pham" &&
-                      (searchParams?.get("danh_muc") ?? "") === child.slug;
-                    return (
-                      <Link
-                        key={child.slug}
-                        href={getChildHref(item.label, child.slug)}
-                        className={`block px-4 py-2 text-sm transition-colors duration-150 hover:bg-border/60 hover:text-text ${childActive ? activeClass : "text-muted"}`}
-                      >
-                        {child.name}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
           );
         })
@@ -283,6 +279,95 @@ function NavItems({
       >
         Vouchers
       </Link>
+    </>
+  );
+}
+
+// ─── Slide-down Panel (Desktop) ──────────────────────────────────────────────
+
+type SlideDownPanelProps = {
+  navGroups: NavGroupItem[];
+  activePanel: string | null;
+  pathname: string;
+  searchParams: URLSearchParams | null;
+  onMouseEnter: (key: string) => void;
+  onMouseLeave: () => void;
+};
+
+function SlideDownPanel({
+  navGroups,
+  activePanel,
+  pathname,
+  searchParams,
+  onMouseEnter,
+  onMouseLeave,
+}: SlideDownPanelProps) {
+  const activeGroup = navGroups.find((g) => g.label === activePanel);
+  const isOpen = !!activeGroup;
+  const headerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    headerRef.current = document.querySelector("header.header-bar");
+  }, []);
+
+  const backdrop =
+    typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+            style={{ top: headerRef.current ? `${headerRef.current.getBoundingClientRect().bottom}px` : "0px" }}
+            onMouseEnter={onMouseLeave}
+          />,
+          document.body,
+        )
+      : null;
+
+  return (
+    <>
+      {backdrop}
+      {/* Panel - positioned right below the nav wrapper */}
+      <div
+        className={`absolute left-0 right-0 top-full z-[99] overflow-hidden border-b border-border bg-bg/95 backdrop-blur-md shadow-lg transition-all duration-300 ease-out ${isOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"}`}
+        onMouseEnter={() => activePanel && onMouseEnter(activePanel)}
+        onMouseLeave={onMouseLeave}
+      >
+        <div className="mx-auto max-w-[1280px] px-6 py-8">
+          {activeGroup && (
+            <div className="flex gap-12">
+              <div>
+                <h3 className="font-display mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                  {activeGroup.label}
+                </h3>
+                <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                  {activeGroup.children.map((child) => {
+                    const childActive =
+                      pathname === "/san-pham" &&
+                      (searchParams?.get("danh_muc") ?? "") === child.slug;
+                    return (
+                      <li key={child.slug}>
+                        <Link
+                          href={getChildHref(activeGroup.label, child.slug)}
+                          className={`text-sm transition-colors duration-150 hover:text-accent ${childActive ? "font-semibold text-accent" : "text-text"}`}
+                        >
+                          {child.name}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              <div className="flex items-center">
+                <Link
+                  href={`/san-pham?danh_muc=${encodeURIComponent(activeGroup.label.toLowerCase())}`}
+                  className="text-xs font-semibold uppercase tracking-[0.15em] text-muted transition-colors hover:text-accent"
+                >
+                  Xem tất cả {activeGroup.label} →
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </>
   );
 }
@@ -361,6 +446,17 @@ export function Header({ navGroups = [] }: HeaderProps) {
   const [isAtTop, setIsAtTop] = useState(true);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activePanel, setActivePanel] = useState<string | null>(null);
+  const panelTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handlePanelEnter = useCallback((key: string) => {
+    if (panelTimeoutRef.current) clearTimeout(panelTimeoutRef.current);
+    setActivePanel(key);
+  }, []);
+
+  const handlePanelLeave = useCallback(() => {
+    panelTimeoutRef.current = setTimeout(() => setActivePanel(null), 300);
+  }, []);
 
   const router = useRouter();
 
@@ -384,6 +480,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
   // Close on route change
   useEffect(() => {
     closeMenu();
+    setActivePanel(null);
   }, [pathname, closeMenu]);
 
   // Track scroll position to toggle menu top offset
@@ -620,14 +717,27 @@ export function Header({ navGroups = [] }: HeaderProps) {
           </div>
         )}
         {!isAdminRoute && (
-          <nav className="hidden items-center gap-6 md:flex md:gap-8 justify-center pt-4">
-            <NavItems
+          <div className="relative hidden md:block">
+            <nav className="flex items-center gap-6 md:gap-8 justify-center pt-4 pb-2">
+              <NavItems
+                navGroups={navGroups}
+                pathname={pathname}
+                searchParams={searchParams}
+                variant="desktop"
+                activePanel={activePanel}
+                onPanelEnter={handlePanelEnter}
+                onPanelLeave={handlePanelLeave}
+              />
+            </nav>
+            <SlideDownPanel
               navGroups={navGroups}
+              activePanel={activePanel}
               pathname={pathname}
               searchParams={searchParams}
-              variant="desktop"
+              onMouseEnter={handlePanelEnter}
+              onMouseLeave={handlePanelLeave}
             />
-          </nav>
+          </div>
         )}
       </header>
 
