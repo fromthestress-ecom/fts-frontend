@@ -118,6 +118,9 @@ function NavItems({
   const blogsActiveClass = pathname?.startsWith("/blogs")
     ? activeClass
     : inactiveClass;
+  const vouchersActiveClass = pathname?.startsWith("/vouchers-collector")
+    ? activeClass
+    : inactiveClass;
 
   return (
     <>
@@ -273,8 +276,8 @@ function NavItems({
         onClick={onClose}
         className={
           isMobile
-            ? `${linkBase} ${blogsActiveClass}`
-            : `${linkBase} ${blogsActiveClass}`
+            ? `${linkBase} ${vouchersActiveClass}`
+            : `${linkBase} ${vouchersActiveClass}`
         }
       >
         Vouchers

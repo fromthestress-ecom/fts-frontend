@@ -5,8 +5,8 @@ import dynamic from "next/dynamic";
 import { AddToCartForm } from "@/components/AddToCartForm";
 import { TrackViewItem } from "@/components/TrackViewItem";
 
-const CountdownPrice = dynamic(
-  () => import("@/components/CountdownPrice").then((m) => m.CountdownPrice),
+const CountdownPrice = dynamic(() =>
+  import("@/components/CountdownPrice").then((m) => m.CountdownPrice),
 );
 
 const ProductImageSlider = dynamic(() =>
@@ -158,10 +158,6 @@ export default async function ProductPage({ params }: Props) {
               {isSoldOut ? (
                 <span className="rounded bg-red-600 px-2 py-1 text-sm font-bold text-white shadow-sm">
                   Sold Out
-                </span>
-              ) : product.preOrder ? (
-                <span className="rounded bg-black/80 px-2 py-1 text-sm font-bold text-white shadow-sm">
-                  Pre-order
                 </span>
               ) : null}
             </h1>
