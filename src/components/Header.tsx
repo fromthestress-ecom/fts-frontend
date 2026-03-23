@@ -34,8 +34,8 @@ function isNavItemActive(
 function Logo({ className }: { className?: string }) {
   return (
     <ThemeAwareImg
-      darkSrc="/logo/logo_white.png"
-      lightSrc="/logo/logo_black.png"
+      darkSrc="/logo/logo_white.webp"
+      lightSrc="/logo/logo_black.webp"
       alt="STREETWEAR"
       className={className}
     />
