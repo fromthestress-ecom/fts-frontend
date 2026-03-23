@@ -142,7 +142,7 @@ export default function DoiTacLayout({
 
   return (
     <div className="affiliate-layout">
-      <aside className="affiliate-sidebar">
+      <div className="affiliate-sidebar">
         <h2 className="affiliate-sidebar__title">Đối tác</h2>
         <nav className="affiliate-sidebar__nav">
           {navItems.map((item) => (
@@ -158,7 +158,7 @@ export default function DoiTacLayout({
             </Link>
           ))}
         </nav>
-      </aside>
+      </div>
       <div className="affiliate-content">{children}</div>
     </div>
   );
