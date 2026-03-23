@@ -32,16 +32,31 @@ export default function MaGioiThieuPage() {
     }
   }, [token]);
 
+  const copyToClipboard = async (text: string) => {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+  };
+
   const copyCode = async () => {
     if (!data) return;
-    await navigator.clipboard.writeText(data.referralCode);
+    await copyToClipboard(data.referralCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const copyLink = async () => {
     if (!data) return;
-    await navigator.clipboard.writeText(data.referralLink);
+    await copyToClipboard(data.referralLink);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };

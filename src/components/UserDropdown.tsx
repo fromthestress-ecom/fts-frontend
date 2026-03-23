@@ -33,25 +33,13 @@ export function UserDropdown() {
         className="flex items-center gap-2 group text-left max-md:user-dropdown__trigger"
         aria-label="Menu tài khoản"
       >
-        <div className="flex items-center justify-center text-muted transition-colors group-hover:text-text max-md:hidden">
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-bg text-sm font-bold shrink-0">
+          {initial}
         </div>
         <div className="flex flex-col text-sm leading-tight max-md:hidden">
-          <span className="text-muted text-xs">Đăng nhập / Đăng ký</span>
+          <span className="text-muted text-xs">Xin chào</span>
           <span className="font-semibold text-text flex items-center gap-1">
-            Tài khoản của tôi{" "}
+            {user.fullName || "Tài khoản"}
             <svg
               width="12"
               height="12"
@@ -66,9 +54,6 @@ export function UserDropdown() {
               <path d="m6 9 6 6 6-6" />
             </svg>
           </span>
-        </div>
-        <div className="md:hidden flex items-center justify-center">
-          <span className="user-dropdown__avatar">{initial}</span>
         </div>
       </button>
 
