@@ -38,7 +38,7 @@ const DEFAULT_DESC =
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn",
   ),
   title: {
     default: `${SITE_NAME} | Thời trang đường phố`,

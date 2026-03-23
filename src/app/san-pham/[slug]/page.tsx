@@ -20,7 +20,7 @@ const OtherProductsSection = dynamic(() =>
 );
 import type { Metadata } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn";
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {

@@ -27,7 +27,7 @@ const PromoSlider = dynamic(
   () => import("@/components/PromoSlider").then((m) => m.PromoSlider),
 );
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn";
 
 async function getFeaturedProducts(): Promise<ProductListResult> {
   try {
