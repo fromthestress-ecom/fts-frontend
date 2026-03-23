@@ -138,20 +138,30 @@ export function HeroBanner() {
           Less Stress - More Drip
         </p>
 
-        <div className="hero-text-banner__ctas" style={{ opacity: revealed ? 1 : 0, transform: revealed ? "translate3d(0,0,0)" : "translate3d(0,30px,0)", transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 1.1s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 1.1s" }}>
+        <div
+          className="hero-text-banner__ctas"
+          style={{
+            opacity: revealed ? 1 : 0,
+            transform: revealed
+              ? "translate3d(0,0,0)"
+              : "translate3d(0,30px,0)",
+            transition:
+              "opacity 0.8s cubic-bezier(0.16,1,0.3,1) 1.1s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 1.1s",
+          }}
+        >
           <Link
             href="/san-pham"
             className="hero-text-banner__btn hero-text-banner__btn--primary"
             onMouseEnter={() => setDismissed(true)}
             onMouseLeave={() => setDismissed(false)}
           >
-            Kham pha ngay
+            Khám phá ngay
           </Link>
           <Link
             href="/lien-he"
             className="hero-text-banner__btn hero-text-banner__btn--ghost"
           >
-            Lien he
+            Liên hệ
           </Link>
         </div>
       </div>
