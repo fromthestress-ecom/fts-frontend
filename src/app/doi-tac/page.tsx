@@ -56,8 +56,8 @@ export default function DoiTacPage() {
 
   if (loading || checkingStatus) {
     return (
-      <div className="affiliate-landing">
-        <div className="affiliate-landing__inner">
+      <div className="partner-landing">
+        <div className="partner-landing__inner">
           <p className="text-muted">Đang tải...</p>
         </div>
       </div>
@@ -65,36 +65,36 @@ export default function DoiTacPage() {
   }
 
   return (
-    <div className="affiliate-landing">
-      <div className="affiliate-landing__inner">
-        <h1 className="affiliate-landing__title">Trở thành đối tác liên kết</h1>
-        <p className="affiliate-landing__subtitle">
+    <div className="partner-landing">
+      <div className="partner-landing__inner">
+        <h1 className="partner-landing__title">Trở thành đối tác liên kết</h1>
+        <p className="partner-landing__subtitle">
           Kiếm hoa hồng khi giới thiệu sản phẩm FROM THE STRESS đến bạn bè và
           người theo dõi của bạn. Chia sẻ link, nhận tiền — đơn giản vậy thôi.
         </p>
 
-        <div className="affiliate-landing__benefits">
-          <div className="affiliate-landing__benefit">
-            <div className="affiliate-landing__benefit-icon">💰</div>
-            <p className="affiliate-landing__benefit-title">Hoa hồng hấp dẫn</p>
-            <p className="affiliate-landing__benefit-desc">
+        <div className="partner-landing__benefits">
+          <div className="partner-landing__benefit">
+            <div className="partner-landing__benefit-icon">💰</div>
+            <p className="partner-landing__benefit-title">Hoa hồng hấp dẫn</p>
+            <p className="partner-landing__benefit-desc">
               Nhận đến 20% hoa hồng cho mỗi đơn hàng từ link giới thiệu của bạn.
             </p>
           </div>
-          <div className="affiliate-landing__benefit">
-            <div className="affiliate-landing__benefit-icon">📊</div>
-            <p className="affiliate-landing__benefit-title">
+          <div className="partner-landing__benefit">
+            <div className="partner-landing__benefit-icon">📊</div>
+            <p className="partner-landing__benefit-title">
               Dashboard thời gian thực
             </p>
-            <p className="affiliate-landing__benefit-desc">
+            <p className="partner-landing__benefit-desc">
               Theo dõi doanh thu, đơn hàng và hoa hồng mọi lúc trên dashboard
               chuyên nghiệp.
             </p>
           </div>
-          <div className="affiliate-landing__benefit">
-            <div className="affiliate-landing__benefit-icon">🔗</div>
-            <p className="affiliate-landing__benefit-title">Link dễ chia sẻ</p>
-            <p className="affiliate-landing__benefit-desc">
+          <div className="partner-landing__benefit">
+            <div className="partner-landing__benefit-icon">🔗</div>
+            <p className="partner-landing__benefit-title">Link dễ chia sẻ</p>
+            <p className="partner-landing__benefit-desc">
               Tạo link affiliate riêng cho từng sản phẩm, chia sẻ qua mạng xã
               hội dễ dàng.
             </p>
@@ -102,12 +102,12 @@ export default function DoiTacPage() {
         </div>
 
         {affiliateStatus === "pending" ? (
-          <div className="affiliate-landing__status">
+          <div className="partner-landing__status">
             ⏳ Đơn đăng ký đối tác của bạn đang chờ phê duyệt. Chúng tôi sẽ
             thông báo khi hoàn tất!
           </div>
         ) : affiliateStatus === "suspended" ? (
-          <div className="affiliate-landing__status">
+          <div className="partner-landing__status">
             ⚠️ Tài khoản đối tác của bạn đã bị tạm ngừng. Vui lòng liên hệ hỗ
             trợ.
           </div>
@@ -115,7 +115,7 @@ export default function DoiTacPage() {
           <button
             type="button"
             onClick={handleRegister}
-            className="affiliate-landing__cta"
+            className="partner-landing__cta"
             disabled={submitting}
           >
             {submitting ? "Đang xử lý..." : "Đăng ký làm Đối tác"}

@@ -29,8 +29,8 @@ export default function DoiTacLayout({
   // For dashboard sub-pages, require active affiliate
   if (loading) {
     return (
-      <div className="affiliate-layout">
-        <div className="affiliate-content">
+      <div className="partner-layout">
+        <div className="partner-content">
           <p className="text-muted">Đang tải...</p>
         </div>
       </div>
@@ -39,16 +39,16 @@ export default function DoiTacLayout({
 
   if (!isAffiliate) {
     return (
-      <div className="affiliate-layout">
-        <div className="affiliate-content">
-          <h1 className="affiliate-content__title">Chưa kích hoạt</h1>
+      <div className="partner-layout">
+        <div className="partner-content">
+          <h1 className="partner-content__title">Chưa kích hoạt</h1>
           <p className="text-muted">
             Bạn cần có tài khoản đối tác đã được phê duyệt để truy cập trang
             này.
           </p>
           <Link
             href="/doi-tac"
-            className="affiliate-landing__cta"
+            className="partner-landing__cta"
             style={{ marginTop: "1rem", display: "inline-flex" }}
           >
             Đăng ký Đối tác
@@ -141,16 +141,16 @@ export default function DoiTacLayout({
   ];
 
   return (
-    <div className="affiliate-layout">
-      <div className="affiliate-sidebar">
-        <h2 className="affiliate-sidebar__title">Đối tác</h2>
-        <nav className="affiliate-sidebar__nav">
+    <div className="partner-layout">
+      <div className="partner-sidebar">
+        <h2 className="partner-sidebar__title">Đối tác</h2>
+        <nav className="partner-sidebar__nav">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`affiliate-sidebar__link ${
-                pathname === item.href ? "affiliate-sidebar__link--active" : ""
+              className={`partner-sidebar__link ${
+                pathname === item.href ? "partner-sidebar__link--active" : ""
               }`}
             >
               {item.icon}
@@ -159,7 +159,7 @@ export default function DoiTacLayout({
           ))}
         </nav>
       </div>
-      <div className="affiliate-content">{children}</div>
+      <div className="partner-content">{children}</div>
     </div>
   );
 }

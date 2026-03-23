@@ -79,12 +79,12 @@ export default function RutTienPage() {
 
   return (
     <>
-      <h1 className="affiliate-content__title">Rút Tiền</h1>
+      <h1 className="partner-content__title">Rút Tiền</h1>
 
       {/* Balance */}
-      <div className="affiliate-stat-card affiliate-stat-card--accent mb-6 max-w-sm">
-        <p className="affiliate-stat-card__label">Số dư có thể rút</p>
-        <p className="affiliate-stat-card__value text-3xl font-display">
+      <div className="partner-stat-card partner-stat-card--accent mb-6 max-w-sm">
+        <p className="partner-stat-card__label">Số dư có thể rút</p>
+        <p className="partner-stat-card__value text-3xl font-display">
           {formatVND(balance)}
         </p>
       </div>
@@ -152,8 +152,8 @@ export default function RutTienPage() {
         </div>
       ) : (
         <>
-          <div className="affiliate-table-wrapper">
-            <table className="affiliate-table">
+          <div className="partner-table-wrapper">
+            <table className="partner-table">
               <thead>
                 <tr>
                   <th>Số tiền</th>
@@ -196,7 +196,7 @@ export default function RutTienPage() {
           </div>
 
           {data.totalPages > 1 && (
-            <div className="affiliate-pagination mt-6">
+            <div className="partner-pagination mt-6">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}

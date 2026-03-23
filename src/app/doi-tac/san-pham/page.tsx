@@ -78,7 +78,7 @@ export default function SanPhamAffiliatePage() {
 
   return (
     <>
-      <h1 className="affiliate-content__title">Sản phẩm & Link giới thiệu</h1>
+      <h1 className="partner-content__title">Sản phẩm & Link giới thiệu</h1>
 
       {!data ? (
         <p className="text-muted">Đang tải...</p>
@@ -152,7 +152,7 @@ export default function SanPhamAffiliatePage() {
           })}
 
           {data.totalPages > 1 && (
-            <div className="affiliate-pagination mt-6">
+            <div className="partner-pagination mt-6">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
