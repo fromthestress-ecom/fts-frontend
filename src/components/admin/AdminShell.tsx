@@ -127,6 +127,19 @@ const navSections: NavSection[] = [
           pathname.startsWith("/admin/blogs/"),
       },
       {
+        href: "/admin/blog-crawl",
+        label: "Auto Crawl",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-violet-500/10 text-violet-400">
+            ⚡
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/blog-crawl" ||
+          pathname.startsWith("/admin/blog-crawl/"),
+        badge: "AI",
+      },
+      {
         href: "/admin/blog-categories",
         label: "DM Bài viết",
         icon: (
