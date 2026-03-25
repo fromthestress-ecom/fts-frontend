@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Product } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
 import { trackAddToCart } from "@/lib/gtag";
+import { useTranslations } from 'next-intl';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -62,6 +63,7 @@ function OptionGroup({ label, options, value, onChange }: OptionGroupProps) {
 }
 
 export function AddToCartForm({ product }: AddToCartFormProps) {
+  const t = useTranslations('product');
   const [quantity, setQuantity] = useState(1);
   const [size, setSize] = useState(product.sizes?.[0] ?? "");
   const [color, setColor] = useState(product.colors?.[0] ?? "");
@@ -118,19 +120,19 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <OptionGroup
-        label="Size"
+        label={t('size')}
         options={product.sizes ?? []}
         value={size}
         onChange={setSize}
       />
       <OptionGroup
-        label="Màu"
+        label={t('color')}
         options={product.colors ?? []}
         value={color}
         onChange={setColor}
       />
       <div className="mb-4">
-        <label className="mb-2 block text-sm">Số lượng</label>
+        <label className="mb-2 block text-sm">{t('quantity')}</label>
         <input
           type="number"
           min={1}
@@ -148,17 +150,17 @@ export function AddToCartForm({ product }: AddToCartFormProps) {
         }`}
       >
         {status === "loading"
-          ? "Đang thêm..."
+          ? t('adding')
           : status === "done"
-            ? "Đã thêm vào giỏ"
+            ? t('addedToCart')
             : isSoldOut
-              ? "Hết hàng"
+              ? t('soldOut')
               : product.preOrder
-                ? "Đặt trước (Pre-order)"
-                : "Thêm vào giỏ"}
+                ? t('preOrderButton')
+                : t('addToCart')}
       </button>
       {status === "error" && (
-        <p className="mt-2 text-sm text-red-500">Có lỗi, vui lòng thử lại.</p>
+        <p className="mt-2 text-sm text-red-500">{t('errorAddCart')}</p>
       )}
     </form>
   );

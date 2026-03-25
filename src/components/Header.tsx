@@ -10,6 +10,8 @@ import { ThemeToggle } from "./ThemeToggle";
 import { AuthDrawer } from "./AuthDrawer";
 import { UserDropdown } from "./UserDropdown";
 import { useAuth } from "@/contexts/AuthContext";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslations } from 'next-intl';
 import type { NavGroupItem } from "@/lib/navGroups";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -100,6 +102,7 @@ function NavItems({
   onPanelEnter,
   onPanelLeave,
 }: NavItemsProps) {
+  const t = useTranslations('nav');
   const isMobile = variant === "mobile";
 
   const linkBase = isMobile
@@ -134,7 +137,7 @@ function NavItems({
               : `text-sm sm:text-base ${inactiveClass}`
           }
         >
-          Sản phẩm
+          SHOP
         </Link>
       ) : (
         navGroups.map((item) => {
@@ -232,7 +235,7 @@ function NavItems({
             : `${linkBase} ${bestSellerActiveClass}`
         }
       >
-        Best Sellers
+        BEST SELLER
       </Link>
 
       <Link
@@ -244,7 +247,7 @@ function NavItems({
             : `${linkBase} ${aboutActiveClass}`
         }
       >
-        About Us
+        ABOUT US
       </Link>
 
       <Link
@@ -256,7 +259,7 @@ function NavItems({
             : `${linkBase} ${contactActiveClass}`
         }
       >
-        Contact
+        CONTACT
       </Link>
 
       <Link
@@ -268,7 +271,7 @@ function NavItems({
             : `${linkBase} ${blogsActiveClass}`
         }
       >
-        Blogs
+        BLOGS
       </Link>
 
       <Link
@@ -280,7 +283,7 @@ function NavItems({
             : `${linkBase} ${vouchersActiveClass}`
         }
       >
-        Vouchers
+        VOUCHERS
       </Link>
     </>
   );
@@ -305,6 +308,7 @@ function SlideDownPanel({
   onMouseEnter,
   onMouseLeave,
 }: SlideDownPanelProps) {
+  const t = useTranslations('nav');
   const activeGroup = navGroups.find((g) => g.label === activePanel);
   const isOpen = !!activeGroup;
   const headerRef = useRef<HTMLElement | null>(null);
@@ -364,7 +368,7 @@ function SlideDownPanel({
                   href={`/san-pham?danh_muc=${encodeURIComponent(activeGroup.label.toLowerCase())}`}
                   className="text-xs font-semibold uppercase tracking-[0.15em] text-muted transition-colors hover:text-accent"
                 >
-                  Xem tất cả {activeGroup.label} →
+                  VIEW ALL {activeGroup.label}
                 </Link>
               </div>
             </div>
@@ -398,6 +402,7 @@ function MobileMenu({
   onToggleNav,
   onClose,
 }: MobileMenuProps) {
+  const t = useTranslations('nav');
   return (
     <>
       {/* Backdrop overlay */}
@@ -429,6 +434,9 @@ function MobileMenu({
             onClose={onClose}
           />
         </nav>
+        <div className="mt-auto px-6 pb-10">
+          <LanguageSwitcher />
+        </div>
       </div>
     </>
   );
@@ -441,6 +449,7 @@ type HeaderProps = {
 };
 
 export function Header({ navGroups = [] }: HeaderProps) {
+  const t = useTranslations('nav');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
@@ -517,7 +526,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
           <div className="announcement-bar__track">
             {[...Array(6)].map((_, i) => (
               <span key={i} className="announcement-bar__item">
-                Welcome to From the Stress
+                {t('announcement')}
               </span>
             ))}
           </div>
@@ -611,10 +620,10 @@ export function Header({ navGroups = [] }: HeaderProps) {
                         </div>
                         <div className="flex flex-col text-sm leading-tight">
                           <span className="text-muted text-xs">
-                            Đăng nhập / Đăng ký
+                            {t('loginRegister')}
                           </span>
                           <span className="font-semibold text-text flex items-center gap-1">
-                            Tài khoản của tôi{" "}
+                            {t('myAccount')}{" "}
                             <svg
                               width="12"
                               height="12"
@@ -638,11 +647,12 @@ export function Header({ navGroups = [] }: HeaderProps) {
                 <CartLink showText />
               </>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
 
           {/* Mobile right: theme + hamburger */}
-          <div className="flex w-1/3 justify-end items-center gap-2 sm:w-auto sm:flex-initial md:hidden">
+          <div className="flex w-1/3 justify-end items-center gap-3 sm:w-auto sm:flex-initial md:hidden">
             <ThemeToggle />
             {!isAdminRoute && (
               <>
@@ -692,7 +702,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
             >
               <input
                 type="text"
-                placeholder="Tìm kiếm sản phẩm..."
+                placeholder={t('searchPlaceholder')}
                 className="flex-1 bg-transparent px-4 py-2 text-sm text-text outline-none placeholder:text-muted h-[40px]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

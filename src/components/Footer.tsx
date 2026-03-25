@@ -1,28 +1,31 @@
 import Link from "next/link";
 import { FooterAttribution } from "./FooterAttribution";
 import { FooterCollapsibleSection } from "./FooterCollapsibleSection";
-
-const FOOTER_LINKS = [
-  { href: "/san-pham", label: "Sản phẩm" },
-  { href: "/ve-chung-toi", label: "Về chúng tôi" },
-  { href: "/gio-hang", label: "Giỏ hàng" },
-] as const;
-
-const POLICY_LINKS = [
-  { href: "/huong-dan-mua-hang", label: "Hướng dẫn mua hàng & Thanh toán" },
-  {
-    href: "/chinh-sach-bao-mat",
-    label: "Chính sách bảo mật thông tin khách hàng",
-  },
-  {
-    href: "/chinh-sach-van-chuyen",
-    label: "Chính sách vận chuyển & Giao nhận",
-  },
-  { href: "/chinh-sach-doi-tra", label: "Chính sách đổi trả và hoàn tiền" },
-  { href: "/chinh-sach-gioi-thieu", label: "Chính sách Affiliate" },
-] as const;
+import { useTranslations } from 'next-intl';
 
 export function Footer() {
+  const t = useTranslations('footer');
+
+  const FOOTER_LINKS = [
+    { href: "/san-pham", label: t('products') },
+    { href: "/ve-chung-toi", label: t('aboutUs') },
+    { href: "/gio-hang", label: t('cart') },
+  ] as const;
+
+  const POLICY_LINKS = [
+    { href: "/huong-dan-mua-hang", label: t('buyingGuide') },
+    {
+      href: "/chinh-sach-bao-mat",
+      label: t('privacyPolicy'),
+    },
+    {
+      href: "/chinh-sach-van-chuyen",
+      label: t('shippingPolicy'),
+    },
+    { href: "/chinh-sach-doi-tra", label: t('returnPolicy') },
+    { href: "/chinh-sach-gioi-thieu", label: t('affiliatePolicy') },
+  ] as const;
+
   return (
     <footer className="border-t border-border bg-surface px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-[1280px] flex flex-col border-b border-border pb-6 md:flex-row md:flex-wrap md:items-start md:justify-between md:gap-8">
@@ -38,7 +41,7 @@ export function Footer() {
             </Link>
           </p>
         </div>
-        <FooterCollapsibleSection title="Liên kết">
+        <FooterCollapsibleSection title={t('links')}>
           {FOOTER_LINKS.map(({ href, label }) => (
             <Link
               key={href}
@@ -49,7 +52,7 @@ export function Footer() {
             </Link>
           ))}
         </FooterCollapsibleSection>
-        <FooterCollapsibleSection title="Chính sách & Hướng dẫn">
+        <FooterCollapsibleSection title={t('policies')}>
           {POLICY_LINKS.map(({ href, label }) => (
             <Link
               key={href}

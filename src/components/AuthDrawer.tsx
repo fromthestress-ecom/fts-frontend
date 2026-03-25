@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslations } from 'next-intl';
 
 type Tab = "login" | "register" | "forgot_password";
 
@@ -11,6 +12,7 @@ interface AuthDrawerProps {
 }
 
 export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
+  const t = useTranslations('auth');
   const { login, register } = useAuth();
   const [tab, setTab] = useState<Tab>("login");
   const [error, setError] = useState("");
@@ -70,7 +72,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
       await login(loginEmail, loginPassword);
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Đã có lỗi xảy ra");
+      setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);
     }
@@ -111,10 +113,10 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
         },
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Có lỗi xảy ra");
+      if (!res.ok) throw new Error(data.message || t('genericError'));
       setForgotMessage(data.message);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+      setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);
     }
@@ -124,29 +126,29 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-[200] bg-black/70 transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-200 bg-black/70 transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={onClose}
       />
 
       {/* Drawer */}
       <div
-        className={`auth-drawer fixed inset-y-0 right-0 z-[201] w-[min(100vw,420px)] flex flex-col bg-bg shadow-2xl transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`auth-drawer fixed inset-y-0 right-0 z-201 w-[min(100vw,420px)] flex flex-col bg-bg shadow-2xl transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
           <h2 className="auth-drawer__title m-0">
             {tab === "login"
-              ? "Đăng nhập"
+              ? t('loginTitle')
               : tab === "register"
-                ? "Đăng ký"
-                : "Quên mật khẩu"}
+                ? t('registerTitle')
+                : t('forgotTitle')}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-transparent text-muted transition-colors hover:border-text hover:text-text"
-            aria-label="Đóng"
+            aria-label={t('close')}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path
@@ -171,7 +173,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                 setForgotMessage("");
               }}
             >
-              Đăng nhập
+              {t('loginTitle')}
             </button>
             <button
               type="button"
@@ -182,7 +184,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                 setForgotMessage("");
               }}
             >
-              Đăng ký
+              {t('registerTitle')}
             </button>
           </div>
         )}
@@ -195,27 +197,27 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
           {tab === "login" ? (
             <form onSubmit={handleLogin} className="auth-drawer__form">
               <div className="auth-drawer__field">
-                <label htmlFor="login-email">Email</label>
+                <label htmlFor="login-email">{t('emailLabel')}</label>
                 <input
                   id="login-email"
                   type="email"
                   required
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder={t('emailPlaceholder')}
                   autoComplete="email"
                 />
               </div>
 
               <div className="auth-drawer__field">
-                <label htmlFor="login-password">Mật khẩu</label>
+                <label htmlFor="login-password">{t('passwordLabel')}</label>
                 <input
                   id="login-password"
                   type="password"
                   required
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   autoComplete="current-password"
                 />
               </div>
@@ -230,7 +232,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                   }}
                   className="text-sm text-accent hover:underline"
                 >
-                  Quên mật khẩu?
+                  {t('forgotLink')}
                 </button>
               </div>
 
@@ -239,14 +241,13 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                 className="auth-drawer__submit"
                 disabled={loading}
               >
-                {loading ? "Đang xử lý..." : "Đăng nhập"}
+                {loading ? t('processing') : t('loginTitle')}
               </button>
             </form>
           ) : tab === "forgot_password" ? (
             <form onSubmit={handleForgotPassword} className="auth-drawer__form">
               <p className="mb-4 text-sm text-text/70">
-                Nhập email của bạn, chúng tôi sẽ gửi thông tin để khôi phục mật
-                khẩu.
+                {t('forgotDesc')}
               </p>
               <div className="auth-drawer__field">
                 <label htmlFor="forgot-email">Email</label>
@@ -271,7 +272,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                 className="auth-drawer__submit"
                 disabled={loading}
               >
-                {loading ? "Đang xử lý..." : "Gửi yêu cầu"}
+                {loading ? t('processing') : t('sendRequest')}
               </button>
 
               <button
@@ -283,13 +284,13 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                   setForgotMessage("");
                 }}
               >
-                Quay lại đăng nhập
+                {t('backToLogin')}
               </button>
             </form>
           ) : (
             <form onSubmit={handleRegister} className="auth-drawer__form">
               <div className="auth-drawer__field">
-                <label htmlFor="reg-name">Họ tên *</label>
+                <label htmlFor="reg-name">{t('fullName')}</label>
                 <input
                   id="reg-name"
                   type="text"
@@ -302,20 +303,20 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
               </div>
 
               <div className="auth-drawer__field">
-                <label htmlFor="reg-email">Email *</label>
+                <label htmlFor="reg-email">{t('emailRequired')}</label>
                 <input
                   id="reg-email"
                   type="email"
                   required
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder={t('emailPlaceholder')}
                   autoComplete="email"
                 />
               </div>
 
               <div className="auth-drawer__field">
-                <label htmlFor="reg-password">Mật khẩu *</label>
+                <label htmlFor="reg-password">{t('passwordRequired')}</label>
                 <input
                   id="reg-password"
                   type="password"
@@ -323,25 +324,25 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                   minLength={8}
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
-                  placeholder="Tối thiểu 8 ký tự"
+                  placeholder={t('passwordMin')}
                   autoComplete="new-password"
                 />
               </div>
 
               <div className="auth-drawer__field">
-                <label htmlFor="reg-phone">Số điện thoại</label>
+                <label htmlFor="reg-phone">{t('phone')}</label>
                 <input
                   id="reg-phone"
                   type="tel"
                   value={regPhone}
                   onChange={(e) => setRegPhone(e.target.value)}
-                  placeholder="0912 345 678"
+                  placeholder={t('phonePlaceholder')}
                   autoComplete="tel"
                 />
               </div>
 
               <div className="auth-drawer__field">
-                <label htmlFor="reg-referral">Mã giới thiệu</label>
+                <label htmlFor="reg-referral">{t('referralCode')}</label>
                 <input
                   id="reg-referral"
                   type="text"
@@ -349,7 +350,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                   onChange={(e) =>
                     setRegReferralCode(e.target.value.toUpperCase())
                   }
-                  placeholder="VD: FTS2812"
+                  placeholder={t('referralPlaceholder')}
                   style={{ textTransform: "uppercase" }}
                 />
               </div>
@@ -359,7 +360,7 @@ export function AuthDrawer({ isOpen, onClose }: AuthDrawerProps) {
                 className="auth-drawer__submit"
                 disabled={loading}
               >
-                {loading ? "Đang xử lý..." : "Tạo tài khoản"}
+                {loading ? t('processing') : t('createAccount')}
               </button>
             </form>
           )}

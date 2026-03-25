@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Cart } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
+import { useTranslations } from 'next-intl';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -19,6 +20,7 @@ function getGuestId(): string {
 }
 
 export function CartContent() {
+  const t = useTranslations('cart');
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,18 +67,18 @@ export function CartContent() {
   };
 
   if (loading) {
-    return <p className="text-muted">Đang tải giỏ hàng...</p>;
+    return <p className="text-muted">{t('loadingCart')}</p>;
   }
 
   if (!cart?.items?.length) {
     return (
       <div className="py-12 text-center text-muted">
-        <p>Giỏ hàng trống.</p>
+        <p>{t('emptyCart')}</p>
         <Link
           href="/san-pham"
           className="mt-4 inline-block font-semibold text-accent hover:underline"
         >
-          Mua sắm ngay
+          {t('shopNow')}
         </Link>
       </div>
     );
@@ -146,7 +148,7 @@ export function CartContent() {
                     onClick={() => removeItem(p._id)}
                     className="ml-auto border-none bg-transparent text-sm text-muted hover:text-text cursor-pointer"
                   >
-                    Xóa
+                    {t('remove')}
                   </button>
                 </div>
               </div>
@@ -158,7 +160,7 @@ export function CartContent() {
         })}
       </ul>
       <div className="mt-8 flex items-center justify-between border-t border-border pt-4">
-        <span className="text-lg">Tạm tính</span>
+        <span className="text-lg">{t('subtotal')}</span>
         <span className="text-xl font-bold text-accent">
           {new Intl.NumberFormat("vi-VN").format(subtotal)}₫
         </span>
@@ -167,7 +169,7 @@ export function CartContent() {
         href="/thanh-toan"
         className="mt-6 inline-block rounded bg-accent px-8 py-3.5 font-bold text-bg hover:opacity-90 text-center uppercase tracking-widest"
       >
-        Thanh toán
+        {t('checkoutBtn')}
       </Link>
     </div>
   );

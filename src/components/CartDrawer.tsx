@@ -6,6 +6,7 @@ import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 import { setCartCount } from "@/hooks/useCartCount";
 import type { Cart } from "@/lib/api";
+import { useTranslations } from 'next-intl';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -20,6 +21,7 @@ function getGuestId(): string {
 }
 
 export function CartDrawer() {
+  const t = useTranslations('cart');
   const { isOpen, closeDrawer } = useCartDrawer();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
@@ -95,7 +97,7 @@ export function CartDrawer() {
       {/* Drawer panel */}
       <div
         role="dialog"
-        aria-label="Giỏ hàng"
+        aria-label={t('cart')}
         aria-modal="true"
         style={{
           position: "fixed",
@@ -133,11 +135,11 @@ export function CartDrawer() {
               color: "var(--text)",
             }}
           >
-            GIỎ HÀNG
+            {t('cartUpper')}
           </h2>
           <button
             onClick={closeDrawer}
-            aria-label="Đóng giỏ hàng"
+            aria-label={t('closeCart')}
             style={{
               background: "none",
               border: "none",
@@ -168,7 +170,7 @@ export function CartDrawer() {
                 textAlign: "center",
               }}
             >
-              Đang tải...
+              {t('loading')}
             </p>
           ) : items.length === 0 ? (
             <div
@@ -178,7 +180,7 @@ export function CartDrawer() {
                 color: "var(--muted)",
               }}
             >
-              <p style={{ marginBottom: "16px" }}>Giỏ hàng trống.</p>
+              <p style={{ marginBottom: "16px" }}>{t('emptyCart')}</p>
               <Link
                 href="/san-pham"
                 onClick={closeDrawer}
@@ -188,7 +190,7 @@ export function CartDrawer() {
                   textDecoration: "none",
                 }}
               >
-                Mua sắm ngay →
+                {t('shopNowArrow')}
               </Link>
             </div>
           ) : (
@@ -327,7 +329,7 @@ export function CartDrawer() {
                             (e.currentTarget.style.color = "var(--muted)")
                           }
                         >
-                          XÓA
+                          {t('removeUpper')}
                         </button>
                       </div>
                     </div>
@@ -357,7 +359,7 @@ export function CartDrawer() {
               }}
             >
               <span style={{ fontSize: "14px", color: "var(--muted)" }}>
-                Thành tiền
+                {t('totalCart')}
               </span>
               <span
                 style={{
@@ -392,7 +394,7 @@ export function CartDrawer() {
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
               >
-                THANH TOÁN NGAY
+                {t('checkoutNow')}
               </Link>
               <Link
                 href="/gio-hang"
@@ -413,7 +415,7 @@ export function CartDrawer() {
                   (e.currentTarget.style.color = "var(--muted)")
                 }
               >
-                XEM GIỎ HÀNG →
+                {t('viewCart')}
               </Link>
             </div>
           </div>

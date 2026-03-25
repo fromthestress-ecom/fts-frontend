@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCartCount } from "@/hooks/useCartCount";
 import { ThemeAwareImg } from "./ThemeAwareImg";
+import { useTranslations } from 'next-intl';
 
 type CartLinkProps = {
   iconOnly?: boolean;
@@ -15,13 +16,14 @@ export function CartLink({
   className = "",
   showText = false,
 }: CartLinkProps) {
+  const t = useTranslations('cart');
   const count = useCartCount();
 
   return (
     <Link
       href="/gio-hang"
       className={`flex items-center gap-2 text-muted text-sm sm:text-base hover:text-text transition-colors ${className}`}
-      aria-label={iconOnly ? "Giỏ hàng" : undefined}
+      aria-label={iconOnly ? t('cart') : undefined}
     >
       <span className="relative inline-block" aria-hidden>
         <ThemeAwareImg
@@ -37,7 +39,7 @@ export function CartLink({
         )}
       </span>
       {!iconOnly && showText && (
-        <span className="font-semibold text-text max-md:hidden">Giỏ hàng</span>
+        <span className="font-semibold text-text max-md:hidden">{t('cart')}</span>
       )}
     </Link>
   );

@@ -8,6 +8,7 @@ import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { setCartCount } from "@/hooks/useCartCount";
 import type { Product } from "@/lib/api";
 import { trackAddToCart } from "@/lib/gtag";
+import { useTranslations } from 'next-intl';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -31,6 +32,7 @@ export function ProductCard({
   product: p,
   headingLevel = "h2",
 }: ProductCardProps) {
+  const t = useTranslations('product');
   const { openDrawer } = useCartDrawer();
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
 
@@ -94,13 +96,13 @@ export function ProductCard({
           {isSoldOut && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40">
               <span className="rounded bg-black/80 px-3 py-1.5 text-xs font-bold tracking-wider text-white uppercase">
-                Sold Out
+                {t('soldOut')}
               </span>
             </div>
           )}
           {p.preOrder && !isSoldOut && (
             <span className="absolute left-2 top-2 rounded bg-black/80 px-2 py-1 text-xs font-bold text-white shadow-sm z-10">
-              Pre-order
+              {t('preOrder')}
             </span>
           )}
         </div>
@@ -182,14 +184,14 @@ export function ProductCard({
           }}
         >
           {status === "loading"
-            ? "Đang thêm..."
+            ? t('adding')
             : status === "done"
-              ? "✓ Đã thêm"
+              ? `✓ ${t('addedToCart')}`
               : isSoldOut
-                ? "HẾT HÀNG"
+                ? t('soldOut')
                 : p.preOrder
-                  ? "ĐẶT TRƯỚC (PRE-ORDER)"
-                  : "THÊM VÀO GIỎ"}
+                  ? t('preOrderButton')
+                  : t('addToCart')}
         </button>
       </div>
     </div>

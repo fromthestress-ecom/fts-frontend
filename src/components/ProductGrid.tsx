@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ProductListResult, Category } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
+import { useTranslations } from 'next-intl';
 
 type ProductGridProps = {
   initialData: ProductListResult;
@@ -20,6 +21,7 @@ export function ProductGrid({
   effectiveCategorySlug,
   basePath,
 }: ProductGridProps) {
+  const t = useTranslations('products');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -40,18 +42,18 @@ export function ProductGrid({
       {/* Sidebar Filters */}
       <aside className="w-full flex-shrink-0 lg:w-64">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[20px] font-bold text-text">Bộ lọc</h2>
+          <h2 className="text-[20px] font-bold text-text">{t('filter')}</h2>
           {(effectiveCategorySlug || currentParams.danh_muc) && (
             <Link
               href={buildUrl({ danh_muc: null, page: null })}
               className="text-[13px] text-text hover:underline"
             >
-              Xóa tất cả
+              {t('clearAll')}
             </Link>
           )}
         </div>
         <div className="mb-8 text-[13px] text-muted">
-          Hiển thị {initialData.total || items.length} sản phẩm
+          {t('showingProducts', { count: initialData.total || items.length })}
         </div>
 
         {/* Categories as text links */}
@@ -66,7 +68,7 @@ export function ProductGrid({
                 : "text-text hover:underline hover:decoration-1 hover:underline-offset-[6px]"
             }`}
           >
-            Tất cả
+            {t('all')}
           </Link>
 
           {categories.map((c) => {
@@ -93,14 +95,14 @@ export function ProductGrid({
 
         {/* Filter Group: Checkboxes for Tops/Bottoms */}
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-[14px] font-bold text-text">Loại</h3>
+          <h3 className="text-[14px] font-bold text-text">{t('type')}</h3>
           {(currentParams.danh_muc === "tops" ||
             currentParams.danh_muc === "bottoms") && (
             <Link
               href={buildUrl({ danh_muc: null, page: null })}
               className="text-[13px] text-text hover:underline"
             >
-              Xóa
+              {t('clear')}
             </Link>
           )}
         </div>
@@ -122,7 +124,7 @@ export function ProductGrid({
               }
               className="h-[18px] w-[18px] cursor-pointer appearance-none rounded-sm border-[1.5px] border-text bg-transparent checked:bg-text checked:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2.5%206.5L5%209L9.5%203.5%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] checked:bg-center checked:bg-no-repeat focus:outline-none focus:ring-2 focus:ring-text/30 focus:ring-offset-1 focus:ring-offset-bg"
             />
-            <span className="text-[14px] text-text">Tops (Áo)</span>
+            <span className="text-[14px] text-text">{t('tops')}</span>
           </label>
           <label className="flex cursor-pointer items-center gap-3">
             <input
@@ -142,7 +144,7 @@ export function ProductGrid({
               }
               className="h-[18px] w-[18px] cursor-pointer appearance-none rounded-sm border-[1.5px] border-text bg-transparent checked:bg-text checked:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2.5%206.5L5%209L9.5%203.5%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] checked:bg-center checked:bg-no-repeat focus:outline-none focus:ring-2 focus:ring-text/30 focus:ring-offset-1 focus:ring-offset-bg"
             />
-            <span className="text-[14px] text-text">Bottoms (Quần)</span>
+            <span className="text-[14px] text-text">{t('bottoms')}</span>
           </label>
         </div>
 
@@ -159,9 +161,9 @@ export function ProductGrid({
               <div className="flex items-center gap-2 bg-surface px-3 py-1.5 text-[13px] border border-border/60 rounded flex-shrink-0">
                 <span>
                   {currentParams.danh_muc === "tops"
-                    ? "Tops (Áo)"
+                    ? t('tops')
                     : currentParams.danh_muc === "bottoms"
-                      ? "Bottoms (Quần)"
+                      ? t('bottoms')
                       : categories.find(
                           (c) =>
                             c.slug === effectiveCategorySlug ||
@@ -196,7 +198,7 @@ export function ProductGrid({
 
           <div className="ml-auto flex items-center gap-2">
             <span className="whitespace-nowrap text-[13px] text-text">
-              Sắp xếp theo
+              {t('sortBy')}
             </span>
             <select
               value={currentParams.sap_xep ?? ""}
@@ -207,11 +209,11 @@ export function ProductGrid({
               }
               className="cursor-pointer border-none bg-transparent py-1 text-[13px] font-medium text-text outline-none focus:ring-0"
             >
-              <option value="">Mặc định</option>
-              <option value="newest">Mới nhất</option>
-              <option value="price_asc">Giá thấp → cao</option>
-              <option value="price_desc">Giá cao → thấp</option>
-              <option value="name">Tên A-Z</option>
+              <option value="">{t('sortDefault')}</option>
+              <option value="newest">{t('sortNewest')}</option>
+              <option value="price_asc">{t('sortPriceAsc')}</option>
+              <option value="price_desc">{t('sortPriceDesc')}</option>
+              <option value="name">{t('sortName')}</option>
             </select>
           </div>
         </div>

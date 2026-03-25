@@ -7,6 +7,7 @@ import type { Cart, CreateOrderDto } from "@/lib/api";
 import { setCartCount } from "@/hooks/useCartCount";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackBeginCheckout, trackPurchase } from "@/lib/gtag";
+import { useTranslations } from 'next-intl';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -20,6 +21,7 @@ const inputClass =
   "w-full rounded border border-border bg-surface px-3 py-2 text-text text-sm sm:text-base";
 
 export function CheckoutForm() {
+  const t = useTranslations('checkout');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, token } = useAuth();
@@ -176,7 +178,7 @@ export function CheckoutForm() {
       const data = (await res.json()) as { orderNumber?: string; subtotal?: number; shippingFee?: number };
       if (!res.ok)
         throw new Error(
-          (data as { message?: string }).message ?? "Lỗi đặt hàng",
+          (data as { message?: string }).message ?? t('orderError'),
         );
       trackPurchase(
         data.orderNumber ?? "",
@@ -193,22 +195,22 @@ export function CheckoutForm() {
       localStorage.removeItem("streetwear-guest-id");
       router.push(`/don-hang/${data.orderNumber ?? ""}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+      setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return <p className="text-muted">Đang tải...</p>;
+    return <p className="text-muted">{t('processing')}</p>;
   }
 
   if (!cart?.items?.length) {
     return (
       <p className="text-muted">
-        Giỏ hàng trống.{" "}
+        {t('emptyCart')}{" "}
         <Link href="/gio-hang" className="text-accent hover:underline">
-          Xem giỏ hàng
+          {t('viewCart')}
         </Link>
         .
       </p>
@@ -242,7 +244,7 @@ export function CheckoutForm() {
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <label className="mb-1 block text-sm">Email *</label>
+        <label className="mb-1 block text-sm">{t('email')}</label>
         <input
           type="email"
           name="email"
@@ -252,7 +254,7 @@ export function CheckoutForm() {
         />
       </div>
       <div className="mb-4">
-        <label className="mb-1 block text-sm">Họ tên *</label>
+        <label className="mb-1 block text-sm">{t('fullName')}</label>
         <input
           type="text"
           name="fullName"
@@ -262,7 +264,7 @@ export function CheckoutForm() {
         />
       </div>
       <div className="mb-4">
-        <label className="mb-1 block text-sm">Số điện thoại *</label>
+        <label className="mb-1 block text-sm">{t('phone')}</label>
         <input
           type="tel"
           name="phone"
@@ -272,34 +274,34 @@ export function CheckoutForm() {
         />
       </div>
       <div className="mb-4">
-        <label className="mb-1 block text-sm">Địa chỉ *</label>
+        <label className="mb-1 block text-sm">{t('address')}</label>
         <input type="text" name="address" required className={inputClass} />
       </div>
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm">Phường/Xã</label>
+          <label className="mb-1 block text-sm">{t('ward')}</label>
           <input type="text" name="ward" className={inputClass} />
         </div>
         <div>
-          <label className="mb-1 block text-sm">Quận/Huyện</label>
+          <label className="mb-1 block text-sm">{t('district')}</label>
           <input type="text" name="district" className={inputClass} />
         </div>
         <div>
-          <label className="mb-1 block text-sm">Tỉnh/Thành</label>
+          <label className="mb-1 block text-sm">{t('city')}</label>
           <input type="text" name="city" className={inputClass} />
         </div>
       </div>
       <div className="mb-4">
-        <label className="mb-1 block text-sm">Ghi chú</label>
+        <label className="mb-1 block text-sm">{t('note')}</label>
         <input type="text" name="note" className={inputClass} />
       </div>
 
       {/* Referral Code */}
       <div className="mb-4">
-        <label className="mb-1 block text-sm">Mã giới thiệu (nếu có)</label>
+        <label className="mb-1 block text-sm">{t('referralCode')}</label>
         {!user ? (
           <p className="text-sm italic text-muted">
-            Vui lòng đăng nhập / đăng ký để có thể sử dụng mã giới thiệu.
+            {t('loginToUseReferral')}
           </p>
         ) : (
           <>
@@ -308,7 +310,7 @@ export function CheckoutForm() {
                 type="text"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                placeholder="VD: NGHIA4821"
+                placeholder={t('referralPlaceholder')}
                 className={inputClass}
                 style={{ textTransform: "uppercase" }}
               />
@@ -318,19 +320,21 @@ export function CheckoutForm() {
                 disabled={checkingReferral || !referralCode}
                 className="rounded border border-border bg-surface px-4 py-2 text-sm font-semibold text-text transition-colors hover:bg-border disabled:opacity-50"
               >
-                {checkingReferral ? "..." : "Áp dụng"}
+                {checkingReferral ? "..." : t('apply')}
               </button>
             </div>
             {referralValid === true && referralDiscount && (
               <p className="mt-1 text-sm" style={{ color: "#22c55e" }}>
-                ✓ Mã hợp lệ! Giảm {referralDiscount.value}
-                {referralDiscount.type === "percent" ? "%" : "đ"} từ{" "}
-                {referralDiscount.name}
+                {t('referralValid', { 
+                  value: referralDiscount.value, 
+                  type: referralDiscount.type === "percent" ? "%" : "đ", 
+                  name: referralDiscount.name 
+                })}
               </p>
             )}
             {referralValid === false && (
               <p className="mt-1 text-sm" style={{ color: "#ef4444" }}>
-                ✗ Mã không hợp lệ
+                {t('referralInvalid')}
               </p>
             )}
           </>
@@ -338,29 +342,29 @@ export function CheckoutForm() {
       </div>
       <div className="mb-4 rounded-lg bg-surface p-4">
         <p className="mb-2 text-muted">
-          Tạm tính: {new Intl.NumberFormat("vi-VN").format(subtotal)}₫
+          {t('subtotalCart')} {new Intl.NumberFormat("vi-VN").format(subtotal)}₫
         </p>
         {discountAmount > 0 && (
           <p className="mb-2 text-accent">
-            Giảm giá: -{new Intl.NumberFormat("vi-VN").format(discountAmount)}₫
+            {t('discountCart')} -{new Intl.NumberFormat("vi-VN").format(discountAmount)}₫
           </p>
         )}
         <p className="mb-2 text-muted">
-          Phí ship:{" "}
+          {t('shippingFee')}{" "}
           {shippingFee === 0
-            ? "Miễn phí"
+            ? t('freeShip')
             : `${new Intl.NumberFormat("vi-VN").format(shippingFee)}₫`}
         </p>
         <p className="text-lg font-bold">
-          Tổng thanh toán: {new Intl.NumberFormat("vi-VN").format(total)}₫
+          {t('totalPay')} {new Intl.NumberFormat("vi-VN").format(total)}₫
         </p>
         {hasPreOrder && (
           <div className="mt-4 border-t border-border pt-4">
             <p className="text-sm font-semibold text-accent mb-1">
-              * Đơn hàng có sản phẩm Pre-order, yêu cầu chuyển khoản cọc 50%:
+              {t('preOrderNotice')}
             </p>
             <p className="text-xl font-bold text-accent">
-              Tiền cọc: {new Intl.NumberFormat("vi-VN").format(depositAmount)}₫
+              {t('deposit')} {new Intl.NumberFormat("vi-VN").format(depositAmount)}₫
             </p>
           </div>
         )}
@@ -372,10 +376,10 @@ export function CheckoutForm() {
         className="w-full rounded border-none bg-accent py-3.5 font-bold text-bg disabled:opacity-70"
       >
         {submitting
-          ? "Đang xử lý..."
+          ? t('processing')
           : hasPreOrder
-            ? "Đặt hàng & Chuyển khoản"
-            : "Đặt hàng"}
+            ? t('orderTransfer')
+            : t('orderSubmit')}
       </button>
     </form>
   );

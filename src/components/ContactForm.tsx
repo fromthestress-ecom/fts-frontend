@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 export function ContactForm() {
+  const t = useTranslations('contact');
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -49,14 +51,14 @@ export function ContactForm() {
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
-        <h2>Tin nhắn đã được gửi!</h2>
-        <p>Chúng tôi sẽ phản hồi bạn sớm nhất có thể.</p>
+        <h2>{t('successTitle')}</h2>
+        <p>{t('successDesc')}</p>
         <button
           onClick={() => setSent(false)}
           className="contact-submit-btn"
           style={{ marginTop: "1rem" }}
         >
-          Gửi tin nhắn khác
+          {t('sendAnother')}
         </button>
       </div>
     );
@@ -66,24 +68,24 @@ export function ContactForm() {
     <form onSubmit={handleSubmit} noValidate>
       <div className="contact-form-row">
         <div className="contact-form-field">
-          <label htmlFor="firstName">First Name</label>
+          <label htmlFor="firstName">{t('firstName')}</label>
           <input
             id="firstName"
             name="firstName"
             type="text"
-            placeholder="Nguyen"
+            placeholder={t('firstNamePlaceholder')}
             value={form.firstName}
             onChange={handleChange}
             required
           />
         </div>
         <div className="contact-form-field">
-          <label htmlFor="lastName">Last Name</label>
+          <label htmlFor="lastName">{t('lastName')}</label>
           <input
             id="lastName"
             name="lastName"
             type="text"
-            placeholder="Van A"
+            placeholder={t('lastNamePlaceholder')}
             value={form.lastName}
             onChange={handleChange}
             required
@@ -93,24 +95,24 @@ export function ContactForm() {
 
       <div className="contact-form-row">
         <div className="contact-form-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('email')}</label>
           <input
             id="email"
             name="email"
             type="email"
-            placeholder="example@gmail.com"
+            placeholder={t('emailPlaceholder')}
             value={form.email}
             onChange={handleChange}
             required
           />
         </div>
         <div className="contact-form-field">
-          <label htmlFor="phone">Phone No</label>
+          <label htmlFor="phone">{t('phone')}</label>
           <input
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+84 xxx xxx xxx"
+            placeholder={t('phonePlaceholder')}
             value={form.phone}
             onChange={handleChange}
           />
@@ -118,12 +120,12 @@ export function ContactForm() {
       </div>
 
       <div className="contact-form-field contact-form-field--full">
-        <label htmlFor="subject">Subject</label>
+        <label htmlFor="subject">{t('subject')}</label>
         <input
           id="subject"
           name="subject"
           type="text"
-          placeholder="Enquiry ..."
+          placeholder={t('subjectPlaceholder')}
           value={form.subject}
           onChange={handleChange}
           required
@@ -131,12 +133,12 @@ export function ContactForm() {
       </div>
 
       <div className="contact-form-field contact-form-field--full">
-        <label htmlFor="message">Message</label>
+        <label htmlFor="message">{t('message')}</label>
         <textarea
           id="message"
           name="message"
           rows={5}
-          placeholder="Enter message here..."
+          placeholder={t('messagePlaceholder')}
           value={form.message}
           onChange={handleChange}
           required
@@ -144,7 +146,7 @@ export function ContactForm() {
       </div>
 
       <button type="submit" className="contact-submit-btn">
-        Send Message
+        {t('submitButton')}
       </button>
     </form>
   );
