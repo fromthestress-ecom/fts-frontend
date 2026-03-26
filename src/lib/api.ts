@@ -160,12 +160,14 @@ export interface BlogItem {
   excerpt: string;
   content: string;
   thumbnail?: string;
+  bannerImage?: string;
   categoryId?: BlogCategory | string;
   authorId?: Author | string;
   status: "draft" | "published";
   publishedAt?: string;
   createdAt: string;
   readingTime: number;
+  showToc?: boolean;
   tags?: Tag[];
   metaTitle?: string;
   metaDescription?: string;

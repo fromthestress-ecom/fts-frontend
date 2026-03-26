@@ -8,6 +8,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { getTranslations } from 'next-intl/server';
+import { TableOfContents } from "@/components/TableOfContents";
+import { extractHeadings, extractText, generateSlug } from "@/lib/toc";
+import { EmbeddedProduct } from "@/components/EmbeddedProduct";
 
 export const revalidate = 60; // Cache for 60s
 
@@ -142,6 +145,9 @@ export default async function BlogDetailPage({
     dateModified: blog.createdAt,
   };
 
+  const parsedContent = blog.content.replace(/::product\{slug="([^"]+)"\}/g, '<product-embed slug="$1"></product-embed>');
+  const headings = blog.showToc !== false ? extractHeadings(parsedContent) : [];
+  
   return (
     <>
       <script
@@ -173,8 +179,15 @@ export default async function BlogDetailPage({
           </div>
         </header>
 
-        {/* Full Width Hero Image */}
-        {blog.thumbnail && (
+        {blog.bannerImage ? (
+          <div className="relative aspect-video w-full overflow-hidden mb-12 bg-surface">
+            <img
+              src={blog.bannerImage}
+              alt={blog.title}
+              className="object-cover w-full h-full block"
+            />
+          </div>
+        ) : blog.thumbnail && (
           <div className="relative aspect-video w-full overflow-hidden mb-12 bg-surface">
             <img
               src={blog.thumbnail}
@@ -189,11 +202,36 @@ export default async function BlogDetailPage({
           {/* Main Content (Centered/Constrained) */}
           <div className="col-span-12 md:col-span-8">
             <div className="blog-content prose prose-invert max-w-none">
+              {/* Optional inline TOC inside article on mobile */}
+              <div className="md:hidden mb-8">
+                {blog.showToc !== false && <TableOfContents headings={headings} />}
+              </div>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
+                components={{
+                  // @ts-expect-error - Custom HTML component mapped in rehypeRaw
+                  "product-embed": ({node, slug, ...props}: any) => {
+                    return <EmbeddedProduct slug={slug} />;
+                  },
+                  h2: ({node, children, ...props}) => {
+                    const id = generateSlug(extractText(children));
+                    return <h2 id={id} className="scroll-mt-24" {...props}>{children}</h2>;
+                  },
+                  h3: ({node, children, ...props}) => {
+                    const id = generateSlug(extractText(children));
+                    return <h3 id={id} className="scroll-mt-24" {...props}>{children}</h3>;
+                  },
+                  h4: ({node, children, ...props}) => {
+                    const id = generateSlug(extractText(children));
+                    return <h4 id={id} className="scroll-mt-24" {...props}>{children}</h4>;
+                  },
+                  p: ({node, children, ...props}: any) => {
+                    return <div className="mb-4 leading-relaxed" {...props}>{children}</div>;
+                  }
+                }}
               >
-                {blog.content}
+                {parsedContent}
               </ReactMarkdown>
             </div>
 
@@ -249,6 +287,9 @@ export default async function BlogDetailPage({
           {/* Sticky Sidebar (Desktop Only) */}
           <aside className="hidden md:block col-span-4 pl-4 border-l border-border">
             <div className="sticky top-24 space-y-12 h-[calc(100vh-100px)] overflow-y-auto pb-12 sidebar-scrollbar-hide">
+              {blog.showToc !== false && headings.length > 0 && (
+                <TableOfContents headings={headings} />
+              )}
               {/* Newsletter Stub */}
               <div className="bg-surface rounded-xl p-6 border border-border">
                 <h3 className="font-display text-xl uppercase tracking-wider mb-2">

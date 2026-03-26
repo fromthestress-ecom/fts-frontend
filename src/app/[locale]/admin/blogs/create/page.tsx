@@ -58,11 +58,13 @@ export default function CreateBlogPage() {
     excerpt: "",
     content: "",
     thumbnail: "",
+    bannerImage: "",
     categoryId: "",
     authorId: "",
     tags: [] as string[],
     status: "draft",
     publishedAt: "",
+    showToc: true,
     metaTitle: "",
     metaDescription: "",
     ogImage: "",
@@ -97,18 +99,41 @@ export default function CreateBlogPage() {
   const generateSlug = (text: string) => {
     return text
       .toString()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
       .toLowerCase()
       .trim()
-      .replace(/[\s_]+/g, "-") // Replace spaces and underscores with -
-      .replace(/[^\w\-]+/g, "") // Remove all non-word chars
-      .replace(/\-\-+/g, "-") // Replace multiple - with single -
-      .replace(/^-+/, "") // Trim - from start
-      .replace(/-+$/, ""); // Trim - from end
+      .replace(/[\s_]+/g, "-")
+      .replace(/[^\w\-]+/g, "")
+      .replace(/\-\-+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "");
+  };
+
+  const handleWrapText = (prefix: string, suffix: string, defaultText: string = "văn bản") => {
+    const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = form.content;
+    const selectedText = text.substring(start, end) || defaultText;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    const newText = before + prefix + selectedText + suffix + after;
+    setForm(f => ({ ...f, content: newText }));
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+    }, 0);
   };
 
   const handleFileSelect = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    field: "thumbnail" | "ogImage",
+    field: "thumbnail" | "ogImage" | "bannerImage",
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -178,9 +203,14 @@ export default function CreateBlogPage() {
     if (!payload.publishedAt) delete (payload as any).publishedAt;
     else
       payload.publishedAt = new Date(payload.publishedAt).toISOString() as any;
+    
+    // Ensure tags is a clean array of actual ObjectId strings
+    payload.tags = payload.tags.filter(t => t && t.trim() !== "" && t !== "[ '', '' ]" && !t.includes("''"));
+
     if (!payload.metaTitle) payload.metaTitle = payload.title;
     if (!payload.metaDescription) payload.metaDescription = payload.excerpt;
     if (!payload.ogImage) payload.ogImage = payload.thumbnail;
+    if (!payload.bannerImage) payload.bannerImage = payload.thumbnail;
 
     try {
       const res = await adminFetch("/admin/blogs", {
@@ -257,12 +287,75 @@ export default function CreateBlogPage() {
               />
             </div>
 
-            <div className="mb-4 relative">
-              <div className="flex justify-between items-end mb-1.5">
+              <div className="mb-4 relative">
+              <div className="flex justify-between items-end mb-1.5 flex-wrap gap-2">
                 <label className="text-xs font-bold text-muted uppercase tracking-wider block">
                   Nội dung bài (Markdown/HTML) *
                 </label>
-                <div>
+                <div className="flex flex-wrap gap-2">
+                  {/* Text Formatting Buttons */}
+                  <div className="flex flex-wrap items-center bg-surface border border-border rounded p-0.5 text-xs font-bold text-text">
+                    <button type="button" onClick={() => handleWrapText("**", "**", "in đậm")} className="px-2.5 py-1 hover:bg-bg rounded font-serif font-bold transition-colors" title="In đậm">B</button>
+                    <button type="button" onClick={() => handleWrapText("_", "_", "in nghiêng")} className="px-2.5 py-1 hover:bg-bg rounded font-serif italic transition-colors" title="In nghiêng">I</button>
+                    <button type="button" onClick={() => handleWrapText("<u>", "</u>", "gạch chân")} className="px-2.5 py-1 hover:bg-bg rounded font-serif underline transition-colors" title="Gạch chân">U</button>
+                    <div className="w-px h-3.5 bg-border mx-1"></div>
+                    <button type="button" onClick={() => handleWrapText("\n## ", "\n\n", "Tiêu đề H2")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Heading 2">H2</button>
+                    <button type="button" onClick={() => handleWrapText("\n### ", "\n\n", "Tiêu đề H3")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Heading 3">H3</button>
+                    <button type="button" onClick={() => handleWrapText("\n#### ", "\n\n", "Tiêu đề H4")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Heading 4">H4</button>
+                    <div className="w-px h-3.5 bg-border mx-1"></div>
+                    <button type="button" onClick={() => handleWrapText("\n> ", "\n\n", "Trích dẫn")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Trích dẫn (Quote)">❝</button>
+                    <button type="button" onClick={() => handleWrapText("\n- ", "\n", "Dòng danh sách")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Danh sách (Gạch đầu dòng)">• LI</button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt("Nhập đường dẫn (URL):");
+                      if (!url) return;
+                      const title = prompt("Nhập văn bản hiển thị:", "Link");
+                      const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
+                      if (textarea) {
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const text = form.content;
+                        const selectedText = text.substring(start, end) || title || "Link";
+                        const before = text.substring(0, start);
+                        const after = text.substring(end);
+                        const mdLink = `[${selectedText}](${url})`;
+                        setForm(f => ({ ...f, content: before + mdLink + after }));
+                        setTimeout(() => {
+                          textarea.focus();
+                          textarea.setSelectionRange(start + mdLink.length, start + mdLink.length);
+                        }, 0);
+                      }
+                    }}
+                    className="cursor-pointer text-xs font-bold bg-surface border border-border text-text px-3 py-1 rounded hover:border-accent hover:text-accent transition-colors"
+                  >
+                    Chèn Link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const slug = prompt("Nhập slug của sản phẩm (VD: ao-thun-nam):");
+                      if (!slug) return;
+                      const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
+                      if (textarea) {
+                        const start = textarea.selectionStart;
+                        const text = form.content;
+                        const before = text.substring(0, start);
+                        const after = text.substring(textarea.selectionEnd);
+                        const mdProduct = `\n::product{slug="${slug}"}\n`;
+                        setForm(f => ({ ...f, content: before + mdProduct + after }));
+                        setTimeout(() => {
+                           textarea.focus();
+                           textarea.setSelectionRange(start + mdProduct.length, start + mdProduct.length);
+                        }, 0);
+                      }
+                    }}
+                    className="cursor-pointer text-xs font-bold bg-surface border border-border text-text px-3 py-1 rounded hover:border-accent hover:text-accent transition-colors"
+                  >
+                    Mã Sản Phẩm
+                  </button>
                   <label className="cursor-pointer text-xs font-bold bg-surface border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-bg transition-colors flex items-center gap-1">
                     {uploading ? (
                       "Đang tải..."
@@ -532,6 +625,65 @@ export default function CreateBlogPage() {
                 disabled={uploading}
                 className="block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer"
               />
+            </div>
+
+            <div className="mb-6">
+              <label className={labelClass}>Ảnh Banner (Banner Image)</label>
+              <div className="border-2 border-dashed border-border p-4 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
+                {form.bannerImage ? (
+                  <div className="relative">
+                    <img
+                      src={form.bannerImage}
+                      alt="Banner"
+                      className="w-full h-auto rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, bannerImage: "" }))}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
+                    >
+                      x
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-muted text-sm flex flex-col items-center">
+                    <svg
+                      className="w-8 h-8 mb-2 opacity-50"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Chưa có ảnh banner
+                  </span>
+                )}
+              </div>
+              <input
+                type="file"
+                onChange={(e) => handleFileSelect(e, "bannerImage")}
+                accept="image/*"
+                disabled={uploading}
+                className="block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer"
+              />
+            </div>
+
+            <div className="mb-6 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showToc"
+                checked={form.showToc}
+                onChange={(e) => setForm(f => ({ ...f, showToc: e.target.checked }))}
+                className="w-4 h-4 cursor-pointer"
+              />
+              <label htmlFor="showToc" className="text-sm font-bold uppercase tracking-wider cursor-pointer">
+                Hiển thị Mục Lục (Table of Contents)
+              </label>
             </div>
 
             {message && (

@@ -103,7 +103,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t('productsTitle'),
     description: t('productsDesc'),
     openGraph: {
-      title: t('productsTitleOG', { defaultMessage: `${t('productsTitle')} | STREETWEAR` }),
+      title: `${t('productsTitle')} | STREETWEAR`,
       description: t('productsDesc'),
     },
   };
