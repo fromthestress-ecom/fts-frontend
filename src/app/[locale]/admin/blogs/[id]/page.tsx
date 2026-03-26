@@ -579,6 +579,7 @@ export default function EditBlogPage({
                 })}
               </div>
               <select
+                value=""
                 onChange={(e) => {
                   if (e.target.value && !form.tags.includes(e.target.value)) {
                     setForm((f) => ({
@@ -586,7 +587,6 @@ export default function EditBlogPage({
                       tags: [...f.tags, e.target.value],
                     }));
                   }
-                  e.target.value = "";
                 }}
                 className={inputClass}
               >

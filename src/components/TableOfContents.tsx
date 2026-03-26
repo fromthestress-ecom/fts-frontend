@@ -7,25 +7,29 @@ export function TableOfContents({ headings }: { headings: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: "-10% 0% -80% 0%" }
-    );
-
-    headings.forEach((heading) => {
-      const element = document.getElementById(heading.id);
-      if (element) {
-        observer.observe(element);
+    const handleScroll = () => {
+      const headingElements = headings.map(h => document.getElementById(h.id)).filter(Boolean);
+      const scrollPosition = window.scrollY + 140; // Offset for sticky header
+      
+      let currentId = "";
+      for (const el of headingElements) {
+        if (el && el.offsetTop <= scrollPosition) {
+          currentId = el.id;
+        }
       }
-    });
+      
+      // If we're at the very top, highlight the first item
+      if (!currentId && headings.length > 0 && window.scrollY < 100) {
+        currentId = headings[0].id;
+      }
+      
+      setActiveId(currentId || (headings[0]?.id ?? ""));
+    };
 
-    return () => observer.disconnect();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Run once on mount to set initial active item
+    setTimeout(handleScroll, 100);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [headings]);
 
   if (headings.length === 0) return null;
@@ -39,17 +43,17 @@ export function TableOfContents({ headings }: { headings: TocEntry[] }) {
       </h3>
       <nav className="flex flex-col gap-3">
         {headings.map((heading, index) => {
-          const paddingLeft = `${(heading.level - minLevel) * 1}rem`;
+          const paddingLeft = `${(heading.level - minLevel) * 1 + 1}rem`;
           const isActive = activeId === heading.id;
           return (
             <a
               key={index}
               href={`#${heading.id}`}
               style={{ paddingLeft }}
-              className={`text-sm tracking-wide transition-colors border-l-2 pl-3 ${
+              className={`block text-sm tracking-wide transition-all border-l-2 py-1.5 pr-3 ${
                 isActive
-                  ? "text-accent font-bold border-accent"
-                  : "text-muted hover:text-text border-transparent"
+                  ? "text-accent font-bold border-accent bg-accent/5 -mr-6"
+                  : "text-muted hover:text-text border-border"
               }`}
               onClick={(e) => {
                 e.preventDefault();

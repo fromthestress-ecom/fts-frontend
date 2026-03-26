@@ -559,6 +559,7 @@ export default function CreateBlogPage() {
                 })}
               </div>
               <select
+                value=""
                 onChange={(e) => {
                   if (e.target.value && !form.tags.includes(e.target.value)) {
                     setForm((f) => ({
@@ -566,7 +567,6 @@ export default function CreateBlogPage() {
                       tags: [...f.tags, e.target.value],
                     }));
                   }
-                  e.target.value = "";
                 }}
                 className={inputClass}
               >

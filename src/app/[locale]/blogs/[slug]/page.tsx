@@ -155,9 +155,9 @@ export default async function BlogDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <article className="mx-auto max-w-[800px] px-4 py-8 sm:px-6 sm:py-16">
+      <article className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 sm:py-16">
         {/* Header */}
-        <header className="mb-10 text-center flex flex-col items-center">
+        <header className="mb-10 text-center flex flex-col items-center max-w-[800px] mx-auto">
           {categoryName && (
             <Link
               href={`/blogs?category=${typeof blog.categoryId === "object" ? blog.categoryId.slug : ""}`}
@@ -179,29 +179,29 @@ export default async function BlogDetailPage({
           </div>
         </header>
 
-        {blog.bannerImage ? (
-          <div className="relative aspect-video w-full overflow-hidden mb-12 bg-surface">
-            <img
-              src={blog.bannerImage}
-              alt={blog.title}
-              className="object-cover w-full h-full block"
-            />
-          </div>
-        ) : blog.thumbnail && (
-          <div className="relative aspect-video w-full overflow-hidden mb-12 bg-surface">
-            <img
-              src={blog.thumbnail}
-              alt={blog.title}
-              className="object-cover w-full h-full block"
-            />
-          </div>
-        )}
-
         {/* 12-Column Grid Layout for Editorial Feel */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 max-w-[1200px] mx-auto px-4 md:px-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Main Content (Centered/Constrained) */}
-          <div className="col-span-12 md:col-span-8">
-            <div className="blog-content prose prose-invert max-w-none">
+          <div className="lg:col-span-8">
+            {blog.bannerImage ? (
+              <div className="relative aspect-video w-full overflow-hidden mb-10 bg-surface rounded-xl">
+                <img
+                  src={blog.bannerImage}
+                  alt={blog.title}
+                  className="object-cover w-full h-full block hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+            ) : blog.thumbnail && (
+              <div className="relative aspect-video w-full overflow-hidden mb-10 bg-surface rounded-xl">
+                <img
+                  src={blog.thumbnail}
+                  alt={blog.title}
+                  className="object-cover w-full h-full block hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+            )}
+
+            <div className="blog-content prose prose-invert max-w-none text-base sm:text-lg leading-relaxed text-text/90">
               {/* Optional inline TOC inside article on mobile */}
               <div className="md:hidden mb-8">
                 {blog.showToc !== false && <TableOfContents headings={headings} />}
@@ -285,8 +285,8 @@ export default async function BlogDetailPage({
           </div>
 
           {/* Sticky Sidebar (Desktop Only) */}
-          <aside className="hidden md:block col-span-4 pl-4 border-l border-border">
-            <div className="sticky top-24 space-y-12 h-[calc(100vh-100px)] overflow-y-auto pb-12 sidebar-scrollbar-hide">
+          <aside className="hidden lg:block lg:col-span-4 lg:pl-6">
+            <div className="sticky top-24 space-y-12 h-[calc(100vh-100px)] overflow-y-auto pb-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {blog.showToc !== false && headings.length > 0 && (
                 <TableOfContents headings={headings} />
               )}
