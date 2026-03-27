@@ -11,7 +11,7 @@ import { AuthDrawer } from "./AuthDrawer";
 import { UserDropdown } from "./UserDropdown";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 import type { NavGroupItem } from "@/lib/navGroups";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -36,8 +36,8 @@ function isNavItemActive(
 function Logo({ className }: { className?: string }) {
   return (
     <ThemeAwareImg
-      darkSrc="/logo/logo_white.webp"
-      lightSrc="/logo/logo_black.webp"
+      darkSrc="/logo/nav_logo_white.webp"
+      lightSrc="/logo/nav_logo_black.webp"
       alt="STREETWEAR"
       className={className}
     />
@@ -102,7 +102,7 @@ function NavItems({
   onPanelEnter,
   onPanelLeave,
 }: NavItemsProps) {
-  const t = useTranslations('nav');
+  const t = useTranslations("nav");
   const isMobile = variant === "mobile";
 
   const linkBase = isMobile
@@ -308,7 +308,7 @@ function SlideDownPanel({
   onMouseEnter,
   onMouseLeave,
 }: SlideDownPanelProps) {
-  const t = useTranslations('nav');
+  const t = useTranslations("nav");
   const activeGroup = navGroups.find((g) => g.label === activePanel);
   const isOpen = !!activeGroup;
   const headerRef = useRef<HTMLElement | null>(null);
@@ -322,7 +322,11 @@ function SlideDownPanel({
       ? createPortal(
           <div
             className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-            style={{ top: headerRef.current ? `${headerRef.current.getBoundingClientRect().bottom}px` : "0px" }}
+            style={{
+              top: headerRef.current
+                ? `${headerRef.current.getBoundingClientRect().bottom}px`
+                : "0px",
+            }}
             onMouseEnter={onMouseLeave}
           />,
           document.body,
@@ -402,7 +406,7 @@ function MobileMenu({
   onToggleNav,
   onClose,
 }: MobileMenuProps) {
-  const t = useTranslations('nav');
+  const t = useTranslations("nav");
   return (
     <>
       {/* Backdrop overlay */}
@@ -449,7 +453,7 @@ type HeaderProps = {
 };
 
 export function Header({ navGroups = [] }: HeaderProps) {
-  const t = useTranslations('nav');
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
@@ -526,7 +530,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
           <div className="announcement-bar__track">
             {[...Array(6)].map((_, i) => (
               <span key={i} className="announcement-bar__item">
-                {t('announcement')}
+                {t("announcement")}
               </span>
             ))}
           </div>
@@ -620,10 +624,10 @@ export function Header({ navGroups = [] }: HeaderProps) {
                         </div>
                         <div className="flex flex-col text-sm leading-tight">
                           <span className="text-muted text-xs">
-                            {t('loginRegister')}
+                            {t("loginRegister")}
                           </span>
                           <span className="font-semibold text-text flex items-center gap-1">
-                            {t('myAccount')}{" "}
+                            {t("myAccount")}{" "}
                             <svg
                               width="12"
                               height="12"
@@ -702,7 +706,7 @@ export function Header({ navGroups = [] }: HeaderProps) {
             >
               <input
                 type="text"
-                placeholder={t('searchPlaceholder')}
+                placeholder={t("searchPlaceholder")}
                 className="flex-1 bg-transparent px-4 py-2 text-sm text-text outline-none placeholder:text-muted h-[40px]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

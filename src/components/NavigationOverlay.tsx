@@ -64,11 +64,11 @@ export function NavigationOverlay() {
 
   return (
     <div className="fixed inset-0 z-99999 flex items-center justify-center bg-bg/50 backdrop-blur-[2px]">
-      <div className="relative text-accent flex items-center justify-center w-20 h-20">
+      <div className="relative text-accent flex items-center justify-center w-24 h-24">
         {/* Outer spinning ring */}
         <div className="absolute inset-0 rounded-full border-[3px] border-accent/20 border-t-accent animate-spin"></div>
         {/* Static center logo */}
-        <span className="block w-12 h-12">
+        <span className="block w-20 h-20">
           <LoadingIcon />
         </span>
       </div>
