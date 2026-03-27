@@ -34,7 +34,7 @@ async function getBlogData(
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale?: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const t = await getTranslations('blogDetails');
@@ -42,13 +42,18 @@ export async function generateMetadata({
     const { blog } = await getBlogData(resolvedParams.slug);
     const title = blog.metaTitle || blog.title;
     const description = blog.metaDescription || blog.excerpt;
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.com"}/blogs/${blog.slug}`;
+    const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.com";
+    const url = `${base}/blogs/${blog.slug}`;
 
     return {
       title,
       description,
       alternates: {
         canonical: url,
+        languages: {
+          vi: `${base}/blogs/${blog.slug}`,
+          en: `${base}/en/blogs/${blog.slug}`,
+        },
       },
       openGraph: {
         title,
@@ -116,10 +121,12 @@ export default async function BlogDetailPage({
       ? (blog.authorId as any).name
       : "FROM THE STRESS";
 
-  // Build JSON-LD Schema
+  // Build JSON-LD Schemas
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.com";
-  const jsonLd = {
+  const wordCount = blog.content ? blog.content.split(/\s+/).length : 0;
+
+  const blogPostingSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     mainEntityOfPage: {
@@ -129,6 +136,9 @@ export default async function BlogDetailPage({
     headline: blog.metaTitle || blog.title,
     description: blog.metaDescription || blog.excerpt,
     image: blog.ogImage || blog.thumbnail,
+    wordCount,
+    ...(categoryName ? { articleSection: categoryName } : {}),
+    inLanguage: "vi-VN",
     author: {
       "@type": "Person",
       name: authorName,
@@ -138,11 +148,49 @@ export default async function BlogDetailPage({
       name: "FROM THE STRESS",
       logo: {
         "@type": "ImageObject",
-        url: `${baseUrl}/ftsshop.png`, // using placeholder standard logo
+        url: `${baseUrl}/ftsshop.png`,
       },
     },
     datePublished: blog.publishedAt || blog.createdAt,
-    dateModified: blog.createdAt,
+    dateModified: blog.updatedAt || blog.createdAt,
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${baseUrl}/blogs`,
+      },
+      ...(categoryName
+        ? [{
+            "@type": "ListItem",
+            position: 3,
+            name: categoryName,
+            item: `${baseUrl}/blogs?category=${typeof blog.categoryId === "object" ? (blog.categoryId as any).slug : ""}`,
+          }, {
+            "@type": "ListItem",
+            position: 4,
+            name: blog.title,
+            item: `${baseUrl}/blogs/${blog.slug}`,
+          }]
+        : [{
+            "@type": "ListItem",
+            position: 3,
+            name: blog.title,
+            item: `${baseUrl}/blogs/${blog.slug}`,
+          }]
+      ),
+    ],
   };
 
   const parsedContent = blog.content.replace(/::product\{slug="([^"]+)"\}/g, '<product-embed slug="$1"></product-embed>');
@@ -152,7 +200,11 @@ export default async function BlogDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <article className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 sm:py-16">

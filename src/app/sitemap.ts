@@ -6,21 +6,36 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fromthestress.vn';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
+  const getAlternates = (path: string) => ({
+    languages: {
+      vi: `${BASE}${path}`,
+      en: `${BASE}/en${path}`,
+    },
+  });
+
   // 1. Static Pages
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE, lastModified: now, changeFrequency: "daily", priority: 1 },
-    { url: `${BASE}/san-pham`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE}/blogs`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE}/best-selling`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
-    { url: `${BASE}/ve-chung-toi`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/lien-he`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/doi-tac`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${BASE}/chinh-sach-bao-mat`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/chinh-sach-doi-tra`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/chinh-sach-gioi-thieu`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/chinh-sach-van-chuyen`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/huong-dan-mua-hang`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+  const staticPaths = [
+    { path: "", priority: 1.0, freq: "daily" as const },
+    { path: "/san-pham", priority: 0.9, freq: "daily" as const },
+    { path: "/blogs", priority: 0.9, freq: "daily" as const },
+    { path: "/best-selling", priority: 0.8, freq: "daily" as const },
+    { path: "/ve-chung-toi", priority: 0.7, freq: "monthly" as const },
+    { path: "/lien-he", priority: 0.7, freq: "monthly" as const },
+    { path: "/doi-tac", priority: 0.6, freq: "monthly" as const },
+    { path: "/chinh-sach-bao-mat", priority: 0.3, freq: "yearly" as const },
+    { path: "/chinh-sach-doi-tra", priority: 0.3, freq: "yearly" as const },
+    { path: "/chinh-sach-gioi-thieu", priority: 0.3, freq: "yearly" as const },
+    { path: "/chinh-sach-van-chuyen", priority: 0.3, freq: "yearly" as const },
+    { path: "/huong-dan-mua-hang", priority: 0.5, freq: "monthly" as const },
   ];
+
+  const staticPages: MetadataRoute.Sitemap = staticPaths.map((item) => ({
+    url: `${BASE}${item.path}`,
+    lastModified: now,
+    changeFrequency: item.freq,
+    priority: item.priority,
+    alternates: getAlternates(item.path),
+  }));
 
   // 2. Fetch Dynamic Data
   let productSlugs: { slug: string; updatedAt?: string }[] = [];
@@ -43,6 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
     changeFrequency: "weekly",
     priority: 0.8,
+    alternates: getAlternates(`/san-pham/${p.slug}`),
   }));
 
   const blogPages: MetadataRoute.Sitemap = blogSlugs.map((b) => ({
@@ -50,6 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: b.updatedAt ? new Date(b.updatedAt) : now,
     changeFrequency: "weekly",
     priority: 0.7,
+    alternates: getAlternates(`/blogs/${b.slug}`),
   }));
 
   return [...staticPages, ...productPages, ...blogPages];

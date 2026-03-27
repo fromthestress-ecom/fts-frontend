@@ -166,6 +166,7 @@ export interface BlogItem {
   status: "draft" | "published";
   publishedAt?: string;
   createdAt: string;
+  updatedAt?: string;
   readingTime: number;
   showToc?: boolean;
   tags?: Tag[];

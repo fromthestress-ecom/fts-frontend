@@ -4,7 +4,14 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fromthestress.vn';
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: '*', allow: '/', disallow: ['/thanh-toan', '/don-hang/'] },
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/thanh-toan', '/don-hang/', '/admin/'],
+      },
+    ],
     sitemap: `${BASE}/sitemap.xml`,
+    host: BASE,
   };
 }
