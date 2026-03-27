@@ -2,18 +2,22 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale?: string }>;
+}): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations('contact');
+  const t = await getTranslations("contact");
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
-  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
   const url = `${base}${localePrefix}/lien-he`;
 
   return {
-    title: t('title'),
-    description: t('desc'),
+    title: t("title"),
+    description: t("desc"),
     alternates: {
       canonical: url,
       languages: {
@@ -29,13 +33,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale?: 
 }
 
 export default async function LienHePage() {
-  const t = await getTranslations('contact');
+  const t = await getTranslations("contact");
   return (
     <main>
       {/* ── Hero Banner ─────────────────────────────────────────────── */}
       <section className="contact-hero">
         <Image
-          src="/images/contact-pages.png"
+          src="/images/contact-pages.webp"
           alt="Contact banner"
           fill
           priority
@@ -46,30 +50,31 @@ export default async function LienHePage() {
         <div className="contact-hero__content">
           <div className="contact-hero__tags">
             <span className="banner-slider-hero__tag banner-slider-hero__tag--solid">
-              {t('tag1')}
+              {t("tag1")}
             </span>
             <span className="banner-slider-hero__tag banner-slider-hero__tag--outline">
-              {t('tag2')}
+              {t("tag2")}
             </span>
           </div>
-          <h1 className="contact-hero__title" style={{ whiteSpace: 'pre-line' }}>
-            {t('heading')}
+          <h1
+            className="contact-hero__title"
+            style={{ whiteSpace: "pre-line" }}
+          >
+            {t("heading")}
           </h1>
-          <p className="contact-hero__subtitle">
-            {t('subheading')}
-          </p>
+          <p className="contact-hero__subtitle">{t("subheading")}</p>
           <div className="banner-slider-hero__ctas">
             <Link
               href="/san-pham"
               className="banner-slider-hero__btn banner-slider-hero__btn--primary"
             >
-              {t('browse')}
+              {t("browse")}
             </Link>
             <Link
               href="/ve-chung-toi"
               className="banner-slider-hero__btn banner-slider-hero__btn--ghost"
             >
-              {t('about')}
+              {t("about")}
             </Link>
           </div>
         </div>
@@ -95,7 +100,7 @@ export default async function LienHePage() {
               </svg>
             </div>
             <p className="contact-info-card__value">info@fromthestress.com</p>
-            <p className="contact-info-card__label">{t('emailLabel')}</p>
+            <p className="contact-info-card__label">{t("emailLabel")}</p>
           </div>
 
           <div className="contact-info-card">
@@ -114,7 +119,7 @@ export default async function LienHePage() {
               </svg>
             </div>
             <p className="contact-info-card__value">+84 853 785 578</p>
-            <p className="contact-info-card__label">{t('phoneLabel')}</p>
+            <p className="contact-info-card__label">{t("phoneLabel")}</p>
           </div>
 
           <div className="contact-info-card">
@@ -133,8 +138,8 @@ export default async function LienHePage() {
                 <circle cx="12" cy="10" r="3" />
               </svg>
             </div>
-            <p className="contact-info-card__value">{t('locationValue')}</p>
-            <p className="contact-info-card__label">{t('locationLabel')}</p>
+            <p className="contact-info-card__value">{t("locationValue")}</p>
+            <p className="contact-info-card__label">{t("locationLabel")}</p>
           </div>
         </div>
       </section>
@@ -145,7 +150,7 @@ export default async function LienHePage() {
           {/* Left: decorative image */}
           <div className="contact-form-image">
             <Image
-              src="/images/contact-pages.png"
+              src="/images/contact-pages.webp"
               alt="FTS fashion"
               fill
               className="contact-form-image__img"

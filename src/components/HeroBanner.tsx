@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 type WordSpan = {
   text: string;
@@ -33,7 +33,7 @@ function getInitialTransform(from: "left" | "right" | "bottom") {
 }
 
 export function HeroBanner() {
-  const t = useTranslations('home');
+  const t = useTranslations("home");
   const containerRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -96,7 +96,7 @@ export function HeroBanner() {
   return (
     <section className="hero-text-banner" ref={containerRef}>
       <img
-        src="/images/HERO_BANNER.jpg"
+        src="/images/HERO_BANNER.webp"
         alt=""
         className="hero-text-banner__bg-img"
         loading="eager"
@@ -157,13 +157,13 @@ export function HeroBanner() {
             onMouseEnter={() => setDismissed(true)}
             onMouseLeave={() => setDismissed(false)}
           >
-            {t('exploreNow')}
+            {t("exploreNow")}
           </Link>
           <Link
             href="/lien-he"
             className="hero-text-banner__btn hero-text-banner__btn--ghost"
           >
-            {t('contactUs')}
+            {t("contactUs")}
           </Link>
         </div>
       </div>
