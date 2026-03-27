@@ -97,12 +97,25 @@ async function getCategories(): Promise<Category[]> {
   }
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('products');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/san-pham`;
+
   return {
     title: t('productsTitle'),
     description: t('productsDesc'),
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/san-pham`,
+        en: `${base}/en/san-pham`,
+      },
+    },
     openGraph: {
+      url,
       title: `${t('productsTitle')} | STREETWEAR`,
       description: t('productsDesc'),
     },

@@ -3,11 +3,27 @@ import type { Metadata } from "next";
 import { AboutLogoBackground } from "@/components/AboutLogoBackground";
 import { getTranslations } from 'next-intl/server';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('about');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/ve-chung-toi`;
+
   return {
     title: t('title'),
     description: t('desc'),
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/ve-chung-toi`,
+        en: `${base}/en/ve-chung-toi`,
+      },
+    },
+    openGraph: {
+      url,
+      type: "website",
+    },
   };
 }
 

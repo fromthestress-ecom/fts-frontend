@@ -15,6 +15,7 @@ import { BlogCard } from "@/components/BlogCard";
 import type { PromoSlide } from "@/components/PromoSlider";
 import { CollectionsSection } from "@/components/CollectionsSection";
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
 // const BannerSlider = dynamic(
 //   () => import("@/components/BannerSlider").then((m) => m.BannerSlider),
@@ -29,6 +30,30 @@ const PromoSlider = dynamic(
 );
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations('home');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}`;
+
+  return {
+    title: t('title') || "FROM THE STRESS | Thời trang đường phố",
+    description: t('description') || "Shop streetwear cao cấp - áo hoodie, tee, quần jogger, giày sneaker. Giao hàng toàn quốc.",
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}`,
+        en: `${base}/en`,
+      },
+    },
+    openGraph: {
+      url,
+      type: "website",
+    },
+  };
+}
 
 async function getFeaturedProducts(): Promise<ProductListResult> {
   try {

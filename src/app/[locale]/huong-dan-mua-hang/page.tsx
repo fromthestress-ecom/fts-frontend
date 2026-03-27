@@ -2,11 +2,27 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from 'next-intl/server';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('buyingGuide');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/huong-dan-mua-hang`;
+
   return {
     title: t('title'),
     description: t('desc'),
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/huong-dan-mua-hang`,
+        en: `${base}/en/huong-dan-mua-hang`,
+      },
+    },
+    openGraph: {
+      url,
+      type: "website",
+    },
   };
 }
 

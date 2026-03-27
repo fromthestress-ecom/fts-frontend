@@ -15,7 +15,7 @@
     "myAccount": "Tài khoản của tôi",
     "loginRegister": "Đăng nhập / Đăng ký",
     "viewAll": "Xem tất cả {category} →",
-    "announcement": "Chào mừng đến với From the Stress"
+    "announcement": "Siêu ưu đãi tháng 4 từ 1/4-30/4"
   },
   "footer": {
     "links": "Liên kết",
@@ -30,6 +30,8 @@
     "affiliatePolicy": "Chính sách Affiliate"
   },
   "home": {
+    "title": "FROM THE STRESS | Gen Stress Style",
+    "description": "Thương hiệu thời trang streetwear dành cho Gen Stress. Khám phá các bộ sưu tập Hoodie, Tee, Jogger độc bản.",
     "newProducts": "SẢN PHẨM MỚI",
     "viewAll": "Xem tất cả →",
     "bestSelling": "BÁN CHẠY NHẤT",

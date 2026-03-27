@@ -52,7 +52,7 @@ async function getOtherProductsByNavGroup(
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = (await params) as { slug: string; locale?: string };
   const product = await getProduct(slug);
   const t = await getTranslations('products');
   if (!product) return { title: t('title') };
@@ -67,15 +67,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description?.slice(0, 160) ??
     `Mua ${product.name} - ${new Intl.NumberFormat("vi-VN").format(product.price)}₫`;
   const image = product.images?.[0];
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/san-pham/${slug}`;
+
   return {
     title: product.name,
     description: desc,
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/san-pham/${slug}`,
+        en: `${base}/en/san-pham/${slug}`,
+      },
+    },
     openGraph: {
       title,
       description: desc,
       images: image ? [{ url: image, alt: product.name }] : undefined,
       type: "website",
-      url: `${SITE_URL}/san-pham/${slug}`,
+      url,
     },
     twitter: { card: "summary_large_image", title, description: desc },
   };

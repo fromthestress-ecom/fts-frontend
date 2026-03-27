@@ -4,11 +4,27 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
 import { getTranslations } from 'next-intl/server';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('contact');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/lien-he`;
+
   return {
     title: t('title'),
     description: t('desc'),
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/lien-he`,
+        en: `${base}/en/lien-he`,
+      },
+    },
+    openGraph: {
+      url,
+      type: "website",
+    },
   };
 }
 

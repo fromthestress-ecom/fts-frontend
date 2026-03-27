@@ -42,8 +42,9 @@ export async function generateMetadata({
     const { blog } = await getBlogData(resolvedParams.slug);
     const title = blog.metaTitle || blog.title;
     const description = blog.metaDescription || blog.excerpt;
-    const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.com";
-    const url = `${base}/blogs/${blog.slug}`;
+    const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+    const localePrefix = resolvedParams.locale && resolvedParams.locale !== 'vi' ? `/${resolvedParams.locale}` : '';
+    const url = `${base}${localePrefix}/blogs/${blog.slug}`;
 
     return {
       title,

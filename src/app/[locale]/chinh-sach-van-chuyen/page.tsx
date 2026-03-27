@@ -2,12 +2,25 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from 'next-intl/server';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('shipping');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/chinh-sach-van-chuyen`;
+
   return {
     title: t('title'),
     description: t('desc'),
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/chinh-sach-van-chuyen`,
+        en: `${base}/en/chinh-sach-van-chuyen`,
+      },
+    },
     openGraph: {
+      url,
       images: [{ url: "/images/og_vanChuyen.jpg", alt: t('title') }],
     },
   };

@@ -1,12 +1,25 @@
 import type { Metadata } from "next";
 import { getTranslations } from 'next-intl/server';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('referralPolicy');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const url = `${base}${localePrefix}/chinh-sach-gioi-thieu`;
+
   return {
     title: t('title'),
     description: t('desc'),
+    alternates: {
+      canonical: url,
+      languages: {
+        vi: `${base}/chinh-sach-gioi-thieu`,
+        en: `${base}/en/chinh-sach-gioi-thieu`,
+      },
+    },
     openGraph: {
+      url,
       images: [{ url: "/images/og_aff.jpg", alt: t('title') }],
     },
   };
