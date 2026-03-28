@@ -132,6 +132,7 @@ export default function EditBlogPage({
     if (!textarea) return;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
+    const scrollTop = textarea.scrollTop;
     const text = form.content;
     const selectedText = text.substring(start, end) || defaultText;
     const before = text.substring(0, start);
@@ -142,6 +143,7 @@ export default function EditBlogPage({
     
     setTimeout(() => {
       textarea.focus();
+      textarea.scrollTop = scrollTop;
       textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
     }, 0);
   };
@@ -178,6 +180,7 @@ export default function EditBlogPage({
       if (textarea) {
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
+        const scrollTop = textarea.scrollTop;
         const text = form.content;
         const before = text.substring(0, start);
         const after = text.substring(end);
@@ -187,6 +190,7 @@ export default function EditBlogPage({
         // Reset cursor back to textarea after React state finishes
         setTimeout(() => {
           textarea.focus();
+          textarea.scrollTop = scrollTop;
           textarea.setSelectionRange(
             start + mdImage.length,
             start + mdImage.length,
@@ -340,6 +344,7 @@ export default function EditBlogPage({
                       if (textarea) {
                         const start = textarea.selectionStart;
                         const end = textarea.selectionEnd;
+                        const scrollTop = textarea.scrollTop;
                         const text = form.content;
                         const selectedText = text.substring(start, end) || title || "Link";
                         const before = text.substring(0, start);
@@ -348,6 +353,7 @@ export default function EditBlogPage({
                         setForm(f => ({ ...f, content: before + mdLink + after }));
                         setTimeout(() => {
                           textarea.focus();
+                          textarea.scrollTop = scrollTop;
                           textarea.setSelectionRange(start + mdLink.length, start + mdLink.length);
                         }, 0);
                       }
@@ -364,6 +370,7 @@ export default function EditBlogPage({
                       const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
                       if (textarea) {
                         const start = textarea.selectionStart;
+                        const scrollTop = textarea.scrollTop;
                         const text = form.content;
                         const before = text.substring(0, start);
                         const after = text.substring(textarea.selectionEnd);
@@ -371,6 +378,7 @@ export default function EditBlogPage({
                         setForm(f => ({ ...f, content: before + mdProduct + after }));
                         setTimeout(() => {
                            textarea.focus();
+                           textarea.scrollTop = scrollTop;
                            textarea.setSelectionRange(start + mdProduct.length, start + mdProduct.length);
                         }, 0);
                       }
