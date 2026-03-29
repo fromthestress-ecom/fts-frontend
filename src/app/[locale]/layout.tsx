@@ -55,7 +55,9 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     siteName: SITE_NAME,
     description: DEFAULT_DESC,
-    images: [{ url: "/images/og_image.jpg", width: 1200, height: 630, alt: SITE_NAME }],
+    images: [
+      { url: "/images/og_image.jpg", width: 1200, height: 630, alt: SITE_NAME },
+    ],
   },
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
@@ -64,20 +66,20 @@ export const metadata: Metadata = {
   },
 };
 
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { routing } from '@/i18n/routing';
-import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { routing } from "@/i18n/routing";
+import { notFound } from "next/navigation";
 
 export default async function RootLayout({
   children,
-  params
+  params,
 }: Readonly<{
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }>) {
   const resolvedParams = await Promise.resolve(params);
-  const locale = resolvedParams?.locale || 'vi';
+  const locale = resolvedParams?.locale || "vi";
 
   if (!routing.locales.includes(locale as any)) {
     notFound();
@@ -107,7 +109,7 @@ export default async function RootLayout({
         <Script id="gtag-init" strategy="afterInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
         </Script>
-        <Script id="fb-pixel" strategy="afterInteractive">
+        <Script id="fb-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
