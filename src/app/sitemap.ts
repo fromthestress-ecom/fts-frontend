@@ -40,19 +40,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 2. Fetch Dynamic Data
   let productSlugs: { slug: string; updatedAt?: string }[] = [];
   let blogSlugs: { slug: string; updatedAt?: string }[] = [];
+  let productCategories: { slug: string; updatedAt?: string }[] = [];
+  let blogCategories: { slug: string; updatedAt?: string }[] = [];
+  let blogTags: { slug: string; updatedAt?: string }[] = [];
 
   try {
-    const [products, blogsData] = await Promise.all([
+    const [products, blogsData, categories, blogCats, tags] = await Promise.all([
       fetchApi<{ slug: string; updatedAt?: string }[]>("/products/slugs"),
-      fetchApi<any>("/blogs?limit=500"),
+      fetchApi<any>("/blogs?limit=1000"),
+      fetchApi<any[]>("/categories"),
+      fetchApi<any[]>("/blogs/categories"),
+      fetchApi<any[]>("/blogs/tags"),
     ]);
     productSlugs = products;
     blogSlugs = blogsData.blogs || [];
+    productCategories = categories;
+    blogCategories = blogCats || [];
+    blogTags = tags || [];
   } catch (error) {
     console.error("Sitemap data fetch failed:", error);
   }
 
   // 3. Map Dynamic Pages
+
+  // Products Detail
   const productPages: MetadataRoute.Sitemap = productSlugs.map((p) => ({
     url: `${BASE}/san-pham/${p.slug}`,
     lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
@@ -61,6 +72,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: getAlternates(`/san-pham/${p.slug}`),
   }));
 
+  // Product Categories
+  const productCategoryPages: MetadataRoute.Sitemap = productCategories.map((c) => ({
+    url: `${BASE}/san-pham?danh_muc=${c.slug}`,
+    lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
+    changeFrequency: "daily",
+    priority: 0.8,
+    alternates: getAlternates(`/san-pham?danh_muc=${c.slug}`),
+  }));
+
+  // Special Nav Groups
+  const specialNavPages: MetadataRoute.Sitemap = ["tops", "bottoms"].map((slug) => ({
+    url: `${BASE}/san-pham?danh_muc=${slug}`,
+    lastModified: now,
+    changeFrequency: "daily",
+    priority: 0.7,
+    alternates: getAlternates(`/san-pham?danh_muc=${slug}`),
+  }));
+
+  // Blogs Detail
   const blogPages: MetadataRoute.Sitemap = blogSlugs.map((b) => ({
     url: `${BASE}/blogs/${b.slug}`,
     lastModified: b.updatedAt ? new Date(b.updatedAt) : now,
@@ -69,5 +99,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     alternates: getAlternates(`/blogs/${b.slug}`),
   }));
 
-  return [...staticPages, ...productPages, ...blogPages];
+  // Blog Categories
+  const blogCategoryPages: MetadataRoute.Sitemap = blogCategories.map((c) => ({
+    url: `${BASE}/blogs?category=${c.slug}`,
+    lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
+    changeFrequency: "weekly",
+    priority: 0.6,
+    alternates: getAlternates(`/blogs?category=${c.slug}`),
+  }));
+
+  // Blog Tags
+  const blogTagPages: MetadataRoute.Sitemap = blogTags.map((t) => ({
+    url: `${BASE}/blogs?tag=${t.slug}`,
+    lastModified: t.updatedAt ? new Date(t.updatedAt) : now,
+    changeFrequency: "weekly",
+    priority: 0.5,
+    alternates: getAlternates(`/blogs?tag=${t.slug}`),
+  }));
+
+  return [
+    ...staticPages,
+    ...productPages,
+    ...productCategoryPages,
+    ...specialNavPages,
+    ...blogPages,
+    ...blogCategoryPages,
+    ...blogTagPages,
+  ];
 }
