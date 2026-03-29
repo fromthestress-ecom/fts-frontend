@@ -18,7 +18,7 @@ const OtherProductsSection = dynamic(() =>
     (m) => m.OtherProductsSection,
   ),
 );
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn";
@@ -54,8 +54,8 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, locale } = (await params) as { slug: string; locale?: string };
   const product = await getProduct(slug);
-  const t = await getTranslations('products');
-  if (!product) return { title: t('title') };
+  const t = await getTranslations("products");
+  if (!product) return { title: t("title") };
   const template =
     typeof product.templateId === "object" && product.templateId !== null
       ? product.templateId
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     `Mua ${product.name} - ${new Intl.NumberFormat("vi-VN").format(product.price)}₫`;
   const image = product.images?.[0];
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
-  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
   const url = `${base}${localePrefix}/san-pham/${slug}`;
 
   return {
@@ -95,8 +95,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProduct(slug);
-  const tp = await getTranslations('products');
-  const td = await getTranslations('productDetails');
+  const tp = await getTranslations("products");
+  const td = await getTranslations("productDetails");
   if (!product) notFound();
 
   const category =
@@ -150,7 +150,7 @@ export default async function ProductPage({ params }: Props) {
       />
       <div className="mx-auto max-w-[960px] px-4 py-8 sm:px-6">
         <nav className="mb-4 text-sm text-muted sm:text-base">
-          <Link href="/san-pham">{tp('title')}</Link>
+          <Link href="/san-pham">{tp("title")}</Link>
           {categoryName && (
             <>
               {" / "}
@@ -168,11 +168,11 @@ export default async function ProductPage({ params }: Props) {
           />
 
           <div>
-            <h1 className="font-display mb-2 text-2xl sm:text-3xl flex items-center gap-3">
+            <h1 className="font-display mb-2 text-2xl sm:text-3xl flex items-start gap-3 flex-col ">
               {product.name}
               {isSoldOut ? (
                 <span className="rounded bg-red-600 px-2 py-1 text-sm font-bold text-white shadow-sm">
-                  {td('soldOut')}
+                  {td("soldOut")}
                 </span>
               ) : null}
             </h1>
@@ -189,7 +189,7 @@ export default async function ProductPage({ params }: Props) {
                   size="lg"
                 />
                 <p className="mt-1 text-sm text-muted">
-                  {td('event')} {product.eventDiscount.eventName}
+                  {td("event")} {product.eventDiscount.eventName}
                 </p>
               </div>
             ) : product.eventDiscount?.status === "active" ? (
@@ -212,7 +212,7 @@ export default async function ProductPage({ params }: Props) {
                     : `-${new Intl.NumberFormat("vi-VN").format(product.eventDiscount.discountValue)}₫`}
                 </span>
                 <p className="mt-1 text-sm text-muted">
-                  {td('event')} {product.eventDiscount.eventName}
+                  {td("event")} {product.eventDiscount.eventName}
                 </p>
               </div>
             ) : (
