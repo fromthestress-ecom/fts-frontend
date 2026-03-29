@@ -23,7 +23,9 @@ function getChildHref(_parentLabel: string, slug: string): string {
 function isNavItemActive(
   item: NavGroupItem,
   searchParams: URLSearchParams | null,
+  pathname: string,
 ): boolean {
+  if (pathname !== "/san-pham" && pathname !== "/en/san-pham") return false;
   if (!searchParams) return false;
   const value = searchParams.get("danh_muc");
   if (!value) return false;
@@ -142,7 +144,7 @@ function NavItems({
       ) : (
         navGroups.map((item) => {
           const key = item.label;
-          const isActive = isNavItemActive(item, searchParams);
+          const isActive = isNavItemActive(item, searchParams, pathname);
           const itemActiveClass = isActive ? activeClass : inactiveClass;
 
           if (isMobile) {

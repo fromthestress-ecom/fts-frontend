@@ -85,6 +85,8 @@ export interface Product {
   order: number;
   preOrder?: boolean;
   isSoldOut?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductListResult {
