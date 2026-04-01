@@ -1,4 +1,4 @@
-import { fetchApi, type ProductListResult, type Category } from "@/lib/api";
+import { fetchApi, type ProductListResult, type Category, type EventItem } from "@/lib/api";
 import { ProductGrid } from "@/components/ProductGrid";
 import { TrackViewItemList } from "@/components/TrackViewItemList";
 import { getTranslations } from 'next-intl/server';
@@ -77,11 +77,13 @@ async function getProducts(
   }
   const q = (searchParams.q ?? "").trim();
   const sort = searchParams.sap_xep ?? "";
+  const event = searchParams.event ?? "";
   const params = new URLSearchParams({ page, limit: "12" });
   if (categoryId) params.set("category", categoryId);
   if (navGroup) params.set("navGroup", navGroup);
   if (q) params.set("q", q);
   if (sort) params.set("sort", sort);
+  if (event) params.set("event", event);
   try {
     return await fetchApi<ProductListResult>(`/products?${params}`);
   } catch {
@@ -92,6 +94,14 @@ async function getProducts(
 async function getCategories(): Promise<Category[]> {
   try {
     return await fetchApi<Category[]>("/categories");
+  } catch {
+    return [];
+  }
+}
+
+async function getEvents(): Promise<EventItem[]> {
+  try {
+    return await fetchApi<EventItem[]>("/events");
   } catch {
     return [];
   }
@@ -132,6 +142,7 @@ export default async function ProductsPage({
   const raw = await searchParams;
   const params = normalizeParams(raw);
   const categories = await getCategories();
+  const events = await getEvents();
   const result = await getProducts(params, categories);
   const effectiveCategorySlug = resolveCategorySlug(params, categories);
   const t = await getTranslations('products');
@@ -145,6 +156,7 @@ export default async function ProductsPage({
       <ProductGrid
         initialData={result}
         categories={categories}
+        events={events}
         currentParams={params}
         effectiveCategorySlug={effectiveCategorySlug}
         basePath="/san-pham"

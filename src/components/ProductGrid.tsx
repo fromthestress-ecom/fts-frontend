@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ProductListResult, Category } from "@/lib/api";
+import type { ProductListResult, Category, EventItem } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { useTranslations } from 'next-intl';
 
 type ProductGridProps = {
   initialData: ProductListResult;
   categories: Category[];
+  events?: EventItem[];
   currentParams: Record<string, string | undefined>;
   effectiveCategorySlug?: string;
   basePath: string;
@@ -17,6 +18,7 @@ type ProductGridProps = {
 export function ProductGrid({
   initialData,
   categories,
+  events = [],
   currentParams,
   effectiveCategorySlug,
   basePath,
@@ -175,6 +177,35 @@ export function ProductGrid({
                 <button
                   onClick={() =>
                     router.push(buildUrl({ danh_muc: null, page: null }))
+                  }
+                  className="cursor-pointer text-muted hover:text-text ml-1"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            )}
+            
+            {currentParams.event && (
+              <div className="flex items-center gap-2 bg-surface px-3 py-1.5 text-[13px] border border-border/60 rounded flex-shrink-0">
+                <span className="text-accent font-medium">Event:</span>
+                <span>
+                  {events.find((e) => e._id === currentParams.event)?.name || "Đang lọc"}
+                </span>
+                <button
+                  onClick={() =>
+                    router.push(buildUrl({ event: null, page: null }))
                   }
                   className="cursor-pointer text-muted hover:text-text ml-1"
                 >
