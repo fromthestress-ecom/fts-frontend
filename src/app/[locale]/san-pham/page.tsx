@@ -107,30 +107,58 @@ async function getEvents(): Promise<EventItem[]> {
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations('products');
+  const rawSearchParams = await searchParams;
+  const t = await getTranslations("products");
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
-  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
-  const url = `${base}${localePrefix}/san-pham`;
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
+
+  // Xây dựng URL canonical sạch (giữ lại danh mục nếu có, loại bỏ page, sort, event)
+  const canonicalBase = `${base}${localePrefix}/san-pham`;
+  const urlObj = new URL(canonicalBase);
+  if (typeof rawSearchParams.danh_muc === "string") {
+    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc);
+  } else if (Array.isArray(rawSearchParams.danh_muc)) {
+    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc[0]);
+  }
+  const canonicalUrl = urlObj.toString();
+
+  // Noindex cho trang tìm kiếm để tránh pha loãng SEO
+  const isSearch = !!rawSearchParams.q;
+
+  // Xây dựng alternates languages sạch
+  const categorySuffix = typeof rawSearchParams.danh_muc === "string" 
+    ? `?danh_muc=${rawSearchParams.danh_muc}`
+    : Array.isArray(rawSearchParams.danh_muc)
+    ? `?danh_muc=${rawSearchParams.danh_muc[0]}`
+    : "";
 
   return {
-    title: t('productsTitle'),
-    description: t('productsDesc'),
+    title: t("productsTitle"),
+    description: t("productsDesc"),
     alternates: {
-      canonical: url,
+      canonical: canonicalUrl,
       languages: {
-        vi: `${base}/san-pham`,
-        en: `${base}/en/san-pham`,
+        vi: `${base}/san-pham${categorySuffix}`,
+        en: `${base}/en/san-pham${categorySuffix}`,
       },
     },
+    robots: isSearch ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
-      url,
-      title: `${t('productsTitle')} | STREETWEAR`,
-      description: t('productsDesc'),
+      url: canonicalUrl,
+      title: `${t("productsTitle")} | STREETWEAR`,
+      description: t("productsDesc"),
     },
   };
 }
+
 
 export const dynamic = "force-dynamic";
 

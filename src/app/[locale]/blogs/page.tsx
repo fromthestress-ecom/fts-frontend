@@ -3,29 +3,53 @@ import { fetchApi, type BlogCategory, type Tag } from "@/lib/api";
 import { BlogGrid } from "@/components/BlogGrid";
 import { getTranslations } from 'next-intl/server';
 
-export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations('blogs');
+  const rawSearchParams = await searchParams;
+  const t = await getTranslations("blogs");
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
-  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
-  const url = `${base}${localePrefix}/blogs`;
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
+
+  // Xây dựng URL canonical sạch (giữ lại category/tag nếu có, loại bỏ các tham số phân trang/tìm kiếm)
+  const canonicalBase = `${base}${localePrefix}/blogs`;
+  const urlObj = new URL(canonicalBase);
+
+  let filterSuffix = "";
+  if (typeof rawSearchParams.category === "string") {
+    urlObj.searchParams.set("category", rawSearchParams.category);
+    filterSuffix = `?category=${rawSearchParams.category}`;
+  } else if (typeof rawSearchParams.tag === "string") {
+    urlObj.searchParams.set("tag", rawSearchParams.tag);
+    filterSuffix = `?tag=${rawSearchParams.tag}`;
+  }
+
+  const canonicalUrl = urlObj.toString();
+  const isSearch = !!rawSearchParams.search;
 
   return {
-    title: t('title'),
-    description: t('desc'),
+    title: t("title"),
+    description: t("desc"),
     alternates: {
-      canonical: url,
+      canonical: canonicalUrl,
       languages: {
-        vi: `${base}/blogs`,
-        en: `${base}/en/blogs`,
+        vi: `${base}/blogs${filterSuffix}`,
+        en: `${base}/en/blogs${filterSuffix}`,
       },
     },
+    robots: isSearch ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
-      url,
-      images: [{ url: "/images/og_blogs.jpg", alt: t('title') }],
+      url: canonicalUrl,
+      images: [{ url: "/images/og_blogs.jpg", alt: t("title") }],
     },
   };
 }
+
 
 async function getCategories() {
   try {

@@ -76,15 +76,52 @@ async function getCategories(): Promise<Category[]> {
   }
 }
 
-export const metadata: Metadata = {
-  title: "Best Selling Items",
-  description:
-    "Những sản phẩm streetwear bán chạy nhất của chúng tôi - hoodie, tee, jogger, sneaker.",
-  openGraph: {
-    title: "Best Sellers | STREETWEAR",
-    description: "Những sản phẩm bán chạy nhất hiện tại.",
-  },
-};
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const rawSearchParams = await searchParams;
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
+
+  // Xây dựng URL canonical sạch (giữ lại danh mục nếu có, loại bỏ các tham số lọc khác)
+  const canonicalBase = `${base}${localePrefix}/best-selling`;
+  const urlObj = new URL(canonicalBase);
+  if (typeof rawSearchParams.danh_muc === "string") {
+    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc);
+  } else if (Array.isArray(rawSearchParams.danh_muc)) {
+    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc[0]);
+  }
+  const canonicalUrl = urlObj.toString();
+
+  const categorySuffix = typeof rawSearchParams.danh_muc === "string" 
+    ? `?danh_muc=${rawSearchParams.danh_muc}`
+    : Array.isArray(rawSearchParams.danh_muc)
+    ? `?danh_muc=${rawSearchParams.danh_muc[0]}`
+    : "";
+
+  return {
+    title: "Best Selling Items",
+    description: "Những sản phẩm streetwear bán chạy nhất của chúng tôi - hoodie, tee, jogger, sneaker.",
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        vi: `${base}/best-selling${categorySuffix}`,
+        en: `${base}/en/best-selling${categorySuffix}`,
+      },
+    },
+    openGraph: {
+      url: canonicalUrl,
+      title: "Best Sellers | STREETWEAR",
+      description: "Những sản phẩm bán chạy nhất hiện tại.",
+    },
+  };
+}
+
 
 export const dynamic = "force-dynamic";
 
