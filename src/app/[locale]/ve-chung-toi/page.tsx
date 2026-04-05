@@ -23,6 +23,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale?: 
     openGraph: {
       url,
       type: "website",
+      images: [
+        {
+          url: "/images/og_image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "FROM THE STRESS",
+        },
+      ],
     },
   };
 }

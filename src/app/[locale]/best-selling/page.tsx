@@ -118,6 +118,14 @@ export async function generateMetadata({
       url: canonicalUrl,
       title: "Best Sellers | STREETWEAR",
       description: "Những sản phẩm bán chạy nhất hiện tại.",
+      images: [
+        {
+          url: "/images/og_image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "FROM THE STRESS",
+        },
+      ],
     },
   };
 }

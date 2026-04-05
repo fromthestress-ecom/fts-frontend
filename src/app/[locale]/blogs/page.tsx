@@ -45,7 +45,14 @@ export async function generateMetadata({
     robots: isSearch ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       url: canonicalUrl,
-      images: [{ url: "/images/og_blogs.jpg", alt: t("title") }],
+      images: [
+        {
+          url: "/images/og_blogs.jpg",
+          width: 1200,
+          height: 630,
+          alt: t("title"),
+        },
+      ],
     },
   };
 }

@@ -28,6 +28,14 @@ export async function generateMetadata({
     openGraph: {
       url,
       type: "website",
+      images: [
+        {
+          url: "/images/og_image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "FROM THE STRESS",
+        },
+      ],
     },
   };
 }

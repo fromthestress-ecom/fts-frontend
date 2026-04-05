@@ -155,6 +155,14 @@ export async function generateMetadata({
       url: canonicalUrl,
       title: `${t("productsTitle")} | STREETWEAR`,
       description: t("productsDesc"),
+      images: [
+        {
+          url: "/images/og_image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "FROM THE STRESS",
+        },
+      ],
     },
   };
 }
