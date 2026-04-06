@@ -2952,3 +2952,158 @@
   color: var(--text);
   border-color: var(--text);
 }
+
+/* =============================================
+   Quill HTML Content Renderer (.quill-content)
+   Dùng để render bài blog mới viết bằng Quill
+   ============================================= */
+.quill-content {
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 1rem;
+  /* Fix overflow: ngăn text tràn ra ngoài container */
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Headings */
+.quill-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.7rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 2rem 0 0.75rem;
+  color: var(--text);
+  line-height: 1.2;
+}
+.quill-content h3 {
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  font-weight: 600;
+  margin: 1.5rem 0 0.6rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+.quill-content h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+  color: var(--text);
+}
+
+/* Paragraphs */
+.quill-content p {
+  margin-bottom: 1rem;
+  color: color-mix(in srgb, var(--text) 90%, transparent);
+}
+
+/* Bold / Italic */
+.quill-content strong {
+  font-weight: 700;
+  color: var(--text);
+}
+.quill-content em {
+  font-style: italic;
+  color: color-mix(in srgb, var(--text) 85%, transparent);
+}
+
+/* Lists */
+.quill-content ul,
+.quill-content ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.quill-content li {
+  margin-bottom: 0.4rem;
+  color: color-mix(in srgb, var(--text) 90%, transparent);
+}
+.quill-content ul > li {
+  list-style: disc;
+}
+.quill-content ul > li::marker {
+  color: var(--accent);
+}
+.quill-content ol > li {
+  list-style: decimal;
+}
+.quill-content ol > li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Links */
+.quill-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+.quill-content a:hover {
+  opacity: 0.8;
+}
+
+/* Blockquote */
+.quill-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 0.6rem 0 0.6rem 1.25rem;
+  margin: 1.25rem 0;
+  font-style: italic;
+  color: var(--muted);
+  background: var(--surface);
+  border-radius: 0 6px 6px 0;
+}
+
+/* Code */
+.quill-content code {
+  font-family: ui-monospace, monospace;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.875em;
+  color: var(--accent);
+}
+.quill-content pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+.quill-content pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text);
+  font-size: inherit;
+}
+
+/* Images */
+.quill-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+  display: block;
+}
+
+/* Horizontal rule */
+.quill-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* Text align */
+.quill-content .ql-align-center { text-align: center; }
+.quill-content .ql-align-right  { text-align: right; }
+.quill-content .ql-align-justify { text-align: justify; }
+
+/* Indent levels (Quill indent classes) */
+.quill-content .ql-indent-1 { padding-left: 2rem; }
+.quill-content .ql-indent-2 { padding-left: 4rem; }
+.quill-content .ql-indent-3 { padding-left: 6rem; }

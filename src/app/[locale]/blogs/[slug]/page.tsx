@@ -9,7 +9,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { getTranslations } from 'next-intl/server';
 import { TableOfContents } from "@/components/TableOfContents";
-import { extractHeadings, extractText, generateSlug } from "@/lib/toc";
+import { extractHeadings, extractText, generateSlug, isHtmlContent } from "@/lib/toc";
 import { EmbeddedProduct } from "@/components/EmbeddedProduct";
 
 export const revalidate = 60; // Cache for 60s
@@ -194,8 +194,48 @@ export default async function BlogDetailPage({
     ],
   };
 
-  const parsedContent = blog.content.replace(/::product\{slug="([^"]+)"\}/g, '<product-embed slug="$1"></product-embed>');
-  const headings = blog.showToc !== false ? extractHeadings(parsedContent) : [];
+  /**
+   * Decode HTML entities (vì Quill dùng &nbsp;, &amp;...)
+   */
+  function decodeEntities(text: string): string {
+    return text
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#(\d+);/g, (_m, d) => String.fromCharCode(Number(d)))
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /**
+   * Với nội dung HTML: inject id vào các thẻ heading để TOC anchor hoạt động.
+   * Markdown: xử lý ::product{} như cũ.
+   */
+  function injectHeadingIds(html: string): string {
+    return html.replace(
+      /<h([2-4])([^>]*)>(.*?)<\/h[2-4]>/gi,
+      (_match, level, attrs, inner) => {
+        const plainText = decodeEntities(inner.replace(/<[^>]+>/g, ""));
+        const id = generateSlug(plainText);
+        return `<h${level}${attrs} id="${id}" class="scroll-mt-24">${inner}</h${level}>`;
+      }
+    );
+  }
+
+  const parsedContent = isHtmlContent(blog.content)
+    ? injectHeadingIds(
+        blog.content.replace(
+          /::product\{slug="([^"]+)"\}/g,
+          '<product-embed slug="$1"></product-embed>'
+        )
+      )
+    : blog.content.replace(
+        /::product\{slug="([^"]+)"\}/g,
+        '<product-embed slug="$1"></product-embed>'
+      );
+  const headings = blog.showToc !== false ? extractHeadings(blog.content) : [];
   
   return (
     <>
@@ -259,33 +299,43 @@ export default async function BlogDetailPage({
               <div className="md:hidden mb-8">
                 {blog.showToc !== false && <TableOfContents headings={headings} />}
               </div>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw]}
-                components={{
-                  // @ts-expect-error - Custom HTML component mapped in rehypeRaw
-                  "product-embed": ({node, slug, ...props}: any) => {
-                    return <EmbeddedProduct slug={slug} />;
-                  },
-                  h2: ({node, children, ...props}) => {
-                    const id = generateSlug(extractText(children));
-                    return <h2 id={id} className="scroll-mt-24" {...props}>{children}</h2>;
-                  },
-                  h3: ({node, children, ...props}) => {
-                    const id = generateSlug(extractText(children));
-                    return <h3 id={id} className="scroll-mt-24" {...props}>{children}</h3>;
-                  },
-                  h4: ({node, children, ...props}) => {
-                    const id = generateSlug(extractText(children));
-                    return <h4 id={id} className="scroll-mt-24" {...props}>{children}</h4>;
-                  },
-                  p: ({node, children, ...props}: any) => {
-                    return <div className="mb-4 leading-relaxed" {...props}>{children}</div>;
-                  }
-                }}
-              >
-                {parsedContent}
-              </ReactMarkdown>
+
+              {isHtmlContent(blog.content) ? (
+                // ── Bài mới viết bằng Quill → render HTML trực tiếp ──
+                <div
+                  dangerouslySetInnerHTML={{ __html: parsedContent }}
+                  className="quill-content"
+                />
+              ) : (
+                // ── Bài cũ viết bằng Markdown → giữ nguyên ReactMarkdown ──
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    // @ts-expect-error - Custom HTML component mapped in rehypeRaw
+                    "product-embed": ({node, slug, ...props}: any) => {
+                      return <EmbeddedProduct slug={slug} />;
+                    },
+                    h2: ({node, children, ...props}) => {
+                      const id = generateSlug(extractText(children));
+                      return <h2 id={id} className="scroll-mt-24" {...props}>{children}</h2>;
+                    },
+                    h3: ({node, children, ...props}) => {
+                      const id = generateSlug(extractText(children));
+                      return <h3 id={id} className="scroll-mt-24" {...props}>{children}</h3>;
+                    },
+                    h4: ({node, children, ...props}) => {
+                      const id = generateSlug(extractText(children));
+                      return <h4 id={id} className="scroll-mt-24" {...props}>{children}</h4>;
+                    },
+                    p: ({node, children, ...props}: any) => {
+                      return <div className="mb-4 leading-relaxed" {...props}>{children}</div>;
+                    }
+                  }}
+                >
+                  {parsedContent}
+                </ReactMarkdown>
+              )}
             </div>
 
             {/* Tags display */}

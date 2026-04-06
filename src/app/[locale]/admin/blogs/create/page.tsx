@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 import type { BlogCategory, Author, Tag } from "@/lib/api";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -112,27 +113,6 @@ export default function CreateBlogPage() {
       .replace(/-+$/, "");
   };
 
-  const handleWrapText = (prefix: string, suffix: string, defaultText: string = "văn bản") => {
-    const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const scrollTop = textarea.scrollTop;
-    const text = form.content;
-    const selectedText = text.substring(start, end) || defaultText;
-    const before = text.substring(0, start);
-    const after = text.substring(end);
-    
-    const newText = before + prefix + selectedText + suffix + after;
-    setForm(f => ({ ...f, content: newText }));
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.scrollTop = scrollTop;
-      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
-    }, 0);
-  };
-
   const handleFileSelect = async (
     e: React.ChangeEvent<HTMLInputElement>,
     field: "thumbnail" | "ogImage" | "bannerImage",
@@ -145,51 +125,6 @@ export default function CreateBlogPage() {
       setForm((f) => ({ ...f, [field]: res.url }));
     } catch (err: any) {
       alert(err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
-  };
-
-  const handleInsertContentImage = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const res = await adminUploadFile(file, "blogs");
-      const textarea = document.getElementById(
-        "blog-content-textarea",
-      ) as HTMLTextAreaElement;
-      if (textarea) {
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const scrollTop = textarea.scrollTop;
-        const text = form.content;
-        const before = text.substring(0, start);
-        const after = text.substring(end);
-        const mdImage = `\n![${file.name}](${res.url})\n`;
-        setForm((f) => ({ ...f, content: before + mdImage + after }));
-
-        // Reset cursor back to textarea after React state finishes
-        setTimeout(() => {
-          textarea.focus();
-          textarea.scrollTop = scrollTop;
-          textarea.setSelectionRange(
-            start + mdImage.length,
-            start + mdImage.length,
-          );
-        }, 0);
-      } else {
-        // Fallback if ref/id fails
-        setForm((f) => ({
-          ...f,
-          content: f.content + `\n![${file.name}](${res.url})\n`,
-        }));
-      }
-    } catch (err: any) {
-      alert("Lỗi upload ảnh chèn: " + err.message);
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -246,9 +181,9 @@ export default function CreateBlogPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        className="flex flex-col gap-6"
       >
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
           {/* Main Content Info */}
           <div className="bg-surface border border-border rounded-lg p-6">
             <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-border pb-2">
@@ -291,74 +226,19 @@ export default function CreateBlogPage() {
               />
             </div>
 
-              <div className="mb-4 relative">
+            <div className="mb-4 relative">
               <div className="flex justify-between items-end mb-1.5 flex-wrap gap-2">
                 <label className="text-xs font-bold text-muted uppercase tracking-wider block">
-                  Nội dung bài (Markdown/HTML) *
+                  Nội dung bài *
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {/* Text Formatting Buttons */}
-                  <div className="flex flex-wrap items-center bg-surface border border-border rounded p-0.5 text-xs font-bold text-text">
-                    <button type="button" onClick={() => handleWrapText("**", "**", "in đậm")} className="px-2.5 py-1 hover:bg-bg rounded font-serif font-bold transition-colors" title="In đậm">B</button>
-                    <button type="button" onClick={() => handleWrapText("_", "_", "in nghiêng")} className="px-2.5 py-1 hover:bg-bg rounded font-serif italic transition-colors" title="In nghiêng">I</button>
-                    <button type="button" onClick={() => handleWrapText("<u>", "</u>", "gạch chân")} className="px-2.5 py-1 hover:bg-bg rounded font-serif underline transition-colors" title="Gạch chân">U</button>
-                    <div className="w-px h-3.5 bg-border mx-1"></div>
-                    <button type="button" onClick={() => handleWrapText("\n## ", "\n\n", "Tiêu đề H2")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Heading 2">H2</button>
-                    <button type="button" onClick={() => handleWrapText("\n### ", "\n\n", "Tiêu đề H3")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Heading 3">H3</button>
-                    <button type="button" onClick={() => handleWrapText("\n#### ", "\n\n", "Tiêu đề H4")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Heading 4">H4</button>
-                    <div className="w-px h-3.5 bg-border mx-1"></div>
-                    <button type="button" onClick={() => handleWrapText("\n> ", "\n\n", "Trích dẫn")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Trích dẫn (Quote)">❝</button>
-                    <button type="button" onClick={() => handleWrapText("\n- ", "\n", "Dòng danh sách")} className="px-2.5 py-1 hover:bg-bg rounded font-sans transition-colors" title="Danh sách (Gạch đầu dòng)">• LI</button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const url = prompt("Nhập đường dẫn (URL):");
-                      if (!url) return;
-                      const title = prompt("Nhập văn bản hiển thị:", "Link");
-                      const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
-                      if (textarea) {
-                        const start = textarea.selectionStart;
-                        const end = textarea.selectionEnd;
-                        const scrollTop = textarea.scrollTop;
-                        const text = form.content;
-                        const selectedText = text.substring(start, end) || title || "Link";
-                        const before = text.substring(0, start);
-                        const after = text.substring(end);
-                        const mdLink = `[${selectedText}](${url})`;
-                        setForm(f => ({ ...f, content: before + mdLink + after }));
-                        setTimeout(() => {
-                          textarea.focus();
-                          textarea.scrollTop = scrollTop;
-                          textarea.setSelectionRange(start + mdLink.length, start + mdLink.length);
-                        }, 0);
-                      }
-                    }}
-                    className="cursor-pointer text-xs font-bold bg-surface border border-border text-text px-3 py-1 rounded hover:border-accent hover:text-accent transition-colors"
-                  >
-                    Chèn Link
-                  </button>
                   <button
                     type="button"
                     onClick={() => {
                       const slug = prompt("Nhập slug của sản phẩm (VD: ao-thun-nam):");
                       if (!slug) return;
-                      const textarea = document.getElementById("blog-content-textarea") as HTMLTextAreaElement;
-                      if (textarea) {
-                        const start = textarea.selectionStart;
-                        const scrollTop = textarea.scrollTop;
-                        const text = form.content;
-                        const before = text.substring(0, start);
-                        const after = text.substring(textarea.selectionEnd);
-                        const mdProduct = `\n::product{slug="${slug}"}\n`;
-                        setForm(f => ({ ...f, content: before + mdProduct + after }));
-                        setTimeout(() => {
-                           textarea.focus();
-                           textarea.scrollTop = scrollTop;
-                           textarea.setSelectionRange(start + mdProduct.length, start + mdProduct.length);
-                        }, 0);
-                      }
+                      const mdProduct = `<p>::product{slug="${slug}"}</p>`;
+                      setForm(f => ({ ...f, content: f.content + mdProduct }));
                     }}
                     className="cursor-pointer text-xs font-bold bg-surface border border-border text-text px-3 py-1 rounded hover:border-accent hover:text-accent transition-colors"
                   >
@@ -382,29 +262,36 @@ export default function CreateBlogPage() {
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        Chèn Ảnh
+                        Upload Ảnh Trực Tiếp
                       </>
                     )}
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={handleInsertContentImage}
+                      onChange={async (e) => {
+                         const file = e.target.files?.[0];
+                         if (!file) return;
+                         setUploading(true);
+                         try {
+                           const res = await adminUploadFile(file, "blogs");
+                           const imgHtml = `<p><img src="${res.url}" alt="${file.name}" /></p>`;
+                           setForm((f) => ({ ...f, content: f.content + imgHtml }));
+                         } catch (err: any) {
+                           alert("Lỗi upload ảnh chèn: " + err.message);
+                         } finally {
+                           setUploading(false);
+                           e.target.value = "";
+                         }
+                      }}
                       disabled={uploading}
                     />
                   </label>
                 </div>
               </div>
-              <textarea
-                id="blog-content-textarea"
+              <RichTextEditor
                 value={form.content}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, content: e.target.value }))
-                }
-                required
-                rows={20}
-                className={`${inputClass} font-mono text-sm`}
-                placeholder="Sử dụng thẻ HTML hoặc viết nội dung chi tiết..."
+                onChange={(val) => setForm((f) => ({ ...f, content: val }))}
               />
             </div>
           </div>
@@ -462,255 +349,168 @@ export default function CreateBlogPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          {/* Post Settings */}
-          <div className="bg-surface border border-border rounded-lg p-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider mb-4 border-b border-border pb-2">
-              Cài đặt xuất bản
-            </h2>
+        {/* ── Cài đặt xuất bản (nằm ngang bên dưới) ── */}
+        <div className="bg-surface border border-border rounded-lg p-6">
+          <h2 className="text-sm font-bold uppercase tracking-wider mb-5 border-b border-border pb-2">
+            Cài đặt xuất bản
+          </h2>
 
-            <div className="mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            {/* Trạng thái */}
+            <div>
               <label className={labelClass}>Trạng thái</label>
               <select
                 value={form.status}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, status: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
                 className={inputClass}
               >
                 <option value="draft">Bản nháp (Draft)</option>
                 <option value="published">Xuất bản (Published)</option>
               </select>
+              {form.status === "published" && (
+                <div className="mt-3">
+                  <label className={labelClass}>Lên lịch đăng</label>
+                  <input
+                    type="datetime-local"
+                    value={form.publishedAt}
+                    onChange={(e) => setForm((f) => ({ ...f, publishedAt: e.target.value }))}
+                    className={inputClass}
+                  />
+                  <p className="text-xs text-muted mt-1">Để trống = đăng ngay.</p>
+                </div>
+              )}
             </div>
 
-            {form.status === "published" && (
-              <div className="mb-6">
-                <label className={labelClass}>
-                  Lên lịch đăng (Published At)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={form.publishedAt}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, publishedAt: e.target.value }))
-                  }
-                  className={inputClass}
-                />
-                <p className="text-xs text-muted mt-1">
-                  Để trống nếu muốn đăng ngay lập tức.
-                </p>
-              </div>
-            )}
-
-            <div className="mb-6">
+            {/* Tác giả */}
+            <div>
               <label className={labelClass}>Tác giả</label>
               <select
                 value={form.authorId}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, authorId: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, authorId: e.target.value }))}
                 className={inputClass}
               >
                 <option value="">-- Chọn tác giả --</option>
                 {authors.map((a) => (
-                  <option key={a._id} value={a._id}>
-                    {a.name}
-                  </option>
+                  <option key={a._id} value={a._id}>{a.name}</option>
                 ))}
               </select>
             </div>
 
-            <div className="mb-6">
+            {/* Danh mục */}
+            <div>
               <label className={labelClass}>Danh mục</label>
               <select
                 value={form.categoryId}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, categoryId: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, categoryId: e.target.value }))}
                 className={inputClass}
               >
                 <option value="">-- Chọn danh mục --</option>
                 {categories.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
+                  <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
               </select>
             </div>
 
-            <div className="mb-6">
-              <label className={labelClass}>Thẻ phân loại (Tags)</label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {form.tags.map((tagId) => {
-                  const tag = availableTags.find((t) => t._id === tagId);
-                  if (!tag) return null;
-                  return (
-                    <span
-                      key={tag._id}
-                      className="px-2 py-1 bg-surface border border-border rounded text-xs tracking-wider uppercase flex items-center gap-2"
-                    >
-                      {tag.name}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setForm((f) => ({
-                            ...f,
-                            tags: f.tags.filter((id) => id !== tagId),
-                          }))
-                        }
-                        className="text-muted hover:text-red-500"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
+            {/* Tags */}
+            <div>
+              <label className={labelClass}>Tags</label>
               <select
                 value=""
                 onChange={(e) => {
                   if (e.target.value && !form.tags.includes(e.target.value)) {
-                    setForm((f) => ({
-                      ...f,
-                      tags: [...f.tags, e.target.value],
-                    }));
+                    setForm((f) => ({ ...f, tags: [...f.tags, e.target.value] }));
                   }
                 }}
                 className={inputClass}
               >
                 <option value="">+ Thêm Tag</option>
-                {availableTags
-                  .filter((t) => !form.tags.includes(t._id))
-                  .map((t) => (
-                    <option key={t._id} value={t._id}>
-                      {t.name}
-                    </option>
-                  ))}
+                {availableTags.filter((t) => !form.tags.includes(t._id)).map((t) => (
+                  <option key={t._id} value={t._id}>{t.name}</option>
+                ))}
               </select>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {form.tags.map((tagId) => {
+                  const tag = availableTags.find((t) => t._id === tagId);
+                  if (!tag) return null;
+                  return (
+                    <span key={tag._id} className="px-2 py-0.5 bg-bg border border-border rounded text-xs tracking-wider uppercase flex items-center gap-1.5">
+                      {tag.name}
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, tags: f.tags.filter((id) => id !== tagId) }))} className="text-muted hover:text-red-500">×</button>
+                    </span>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="mb-6">
+            {/* Ảnh Thumbnail */}
+            <div>
               <label className={labelClass}>Ảnh đại diện (Thumbnail)</label>
-              <div className="border-2 border-dashed border-border p-4 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
+              <div className="border-2 border-dashed border-border p-3 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
                 {form.thumbnail ? (
                   <div className="relative">
-                    <img
-                      src={form.thumbnail}
-                      alt="Thubmail"
-                      className="w-full h-auto rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, thumbnail: "" }))}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
-                    >
-                      x
-                    </button>
+                    <img src={form.thumbnail} alt="Thumbnail" className="w-full h-auto rounded" />
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, thumbnail: "" }))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center cursor-pointer">×</button>
                   </div>
                 ) : (
-                  <span className="text-muted text-sm flex flex-col items-center">
-                    <svg
-                      className="w-8 h-8 mb-2 opacity-50"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Chưa có ảnh
-                  </span>
+                  <span className="text-muted text-xs">Chưa có ảnh</span>
                 )}
               </div>
-              <input
-                type="file"
-                onChange={(e) => handleFileSelect(e, "thumbnail")}
-                accept="image/*"
-                disabled={uploading}
-                className="block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer"
-              />
+              <input type="file" onChange={(e) => handleFileSelect(e, "thumbnail")} accept="image/*" disabled={uploading}
+                className="block w-full text-xs text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer" />
             </div>
 
-            <div className="mb-6">
-              <label className={labelClass}>Ảnh Banner (Banner Image)</label>
-              <div className="border-2 border-dashed border-border p-4 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
+            {/* Ảnh Banner */}
+            <div>
+              <label className={labelClass}>Ảnh Banner</label>
+              <div className="border-2 border-dashed border-border p-3 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
                 {form.bannerImage ? (
                   <div className="relative">
-                    <img
-                      src={form.bannerImage}
-                      alt="Banner"
-                      className="w-full h-auto rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, bannerImage: "" }))}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer"
-                    >
-                      x
-                    </button>
+                    <img src={form.bannerImage} alt="Banner" className="w-full h-auto rounded" />
+                    <button type="button" onClick={() => setForm((f) => ({ ...f, bannerImage: "" }))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center cursor-pointer">×</button>
                   </div>
                 ) : (
-                  <span className="text-muted text-sm flex flex-col items-center">
-                    <svg
-                      className="w-8 h-8 mb-2 opacity-50"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Chưa có ảnh banner
-                  </span>
+                  <span className="text-muted text-xs">Chưa có ảnh banner</span>
                 )}
               </div>
-              <input
-                type="file"
-                onChange={(e) => handleFileSelect(e, "bannerImage")}
-                accept="image/*"
-                disabled={uploading}
-                className="block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer"
-              />
+              <input type="file" onChange={(e) => handleFileSelect(e, "bannerImage")} accept="image/*" disabled={uploading}
+                className="block w-full text-xs text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer" />
             </div>
 
-            <div className="mb-6 flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="showToc"
-                checked={form.showToc}
-                onChange={(e) => setForm(f => ({ ...f, showToc: e.target.checked }))}
-                className="w-4 h-4 cursor-pointer"
-              />
-              <label htmlFor="showToc" className="text-sm font-bold uppercase tracking-wider cursor-pointer">
-                Hiển thị Mục Lục (Table of Contents)
-              </label>
+            {/* OG Image */}
+            <div>
+              <label className={labelClass}>Ảnh OpenGraph (OG Image)</label>
+              <div className="flex gap-3 items-start">
+                <input type="file" onChange={(e) => handleFileSelect(e, "ogImage")} accept="image/*" disabled={uploading} className="text-sm text-muted" />
+                {form.ogImage && <img src={form.ogImage} alt="" className="h-14 w-24 object-cover border border-border rounded" />}
+              </div>
             </div>
 
-            {message && (
-              <p className="mb-4 text-sm text-red-500 font-semibold">
-                {message}
-              </p>
-            )}
+            {/* TOC + Submit */}
+            <div className="flex flex-col justify-between gap-4">
+              <div>
+                <label className={labelClass}>Tùy chọn</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input type="checkbox" id="showToc" checked={form.showToc}
+                    onChange={(e) => setForm(f => ({ ...f, showToc: e.target.checked }))}
+                    className="w-4 h-4 cursor-pointer accent-accent" />
+                  <label htmlFor="showToc" className="text-sm font-semibold cursor-pointer">Hiển thị Mục Lục (TOC)</label>
+                </div>
+              </div>
 
-            <button
-              type="submit"
-              disabled={saving || uploading}
-              className="w-full cursor-pointer rounded border border-text bg-text px-4 py-3 font-bold uppercase tracking-widest text-bg hover:bg-bg hover:text-text transition-colors disabled:opacity-50"
-            >
-              {saving
-                ? "Đang lưu..."
-                : form.status === "published"
-                  ? "Xuất bản bài vết"
-                  : "Lưu bản nháp"}
-            </button>
+              {message && (
+                <p className="text-sm text-red-500 font-semibold">{message}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={saving || uploading}
+                className="w-full cursor-pointer rounded border border-text bg-text px-4 py-3 font-bold uppercase tracking-widest text-bg hover:bg-bg hover:text-text transition-colors disabled:opacity-50"
+              >
+                {saving ? "Đang lưu..." : form.status === "published" ? "Xuất bản bài viết" : "Lưu bản nháp"}
+              </button>
+            </div>
+
           </div>
         </div>
       </form>
