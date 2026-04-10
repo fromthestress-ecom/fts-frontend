@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchApi } from "@/lib/api";
+import { fetchApi, sortProductsBySoldOut } from "@/lib/api";
 
 interface AffProduct {
   _id: string;
@@ -37,7 +37,12 @@ export default function SanPhamAffiliatePage() {
     fetchApi<ProductResult>(`/affiliates/products?page=${page}&limit=20`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(setData)
+      .then((res) => {
+        setData({
+          ...res,
+          items: sortProductsBySoldOut(res.items as any) as any,
+        });
+      })
       .catch(() => {});
   }, [token, page]);
 

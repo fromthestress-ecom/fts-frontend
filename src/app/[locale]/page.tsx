@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   fetchApi,
   fetchBestSellingProducts,
+  sortProductsBySoldOut,
   type Product,
   type ProductListResult,
   type BlogItem,
@@ -98,6 +99,7 @@ async function getActiveEvents(): Promise<EventItem[]> {
 async function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
   if (items.length === 0) return null;
   const t = await getTranslations('home');
+  const sortedItems = sortProductsBySoldOut(items);
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
@@ -105,7 +107,7 @@ async function FeaturedProductsSection({ items }: { items: readonly Product[] })
         {t('newProducts')}
       </h2>
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {items.map((p) => (
+        {sortedItems.map((p) => (
           <li key={p._id}>
             <ProductCard product={p} headingLevel="h3" />
           </li>
@@ -126,6 +128,7 @@ async function FeaturedProductsSection({ items }: { items: readonly Product[] })
 async function BestSellingProductsSection({ items }: { items: readonly Product[] }) {
   if (items.length === 0) return null;
   const t = await getTranslations('home');
+  const sortedItems = sortProductsBySoldOut(items);
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
@@ -133,7 +136,7 @@ async function BestSellingProductsSection({ items }: { items: readonly Product[]
         {t('bestSelling')}
       </h2>
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {items.map((p) => (
+        {sortedItems.map((p) => (
           <li key={p._id}>
             <ProductCard product={p} headingLevel="h3" />
           </li>

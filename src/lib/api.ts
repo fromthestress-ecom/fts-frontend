@@ -199,3 +199,17 @@ export interface OrderListResult {
   page: number;
   totalPages: number;
 }
+
+/**
+ * Sorts products so that sold out items are at the end of the array.
+ * Maintains relative order for items with the same sold out status.
+ */
+export function sortProductsBySoldOut(products: Product[] | readonly Product[]): Product[] {
+  return [...products].sort((a, b) => {
+    const aSoldOut = a.isSoldOut || !a.inStock;
+    const bSoldOut = b.isSoldOut || !b.inStock;
+    if (aSoldOut && !bSoldOut) return 1;
+    if (!aSoldOut && bSoldOut) return -1;
+    return 0;
+  });
+}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ProductListResult, Category, EventItem } from "@/lib/api";
+import { sortProductsBySoldOut, type ProductListResult, type Category, type EventItem } from "@/lib/api";
 import { ProductCard } from "@/components/ProductCard";
 import { useTranslations } from 'next-intl';
 
@@ -37,7 +37,8 @@ export function ProductGrid({
     return q ? `${basePath}?${q}` : basePath;
   };
 
-  const { items, page, totalPages } = initialData;
+  const sortedItems = sortProductsBySoldOut(initialData.items);
+  const { page, totalPages } = initialData;
 
   return (
     <div className="flex flex-col items-start gap-8 lg:flex-row lg:gap-12">
@@ -55,7 +56,7 @@ export function ProductGrid({
           )}
         </div>
         <div className="mb-8 text-[13px] text-muted">
-          {t('showingProducts', { count: initialData.total || items.length })}
+          {t('showingProducts', { count: initialData.total || sortedItems.length })}
         </div>
 
         {/* Categories as text links */}
@@ -251,7 +252,7 @@ export function ProductGrid({
 
       {/* Grid */}
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-        {items.map((p) => (
+        {sortedItems.map((p) => (
           <li key={p._id}>
             <ProductCard product={p} headingLevel="h2" />
           </li>

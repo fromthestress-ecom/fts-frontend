@@ -5,7 +5,7 @@ import Link from "next/link";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import type { Product } from "@/lib/api";
+import { sortProductsBySoldOut, type Product } from "@/lib/api";
 import { ImageWithSkeleton } from "@/components/ImageWithSkeleton";
 
 function getSlidesToShow(width: number) {
@@ -19,6 +19,7 @@ type OtherProductsSectionProps = {
 };
 
 export function OtherProductsSection({ products }: OtherProductsSectionProps) {
+  const sortedProducts = sortProductsBySoldOut(products);
   const [slidesToShow, setSlidesToShow] = useState(4);
   const [mounted, setMounted] = useState(false);
 
@@ -51,7 +52,7 @@ export function OtherProductsSection({ products }: OtherProductsSectionProps) {
         {mounted && (
           <div className="other-products-slider">
             <Slider {...sliderSettings} key={slidesToShow}>
-              {products.map((p) => (
+              {sortedProducts.map((p) => (
                 <div key={p._id} className="px-2">
                   <Link
                     href={`/san-pham/${p.slug}`}

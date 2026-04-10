@@ -1,6 +1,7 @@
 import {
   fetchApi,
   fetchBestSellingProducts,
+  sortProductsBySoldOut,
   type ProductListResult,
   type Category,
   type Product,
@@ -56,7 +57,7 @@ async function getBestSelling(params: Record<string, string>, categories: Catego
     }
 
     return {
-      items: products,
+      items: sortProductsBySoldOut(products),
       total: products.length,
       page: 1,
       limit: 48,
