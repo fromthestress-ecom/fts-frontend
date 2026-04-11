@@ -39,7 +39,7 @@ export default function VouchersCollectorPage() {
             </p>
             <div className="mt-auto">
               <a
-                href="https://block-blast-game-fawn.vercel.app/"
+                href="https://blockerino.fromthestress.vn/"
                 rel="noopener noreferrer"
                 className="flex w-full items-center justify-center rounded-lg bg-text px-4 py-3 text-sm font-semibold text-bg transition-transform active:scale-95 group-hover:bg-accent"
               >
