@@ -140,6 +140,19 @@ const navSections: NavSection[] = [
         badge: "AI",
       },
       {
+        href: "/admin/ai-writer",
+        label: "AI Writer",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-green-500/10 text-green-400">
+            ✦
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/ai-writer" ||
+          pathname.startsWith("/admin/ai-writer/"),
+        badge: "AI",
+      },
+      {
         href: "/admin/blog-categories",
         label: "DM Bài viết",
         icon: (

@@ -52,6 +52,7 @@ export default function CreateBlogPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [fromAi, setFromAi] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -72,6 +73,17 @@ export default function CreateBlogPage() {
   });
 
   useEffect(() => {
+    // Pre-fill from AI Writer if available
+    const aiDraft = sessionStorage.getItem("ai_writer_draft");
+    if (aiDraft) {
+      try {
+        const parsed = JSON.parse(aiDraft);
+        setForm((f) => ({ ...f, ...parsed }));
+        setFromAi(true);
+      } catch {}
+      sessionStorage.removeItem("ai_writer_draft");
+    }
+
     Promise.all([
       adminFetch("/admin/blog-categories"),
       adminFetch("/admin/authors"),
@@ -178,6 +190,19 @@ export default function CreateBlogPage() {
           &larr; Quay lại
         </Link>
       </div>
+
+      {fromAi && (
+        <div className="mb-4 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400 flex items-center justify-between">
+          <span>Nội dung được tạo từ AI Writer. Kiểm tra lại trước khi xuất bản.</span>
+          <button
+            type="button"
+            onClick={() => setFromAi(false)}
+            className="text-green-400/60 hover:text-green-400 cursor-pointer"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <form
         onSubmit={handleSubmit}

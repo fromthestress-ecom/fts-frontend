@@ -7,9 +7,14 @@ import { ShareButton } from "@/components/ShareButton";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 import { TableOfContents } from "@/components/TableOfContents";
-import { extractHeadings, extractText, generateSlug, isHtmlContent } from "@/lib/toc";
+import {
+  extractHeadings,
+  extractText,
+  generateSlug,
+  isHtmlContent,
+} from "@/lib/toc";
 import { EmbeddedProduct } from "@/components/EmbeddedProduct";
 
 export const revalidate = 60; // Cache for 60s
@@ -37,13 +42,16 @@ export async function generateMetadata({
   params: Promise<{ slug: string; locale?: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
-  const t = await getTranslations('blogDetails');
+  const t = await getTranslations("blogDetails");
   try {
     const { blog } = await getBlogData(resolvedParams.slug);
     const title = blog.metaTitle || blog.title;
     const description = blog.metaDescription || blog.excerpt;
     const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
-    const localePrefix = resolvedParams.locale && resolvedParams.locale !== 'vi' ? `/${resolvedParams.locale}` : '';
+    const localePrefix =
+      resolvedParams.locale && resolvedParams.locale !== "vi"
+        ? `/${resolvedParams.locale}`
+        : "";
     const url = `${base}${localePrefix}/blogs/${blog.slug}`;
 
     return {
@@ -84,8 +92,8 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: t('notFoundTitle'),
-      description: t('notFoundDesc'),
+      title: t("notFoundTitle"),
+      description: t("notFoundDesc"),
     };
   }
 }
@@ -96,7 +104,7 @@ export default async function BlogDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const t = await getTranslations('blogDetails');
+  const t = await getTranslations("blogDetails");
   let data;
   try {
     data = await getBlogData(slug);
@@ -173,24 +181,28 @@ export default async function BlogDetailPage({
         item: `${baseUrl}/blogs`,
       },
       ...(categoryName
-        ? [{
-            "@type": "ListItem",
-            position: 3,
-            name: categoryName,
-            item: `${baseUrl}/blogs?category=${typeof blog.categoryId === "object" ? (blog.categoryId as any).slug : ""}`,
-          }, {
-            "@type": "ListItem",
-            position: 4,
-            name: blog.title,
-            item: `${baseUrl}/blogs/${blog.slug}`,
-          }]
-        : [{
-            "@type": "ListItem",
-            position: 3,
-            name: blog.title,
-            item: `${baseUrl}/blogs/${blog.slug}`,
-          }]
-      ),
+        ? [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: categoryName,
+              item: `${baseUrl}/blogs?category=${typeof blog.categoryId === "object" ? (blog.categoryId as any).slug : ""}`,
+            },
+            {
+              "@type": "ListItem",
+              position: 4,
+              name: blog.title,
+              item: `${baseUrl}/blogs/${blog.slug}`,
+            },
+          ]
+        : [
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: blog.title,
+              item: `${baseUrl}/blogs/${blog.slug}`,
+            },
+          ]),
     ],
   };
 
@@ -220,7 +232,7 @@ export default async function BlogDetailPage({
         const plainText = decodeEntities(inner.replace(/<[^>]+>/g, ""));
         const id = generateSlug(plainText);
         return `<h${level}${attrs} id="${id}" class="scroll-mt-24">${inner}</h${level}>`;
-      }
+      },
     );
   }
 
@@ -228,15 +240,15 @@ export default async function BlogDetailPage({
     ? injectHeadingIds(
         blog.content.replace(
           /::product\{slug="([^"]+)"\}/g,
-          '<product-embed slug="$1"></product-embed>'
-        )
+          '<product-embed slug="$1"></product-embed>',
+        ),
       )
     : blog.content.replace(
         /::product\{slug="([^"]+)"\}/g,
-        '<product-embed slug="$1"></product-embed>'
+        '<product-embed slug="$1"></product-embed>',
       );
   const headings = blog.showToc !== false ? extractHeadings(blog.content) : [];
-  
+
   return (
     <>
       <script
@@ -264,11 +276,15 @@ export default async function BlogDetailPage({
             {blog.title}
           </h1>
           <div className="flex items-center justify-center gap-4 text-xs sm:text-sm text-muted font-bold tracking-widest uppercase">
-            <span>{t('by')} {authorName}</span>
+            <span>
+              {t("by")} {authorName}
+            </span>
             <span className="w-1.5 h-1.5 rounded-full bg-border border border-muted"></span>
             <span>{dateStr}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-border border border-muted"></span>
-            <span>{blog.readingTime || 1} {t('minRead')}</span>
+            <span>
+              {blog.readingTime || 1} {t("minRead")}
+            </span>
           </div>
         </header>
 
@@ -284,20 +300,24 @@ export default async function BlogDetailPage({
                   className="object-cover w-full h-full block hover:scale-105 transition-transform duration-700"
                 />
               </div>
-            ) : blog.thumbnail && (
-              <div className="relative aspect-video w-full overflow-hidden mb-10 bg-surface rounded-xl">
-                <img
-                  src={blog.thumbnail}
-                  alt={blog.title}
-                  className="object-cover w-full h-full block hover:scale-105 transition-transform duration-700"
-                />
-              </div>
+            ) : (
+              blog.thumbnail && (
+                <div className="relative aspect-video w-full overflow-hidden mb-10 bg-surface rounded-xl">
+                  <img
+                    src={blog.thumbnail}
+                    alt={blog.title}
+                    className="object-cover w-full h-full block hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+              )
             )}
 
             <div className="blog-content prose prose-invert max-w-none text-base sm:text-lg leading-relaxed text-text/90">
               {/* Optional inline TOC inside article on mobile */}
               <div className="md:hidden mb-8">
-                {blog.showToc !== false && <TableOfContents headings={headings} />}
+                {blog.showToc !== false && (
+                  <TableOfContents headings={headings} />
+                )}
               </div>
 
               {isHtmlContent(blog.content) ? (
@@ -313,24 +333,40 @@ export default async function BlogDetailPage({
                   rehypePlugins={[rehypeRaw]}
                   components={{
                     // @ts-expect-error - Custom HTML component mapped in rehypeRaw
-                    "product-embed": ({node, slug, ...props}: any) => {
+                    "product-embed": ({ node, slug, ...props }: any) => {
                       return <EmbeddedProduct slug={slug} />;
                     },
-                    h2: ({node, children, ...props}) => {
+                    h2: ({ node, children, ...props }) => {
                       const id = generateSlug(extractText(children));
-                      return <h2 id={id} className="scroll-mt-24" {...props}>{children}</h2>;
+                      return (
+                        <h2 id={id} className="scroll-mt-24" {...props}>
+                          {children}
+                        </h2>
+                      );
                     },
-                    h3: ({node, children, ...props}) => {
+                    h3: ({ node, children, ...props }) => {
                       const id = generateSlug(extractText(children));
-                      return <h3 id={id} className="scroll-mt-24" {...props}>{children}</h3>;
+                      return (
+                        <h3 id={id} className="scroll-mt-24" {...props}>
+                          {children}
+                        </h3>
+                      );
                     },
-                    h4: ({node, children, ...props}) => {
+                    h4: ({ node, children, ...props }) => {
                       const id = generateSlug(extractText(children));
-                      return <h4 id={id} className="scroll-mt-24" {...props}>{children}</h4>;
+                      return (
+                        <h4 id={id} className="scroll-mt-24" {...props}>
+                          {children}
+                        </h4>
+                      );
                     },
-                    p: ({node, children, ...props}: any) => {
-                      return <div className="mb-4 leading-relaxed" {...props}>{children}</div>;
-                    }
+                    p: ({ node, children, ...props }: any) => {
+                      return (
+                        <div className="mb-4 leading-relaxed" {...props}>
+                          {children}
+                        </div>
+                      );
+                    },
                   }}
                 >
                   {parsedContent}
@@ -373,12 +409,12 @@ export default async function BlogDetailPage({
                   <line x1="19" y1="12" x2="5" y2="12" />
                   <polyline points="12 19 5 12 12 5" />
                 </svg>
-                {t('backToJournal')}
+                {t("backToJournal")}
               </Link>
 
               <div className="flex items-center gap-4">
                 <span className="text-sm font-semibold text-muted uppercase tracking-widest">
-                  {t('share')}
+                  {t("share")}
                 </span>
                 <div className="flex gap-2">
                   <ShareButton />
@@ -396,19 +432,17 @@ export default async function BlogDetailPage({
               {/* Newsletter Stub */}
               <div className="bg-surface rounded-xl p-6 border border-border">
                 <h3 className="font-display text-xl uppercase tracking-wider mb-2">
-                  {t('theDispatch')}
+                  {t("theDispatch")}
                 </h3>
-                <p className="text-sm text-muted mb-6">
-                  {t('dispatchDesc')}
-                </p>
+                <p className="text-sm text-muted mb-6">{t("dispatchDesc")}</p>
                 <form className="flex flex-col gap-3">
                   <input
                     type="email"
-                    placeholder={t('enterEmail')}
+                    placeholder={t("enterEmail")}
                     className="bg-bg border border-border rounded px-4 py-3 text-sm focus:border-accent outline-none"
                   />
                   <button className="bg-text text-bg uppercase font-bold text-sm tracking-widest py-3 rounded hover:bg-accent hover:text-white transition-colors">
-                    {t('subscribe')}
+                    {t("subscribe")}
                   </button>
                 </form>
               </div>
@@ -416,7 +450,7 @@ export default async function BlogDetailPage({
               {/* Tag Cloud Overview could go here based on all tags but keeping simple for now */}
               <div className="pt-8 border-t border-border">
                 <p className="text-xs font-bold uppercase tracking-widest text-muted mb-4">
-                  {t('shareThisArticle')}
+                  {t("shareThisArticle")}
                 </p>
                 <div className="flex gap-2">
                   <ShareButton />
@@ -432,7 +466,7 @@ export default async function BlogDetailPage({
         <section className="bg-surface border-t border-border mt-12">
           <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6">
             <h2 className="font-display text-2xl sm:text-3xl uppercase tracking-wide mb-10 text-center text-text m-0">
-              {t('relatedEditorial')}
+              {t("relatedEditorial")}
             </h2>
             <ul className="grid list-none grid-cols-1 gap-6 p-0 m-0 sm:grid-cols-3">
               {relatedBlogs.map((b) => (

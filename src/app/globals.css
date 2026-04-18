@@ -2961,9 +2961,8 @@
   color: var(--text);
   line-height: 1.8;
   font-size: 1rem;
-  /* Fix overflow: ngăn text tràn ra ngoài container */
   overflow-wrap: break-word;
-  word-break: break-word;
+  word-break: normal;
   min-width: 0;
   max-width: 100%;
 }
