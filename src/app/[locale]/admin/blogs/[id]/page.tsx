@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 import type { BlogCategory, Author, BlogItem, Tag } from "@/lib/api";
 import RichTextEditor from "@/components/RichTextEditor";
+import { ImageUploader, MediaLibrary } from "@/components/admin/ImageUploader";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -21,28 +22,7 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
-function adminUploadFile(
-  file: File,
-  folder?: string,
-): Promise<{ url: string; key: string }> {
-  const key = getAdminKey();
-  const formData = new FormData();
-  formData.append("file", file);
-  const uploadUrl = folder
-    ? `${API}/admin/upload?folder=${folder}`
-    : `${API}/admin/upload`;
-  return fetch(uploadUrl, {
-    method: "POST",
-    headers: { "x-admin-key": key ?? "" },
-    body: formData,
-  }).then((res) => {
-    if (!res.ok)
-      return res.json().then((data) => {
-        throw new Error(data.message || "Upload thất bại");
-      });
-    return res.json();
-  });
-}
+
 
 export default function EditBlogPage({
   params,
@@ -56,8 +36,8 @@ export default function EditBlogPage({
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+  const [showInlineLibrary, setShowInlineLibrary] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -127,24 +107,6 @@ export default function EditBlogPage({
         setLoading(false);
       });
   }, [id]);
-
-  const handleFileSelect = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-    field: "thumbnail" | "ogImage" | "bannerImage",
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const res = await adminUploadFile(file, "blogs");
-      setForm((f) => ({ ...f, [field]: res.url }));
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,6 +212,16 @@ export default function EditBlogPage({
             </div>
 
             <div className="mb-4 relative">
+              {showInlineLibrary && (
+                <MediaLibrary
+                  onPick={(url) => {
+                    const imgHtml = `<p><img src="${url}" alt="" /></p>`;
+                    setForm((f) => ({ ...f, content: f.content + imgHtml }));
+                    setShowInlineLibrary(false);
+                  }}
+                  onClose={() => setShowInlineLibrary(false)}
+                />
+              )}
               <div className="flex justify-between items-end mb-1.5 flex-wrap gap-2">
                 <label className="text-xs font-bold text-muted uppercase tracking-wider block">
                   Nội dung bài *
@@ -267,47 +239,45 @@ export default function EditBlogPage({
                   >
                     Mã Sản Phẩm
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowInlineLibrary(true)}
+                    className="cursor-pointer text-xs font-bold bg-surface border border-border text-muted px-3 py-1 rounded hover:border-accent hover:text-accent transition-colors flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2}/><circle cx="8.5" cy="8.5" r="1.5" strokeWidth={2}/><polyline points="21 15 16 10 5 21" strokeWidth={2}/>
+                    </svg>
+                    Thư viện
+                  </button>
                   <label className="cursor-pointer text-xs font-bold bg-surface border border-accent text-accent px-3 py-1 rounded hover:bg-accent hover:text-bg transition-colors flex items-center gap-1">
-                    {uploading ? (
-                      "Đang tải..."
-                    ) : (
-                      <>
-                        <svg
-                          className="w-3 h-3"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        Upload Ảnh Trực Tiếp
-                      </>
-                    )}
+                    <>
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Upload Ảnh
+                    </>
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
                       onChange={async (e) => {
-                         const file = e.target.files?.[0];
-                         if (!file) return;
-                         setUploading(true);
-                         try {
-                           const res = await adminUploadFile(file, "blogs");
-                           const imgHtml = `<p><img src="${res.url}" alt="${file.name}" /></p>`;
-                           setForm((f) => ({ ...f, content: f.content + imgHtml }));
-                         } catch (err: any) {
-                           alert("Lỗi upload ảnh chèn: " + err.message);
-                         } finally {
-                           setUploading(false);
-                           e.target.value = "";
-                         }
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const key = getAdminKey();
+                          const fd = new FormData();
+                          fd.append("file", file);
+                          const r = await fetch(`${API}/admin/upload?folder=blogs`, {
+                            method: "POST", headers: { "x-admin-key": key ?? "" }, body: fd,
+                          });
+                          const d = await r.json();
+                          if (!r.ok) throw new Error(d.message);
+                          const imgHtml = `<p><img src="${d.url}" alt="${file.name}" /></p>`;
+                          setForm((f) => ({ ...f, content: f.content + imgHtml }));
+                        } catch (err: any) {
+                          alert("Lỗi upload ảnh chèn: " + err.message);
+                        } finally { e.target.value = ""; }
                       }}
-                      disabled={uploading}
                     />
                   </label>
                 </div>
@@ -350,23 +320,13 @@ export default function EditBlogPage({
             </div>
 
             <div className="mb-4">
-              <label className={labelClass}>Ảnh OpenGraph (OG Image)</label>
-              <div className="flex gap-4 items-start">
-                <input
-                  type="file"
-                  onChange={(e) => handleFileSelect(e, "ogImage")}
-                  accept="image/*"
-                  disabled={uploading}
-                  className="text-sm text-muted mt-2"
-                />
-                {form.ogImage && (
-                  <img
-                    src={form.ogImage}
-                    alt=""
-                    className="h-16 w-32 object-cover border border-border rounded"
-                  />
-                )}
-              </div>
+              <ImageUploader
+                label="Ảnh OpenGraph (OG Image)"
+                value={form.ogImage}
+                onChange={(url) => setForm((f) => ({ ...f, ogImage: url }))}
+                folder="blogs"
+                aspectHint="1200×630"
+              />
             </div>
           </div>
         </div>
@@ -467,45 +427,35 @@ export default function EditBlogPage({
 
             {/* Ảnh Thumbnail */}
             <div>
-              <label className={labelClass}>Ảnh đại diện (Thumbnail)</label>
-              <div className="border-2 border-dashed border-border p-3 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
-                {form.thumbnail ? (
-                  <div className="relative group">
-                    <img src={form.thumbnail} alt="Thumbnail" className="w-full h-auto rounded" />
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, thumbnail: "" }))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">×</button>
-                  </div>
-                ) : (
-                  <span className="text-muted text-xs">Chưa có ảnh</span>
-                )}
-              </div>
-              <input type="file" onChange={(e) => handleFileSelect(e, "thumbnail")} accept="image/*" disabled={uploading}
-                className="block w-full text-xs text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer" />
+              <ImageUploader
+                label="Ảnh đại diện (Thumbnail)"
+                value={form.thumbnail}
+                onChange={(url) => setForm((f) => ({ ...f, thumbnail: url }))}
+                folder="blogs"
+                aspectHint="16:9"
+              />
             </div>
 
             {/* Ảnh Banner */}
             <div>
-              <label className={labelClass}>Ảnh Banner</label>
-              <div className="border-2 border-dashed border-border p-3 rounded text-center mb-2 hover:border-accent transition-colors bg-bg">
-                {form.bannerImage ? (
-                  <div className="relative group">
-                    <img src={form.bannerImage} alt="Banner" className="w-full h-auto rounded" />
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, bannerImage: "" }))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">×</button>
-                  </div>
-                ) : (
-                  <span className="text-muted text-xs">Chưa có ảnh banner</span>
-                )}
-              </div>
-              <input type="file" onChange={(e) => handleFileSelect(e, "bannerImage")} accept="image/*" disabled={uploading}
-                className="block w-full text-xs text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-text file:text-bg hover:file:opacity-90 cursor-pointer" />
+              <ImageUploader
+                label="Ảnh Banner"
+                value={form.bannerImage}
+                onChange={(url) => setForm((f) => ({ ...f, bannerImage: url }))}
+                folder="blogs"
+                aspectHint="16:9 — rộng hơn thumbnail"
+              />
             </div>
 
             {/* OG Image */}
             <div>
-              <label className={labelClass}>Ảnh OpenGraph (OG Image)</label>
-              <div className="flex gap-3 items-start">
-                <input type="file" onChange={(e) => handleFileSelect(e, "ogImage")} accept="image/*" disabled={uploading} className="text-sm text-muted mt-2" />
-                {form.ogImage && <img src={form.ogImage} alt="" className="h-14 w-24 object-cover border border-border rounded" />}
-              </div>
+              <ImageUploader
+                label="Ảnh OpenGraph (OG Image)"
+                value={form.ogImage}
+                onChange={(url) => setForm((f) => ({ ...f, ogImage: url }))}
+                folder="blogs"
+                aspectHint="1200×630"
+              />
             </div>
 
             {/* TOC + Preview + Submit */}
@@ -529,7 +479,7 @@ export default function EditBlogPage({
               <div className="flex flex-col gap-2">
                 <button
                   type="submit"
-                  disabled={saving || uploading}
+                  disabled={saving}
                   className="w-full cursor-pointer rounded border border-text bg-text px-4 py-3 font-bold uppercase tracking-widest text-bg hover:bg-bg hover:text-text transition-colors disabled:opacity-50"
                 >
                   {saving ? "Đang cập nhật..." : "Lưu Thay Đổi"}

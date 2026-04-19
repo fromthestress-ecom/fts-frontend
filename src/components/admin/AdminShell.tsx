@@ -40,8 +40,7 @@ const navSections: NavSection[] = [
           </span>
         ),
         isActive: (pathname) =>
-          pathname === "/admin/orders" ||
-          pathname.startsWith("/admin/orders/"),
+          pathname === "/admin/orders" || pathname.startsWith("/admin/orders/"),
       },
       {
         href: "/admin/users",
@@ -52,8 +51,7 @@ const navSections: NavSection[] = [
           </span>
         ),
         isActive: (pathname) =>
-          pathname === "/admin/users" ||
-          pathname.startsWith("/admin/users/"),
+          pathname === "/admin/users" || pathname.startsWith("/admin/users/"),
       },
     ],
   },
@@ -105,8 +103,7 @@ const navSections: NavSection[] = [
           </span>
         ),
         isActive: (pathname) =>
-          pathname === "/admin/events" ||
-          pathname.startsWith("/admin/events/"),
+          pathname === "/admin/events" || pathname.startsWith("/admin/events/"),
         badge: "NEW",
       },
     ],
@@ -123,8 +120,7 @@ const navSections: NavSection[] = [
           </span>
         ),
         isActive: (pathname) =>
-          pathname === "/admin/blogs" ||
-          pathname.startsWith("/admin/blogs/"),
+          pathname === "/admin/blogs" || pathname.startsWith("/admin/blogs/"),
       },
       {
         href: "/admin/blog-crawl",
@@ -138,6 +134,17 @@ const navSections: NavSection[] = [
           pathname === "/admin/blog-crawl" ||
           pathname.startsWith("/admin/blog-crawl/"),
         badge: "AI",
+      },
+      {
+        href: "/admin/media",
+        label: "Thư viện ảnh",
+        icon: (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-pink-500/10 text-pink-400">
+            ⎙
+          </span>
+        ),
+        isActive: (pathname) =>
+          pathname === "/admin/media" || pathname.startsWith("/admin/media/"),
       },
       {
         href: "/admin/ai-writer",
@@ -236,7 +243,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-[60vh] border-t border-border bg-surface">
+    <div className="flex min-h-[calc(100svh-60px)] border-t border-border bg-surface">
       <aside className="w-60 shrink-0 border-r border-border bg-bg py-6 text-text">
         <div className="px-6 pb-4 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           Admin Panel
@@ -291,7 +298,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
       </aside>
-      <main className="min-w-0 flex-1 p-6 sm:p-8">{children}</main>
+      <main className="min-w-0 flex-1 px-6 sm:p-8 overflow-y-auto">{children}</main>
     </div>
   );
 }

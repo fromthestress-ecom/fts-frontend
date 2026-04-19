@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getAdminKey } from "@/components/admin/AdminGuard";
 import type { ProductTemplate } from "@/lib/api";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -18,34 +19,11 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
-function adminUploadSizeChart(
-  file: File,
-): Promise<{ url: string; key: string }> {
-  const key = getAdminKey();
-  const formData = new FormData();
-  formData.append("file", file);
-  return fetch(`${API}/admin/upload?folder=size-chart`, {
-    method: "POST",
-    headers: {
-      "x-admin-key": key ?? "",
-    },
-    body: formData,
-  }).then((res) => {
-    if (!res.ok) {
-      return res.json().then((data) => {
-        throw new Error(data.message || "Upload thất bại");
-      });
-    }
-    return res.json();
-  });
-}
-
 export default function AdminTemplatesPage() {
   const [templates, setTemplates] = useState<ProductTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
-  const [uploadingSizeChart, setUploadingSizeChart] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
@@ -85,24 +63,6 @@ export default function AdminTemplatesPage() {
       sizeChart: t.sizeChart ?? "",
     });
     setMessage("");
-  };
-
-  const handleSizeChartSelect = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingSizeChart(true);
-    setMessage("");
-    try {
-      const result = await adminUploadSizeChart(file);
-      setForm((f) => ({ ...f, sizeChart: result.url }));
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Upload thất bại");
-    } finally {
-      setUploadingSizeChart(false);
-      e.target.value = "";
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,41 +163,18 @@ export default function AdminTemplatesPage() {
           />
         </div>
         <div className="mb-4">
-          <label className={labelClass}>Ảnh Size Chart</label>
-          <div className="mb-2 flex items-center gap-2">
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              onChange={handleSizeChartSelect}
-              disabled={uploadingSizeChart || saving}
-              className="text-sm"
-            />
-            {uploadingSizeChart && (
-              <span className="text-sm text-muted">Đang upload...</span>
-            )}
-          </div>
-          {form.sizeChart && (
-            <div className="relative mt-2 max-w-[200px] rounded border-2 border-border bg-surface overflow-hidden">
-              <img
-                src={form.sizeChart}
-                alt="Size chart"
-                className="h-auto w-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, sizeChart: "" }))}
-                className="absolute right-0.5 top-0.5 z-10 flex h-6 w-6 items-center justify-center rounded border-none bg-red-600/90 text-xs text-white cursor-pointer"
-                title="Xóa link ảnh"
-              >
-                ×
-              </button>
-            </div>
-          )}
+          <ImageUploader
+            label="Ảnh Size Chart"
+            value={form.sizeChart}
+            onChange={(url) => setForm((f) => ({ ...f, sizeChart: url }))}
+            folder="size-chart"
+            aspectHint="Bảng size — nên crop vuông hoặc tỉ lệ cố định"
+          />
         </div>
 
         <button
           type="submit"
-          disabled={saving || uploadingSizeChart}
+          disabled={saving}
           className={btnPrimaryClass}
         >
           {saving
