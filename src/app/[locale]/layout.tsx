@@ -48,6 +48,7 @@ export const metadata: Metadata = {
   description: DEFAULT_DESC,
   icons: {
     icon: [{ url: "/favicon/favicon-32x32.png", type: "image/svg+xml" }],
+    apple: [{ url: "/icon/maskable_icon_x192.png", sizes: "192x192", type: "image/png" }],
   },
   manifest: "/favicon/site.webmanifest",
   openGraph: {
