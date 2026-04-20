@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, locale } = (await params) as { slug: string; locale?: string };
   const product = await getProduct(slug);
   const t = await getTranslations("products");
-  if (!product) return { title: t("title") };
+  if (!product) return { title: t("productsTitle") };
   const template =
     typeof product.templateId === "object" && product.templateId !== null
       ? product.templateId
@@ -216,7 +216,7 @@ export default async function ProductPage({ params }: Props) {
       />
       <div className="mx-auto max-w-[960px] px-4 py-8 sm:px-6">
         <nav className="mb-4 text-sm text-muted sm:text-base">
-          <Link href="/san-pham">{tp("title")}</Link>
+          <Link href="/san-pham">{tp("productsTitle")}</Link>
           {categoryName && (
             <>
               {" / "}
