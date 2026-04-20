@@ -369,7 +369,9 @@
     "enterEmail": "ENTER YOUR EMAIL",
     "subscribe": "Subscribe",
     "shareThisArticle": "Share This Article",
-    "relatedEditorial": "Related Editorial"
+    "relatedEditorial": "Related Editorial",
+    "summarizeWith": "Summarize article with:",
+    "summarizePrompt": "Summarize this article:"
   },
   "productDetails": {
     "soldOut": "Sold Out",

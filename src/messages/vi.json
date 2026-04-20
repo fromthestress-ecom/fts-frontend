@@ -369,7 +369,9 @@
     "enterEmail": "NHẬP EMAIL CỦA BẠN",
     "subscribe": "Đăng ký",
     "shareThisArticle": "Chia sẻ bài viết này",
-    "relatedEditorial": "Bài viết liên quan"
+    "relatedEditorial": "Bài viết liên quan",
+    "summarizeWith": "Tóm tắt bài viết với:",
+    "summarizePrompt": "Tóm tắt bài viết này:"
   },
   "productDetails": {
     "soldOut": "Hết hàng",

@@ -16,6 +16,7 @@ import {
   isHtmlContent,
 } from "@/lib/toc";
 import { EmbeddedProduct } from "@/components/EmbeddedProduct";
+import { AISummaryButtons } from "@/components/AISummaryButtons";
 
 export const revalidate = 60; // Cache for 60s
 
@@ -101,9 +102,9 @@ export async function generateMetadata({
 export default async function BlogDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale?: string }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const t = await getTranslations("blogDetails");
   let data;
   try {
@@ -133,6 +134,8 @@ export default async function BlogDetailPage({
   // Build JSON-LD Schemas
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.com";
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
+  const articleUrl = `${baseUrl}${localePrefix}/blogs/${blog.slug}`;
   const wordCount = blog.content ? blog.content.split(/\s+/).length : 0;
 
   const blogPostingSchema = {
@@ -315,6 +318,12 @@ export default async function BlogDetailPage({
               )
             )}
 
+            <AISummaryButtons
+              articleUrl={articleUrl}
+              label={t("summarizeWith")}
+              promptTemplate={t("summarizePrompt")}
+            />
+
             <div className="blog-content prose prose-invert max-w-none text-base sm:text-lg leading-relaxed text-text/90">
               {/* Optional inline TOC inside article on mobile */}
               <div className="md:hidden mb-8">
@@ -415,14 +424,14 @@ export default async function BlogDetailPage({
                 {t("backToJournal")}
               </Link>
 
-              <div className="flex items-center gap-4">
+              {/* <div className="flex items-center gap-4">
                 <span className="text-sm font-semibold text-muted uppercase tracking-widest">
                   {t("share")}
                 </span>
                 <div className="flex gap-2">
                   <ShareButton />
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 
