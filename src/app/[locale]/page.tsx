@@ -256,9 +256,11 @@ export default async function HomePage() {
   const { blogs } = await getLatestBlogs();
   const activeEvents = await getActiveEvents();
   const promoSlides = buildPromoSlides(activeEvents);
+  const t = await getTranslations('home');
 
   return (
     <>
+      <h1 style={{ display: "none" }}>{t('h1')}</h1>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}

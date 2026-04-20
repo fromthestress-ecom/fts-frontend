@@ -112,7 +112,7 @@ const AI_SERVICES: AIService[] = [
       </svg>
     ),
     buildUrl: (p) =>
-      `https://gemini.google.com/app?q=${encodeURIComponent(p)}`,
+      `https://www.google.com/search?udm=50&aep=11&q=${encodeURIComponent(p)}`,
   },
 ];
 
