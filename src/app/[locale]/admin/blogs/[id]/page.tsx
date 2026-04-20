@@ -114,6 +114,8 @@ export default function EditBlogPage({
     setMessage("");
 
     const payload = { ...form };
+    // Sanitize Quill's &nbsp; to prevent word-wrap bugs on frontend
+    payload.content = payload.content.replace(/&nbsp;/g, " ");
     if (!payload.categoryId) delete (payload as any).categoryId;
     if (!payload.authorId) delete (payload as any).authorId;
     if (!payload.publishedAt) delete (payload as any).publishedAt;

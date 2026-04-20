@@ -120,19 +120,85 @@ export default async function ProductPage({ params }: Props) {
 
   const isSoldOut = product.isSoldOut || !product.inStock;
 
+  const now = new Date();
+  const qEndMonth = (Math.floor(now.getMonth() / 3) + 1) * 3;
+  const priceValidUntil = new Date(now.getFullYear(), qEndMonth, 0)
+    .toISOString()
+    .split("T")[0];
+  const productUrl = `${SITE_URL}/san-pham/${slug}`;
+  const lowPrice = product.finalPrice ?? product.price;
+  const highPrice = product.compareAtPrice ?? lowPrice;
+  const sizeCount = product.sizes?.length || 1;
+  const colorCount = product.colors?.length || 1;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": `${productUrl}/#product`,
     name: product.name,
-    description: description ?? undefined,
-    image: product.images,
+    ...(description ? { description: description.slice(0, 500) } : {}),
+    ...(product.images.length > 0 ? { image: product.images } : {}),
+    sku: product.slug,
+    brand: { "@type": "Brand", name: "FROM THE STRESS" },
+    ...(product.colors?.length ? { color: product.colors.join(", ") } : {}),
+    ...(otherProducts.length > 0
+      ? {
+          isRelatedTo: otherProducts.slice(0, 3).map((p) => ({
+            "@type": "Product",
+            name: p.name,
+            url: `${SITE_URL}/san-pham/${p.slug}`,
+          })),
+        }
+      : {}),
     offers: {
-      "@type": "Offer",
-      price: product.finalPrice ?? product.price,
+      "@type": "AggregateOffer",
+      url: productUrl,
       priceCurrency: "VND",
+      lowPrice,
+      highPrice,
+      offerCount: String(sizeCount * colorCount),
+      priceValidUntil,
       availability: isSoldOut
         ? "https://schema.org/OutOfStock"
         : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@id": `${SITE_URL}/#organization` },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: 0,
+          currency: "VND",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "VN",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 1,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "VN",
+        returnPolicyCategory:
+          "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
     },
   };
 

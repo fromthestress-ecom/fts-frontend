@@ -236,18 +236,21 @@ export default async function BlogDetailPage({
     );
   }
 
-  const parsedContent = isHtmlContent(blog.content)
+  // Quill outputs &nbsp; instead of regular spaces which causes word-wrap bugs
+  const rawContent = blog.content.replace(/&nbsp;/g, " ");
+
+  const parsedContent = isHtmlContent(rawContent)
     ? injectHeadingIds(
-        blog.content.replace(
+        rawContent.replace(
           /::product\{slug="([^"]+)"\}/g,
           '<product-embed slug="$1"></product-embed>',
         ),
       )
-    : blog.content.replace(
+    : rawContent.replace(
         /::product\{slug="([^"]+)"\}/g,
         '<product-embed slug="$1"></product-embed>',
       );
-  const headings = blog.showToc !== false ? extractHeadings(blog.content) : [];
+  const headings = blog.showToc !== false ? extractHeadings(rawContent) : [];
 
   return (
     <>
