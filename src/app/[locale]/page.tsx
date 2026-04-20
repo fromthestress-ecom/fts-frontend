@@ -15,33 +15,39 @@ import { ProductCard } from "@/components/ProductCard";
 import { BlogCard } from "@/components/BlogCard";
 import type { PromoSlide } from "@/components/PromoSlider";
 import { CollectionsSection } from "@/components/CollectionsSection";
-import { getTranslations } from 'next-intl/server';
-import type { Metadata } from 'next';
+import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
 
 // const BannerSlider = dynamic(
 //   () => import("@/components/BannerSlider").then((m) => m.BannerSlider),
 // );
 
-const HeroBanner = dynamic(
-  () => import("@/components/HeroBanner").then((m) => m.HeroBanner),
+const HeroBanner = dynamic(() =>
+  import("@/components/HeroBanner").then((m) => m.HeroBanner),
 );
 
-const PromoSlider = dynamic(
-  () => import("@/components/PromoSlider").then((m) => m.PromoSlider),
+const PromoSlider = dynamic(() =>
+  import("@/components/PromoSlider").then((m) => m.PromoSlider),
 );
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn";
 
-export async function generateMetadata({ params }: { params: Promise<{ locale?: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale?: string }>;
+}): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
-  const localePrefix = locale && locale !== 'vi' ? `/${locale}` : '';
+  const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
   const url = `${base}${localePrefix}`;
 
   return {
-    title: t('title') || "FROM THE STRESS | Thời trang đường phố",
-    description: t('description') || "Shop streetwear cao cấp - áo hoodie, tee, quần jogger, giày sneaker. Giao hàng toàn quốc.",
+    title: t("title") || "FROM THE STRESS | Thời trang đường phố",
+    description:
+      t("description") ||
+      "Shop streetwear cao cấp - áo hoodie, tee, quần jogger, giày sneaker. Giao hàng toàn quốc.",
     alternates: {
       canonical: url,
       languages: {
@@ -96,15 +102,19 @@ async function getActiveEvents(): Promise<EventItem[]> {
   }
 }
 
-async function FeaturedProductsSection({ items }: { items: readonly Product[] }) {
+async function FeaturedProductsSection({
+  items,
+}: {
+  items: readonly Product[];
+}) {
   if (items.length === 0) return null;
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
   const sortedItems = sortProductsBySoldOut(items);
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
       <h2 className="font-display mb-6 text-xl tracking-wide sm:mb-8 sm:text-2xl">
-        {t('newProducts')}
+        {t("newProducts")}
       </h2>
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {sortedItems.map((p) => (
@@ -118,22 +128,26 @@ async function FeaturedProductsSection({ items }: { items: readonly Product[] })
           href="/san-pham"
           className="font-semibold text-accent hover:underline"
         >
-          {t('viewAll')}
+          {t("viewAll")}
         </a>
       </div>
     </section>
   );
 }
 
-async function BestSellingProductsSection({ items }: { items: readonly Product[] }) {
+async function BestSellingProductsSection({
+  items,
+}: {
+  items: readonly Product[];
+}) {
   if (items.length === 0) return null;
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
   const sortedItems = sortProductsBySoldOut(items);
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
       <h2 className="font-display mb-6 text-xl tracking-wide sm:mb-8 sm:text-2xl text-accent">
-        {t('bestSelling')}
+        {t("bestSelling")}
       </h2>
       <ul className="grid list-none grid-cols-2 gap-4 p-0 m-0 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
         {sortedItems.map((p) => (
@@ -147,7 +161,7 @@ async function BestSellingProductsSection({ items }: { items: readonly Product[]
           href="/san-pham"
           className="font-semibold text-accent hover:underline"
         >
-          {t('viewAll')}
+          {t("viewAll")}
         </a>
       </div>
     </section>
@@ -156,12 +170,12 @@ async function BestSellingProductsSection({ items }: { items: readonly Product[]
 
 async function PromoSection({ slides }: { slides: readonly PromoSlide[] }) {
   if (slides.length === 0) return null;
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
       <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
-        {t('promotions')}
+        {t("promotions")}
       </h2>
       <PromoSlider slides={slides} />
     </section>
@@ -170,24 +184,22 @@ async function PromoSection({ slides }: { slides: readonly PromoSlide[] }) {
 
 async function LatestStoriesSection({ blogs }: { blogs: readonly BlogItem[] }) {
   if (blogs.length === 0) return null;
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
 
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12 bg-surface mt-12 mb-4">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h2 className="font-display text-2xl tracking-wide sm:text-3xl uppercase m-0">
-            {t('latestStories')}
+            {t("latestStories")}
           </h2>
-          <p className="text-muted mt-2 text-sm max-w-xl">
-            {t('storiesDesc')}
-          </p>
+          <p className="text-muted mt-2 text-sm max-w-xl">{t("storiesDesc")}</p>
         </div>
         <Link
           href="/blogs"
           className="hidden sm:inline-flex items-center gap-2 font-semibold text-text border border-text px-4 py-2 rounded-full hover:bg-text hover:text-bg transition-colors uppercase text-xs tracking-widest"
         >
-          {t('viewJournal')}
+          {t("viewJournal")}
         </Link>
       </div>
       <ul className="grid list-none grid-cols-1 gap-6 p-0 m-0 sm:grid-cols-2 lg:grid-cols-4">
@@ -202,7 +214,7 @@ async function LatestStoriesSection({ blogs }: { blogs: readonly BlogItem[] }) {
           href="/blogs"
           className="inline-flex items-center gap-2 font-semibold text-text border border-text px-6 py-3 rounded-full hover:bg-text hover:text-bg transition-colors uppercase text-xs tracking-widest"
         >
-          {t('viewJournal')}
+          {t("viewJournal")}
         </Link>
       </div>
     </section>
@@ -210,11 +222,11 @@ async function LatestStoriesSection({ blogs }: { blogs: readonly BlogItem[] }) {
 }
 
 async function BrandsSection() {
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
   return (
     <section className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12">
       <h2 className="font-display mb-6 text-xl tracking-wide sm:text-2xl">
-        {t('brands')}
+        {t("brands")}
       </h2>
       <BrandsSectionLogos />
     </section>
@@ -224,9 +236,10 @@ async function BrandsSection() {
 const webSiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "STREETWEAR",
+  name: "FROM THE STRESS",
   url: SITE_URL,
-  description: "Thời trang đường phố cao cấp - Hoodie, tee, jogger, sneaker.",
+  description:
+    "From the Stress: VIETNAMESE STREETWEAR BRAND - Biến Áp Lực Thành Bản Sắc Và Sức Mạnh Tinh Thần",
   potentialAction: {
     "@type": "SearchAction",
     target: {
@@ -237,9 +250,7 @@ const webSiteJsonLd = {
   },
 };
 
-function buildPromoSlides(
-  events: readonly EventItem[],
-): readonly PromoSlide[] {
+function buildPromoSlides(events: readonly EventItem[]): readonly PromoSlide[] {
   return events
     .filter((e) => e.bannerImage)
     .map((e) => ({
@@ -256,11 +267,11 @@ export default async function HomePage() {
   const { blogs } = await getLatestBlogs();
   const activeEvents = await getActiveEvents();
   const promoSlides = buildPromoSlides(activeEvents);
-  const t = await getTranslations('home');
+  const t = await getTranslations("home");
 
   return (
     <>
-      <h1 style={{ display: "none" }}>{t('h1')}</h1>
+      <h1 style={{ display: "none" }}>{t("h1")}</h1>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
