@@ -8,6 +8,15 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 type RelatedBlog = { anchor: string; path: string };
 
+type GeneratedImage = {
+  assetId: string;
+  url: string;
+  alt: string;
+  orientation: "landscape" | "portrait" | "square";
+  width: number;
+  height: number;
+};
+
 type AiWriterResult = {
   seoTitle: string;
   metaDescription: string;
@@ -19,6 +28,11 @@ type AiWriterResult = {
   wordCount: number;
   keywordDensity: string;
   internalLinksCount: number;
+  generatedImages: GeneratedImage[];
+  imageWarnings: string[];
+  thumbnail: string;
+  bannerImage: string;
+  ogImage: string;
 };
 
 const SEARCH_INTENTS = [
@@ -27,7 +41,7 @@ const SEARCH_INTENTS = [
   { value: "navigational", label: "Navigational — người dùng tìm trang cụ thể" },
 ];
 
-const WORD_COUNTS = [800, 1000, 1500];
+const WORD_COUNTS = [800, 1000, 1500, 2000];
 
 export default function AiWriterPage() {
   const router = useRouter();
@@ -112,6 +126,9 @@ export default function AiWriterPage() {
         content: result.content,
         metaTitle: result.seoTitle,
         metaDescription: result.metaDescription,
+        thumbnail: result.thumbnail,
+        bannerImage: result.bannerImage,
+        ogImage: result.ogImage,
       }),
     );
     router.push("/admin/blogs/create");
@@ -228,7 +245,7 @@ export default function AiWriterPage() {
 
           <div>
             <label className={labelClass}>Word Count Target</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-2">
               {WORD_COUNTS.map((wc) => (
                 <button
                   key={wc}
@@ -244,6 +261,24 @@ export default function AiWriterPage() {
                 </button>
               ))}
             </div>
+            <input
+              type="number"
+              min={600}
+              max={3000}
+              step={100}
+              value={form.wordCountTarget}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  wordCountTarget: Number(e.target.value) || 1000,
+                }))
+              }
+              className={inputClass}
+              placeholder="Nhap so luong tu, VD: 1800"
+            />
+            <p className="text-xs text-muted mt-1">
+              Chon nhanh bang preset hoac nhap tay so tu muc tieu.
+            </p>
           </div>
 
           <div>
@@ -321,8 +356,47 @@ export default function AiWriterPage() {
                   <span>~{result.wordCount} từ</span>
                   <span>Keyword density: {result.keywordDensity}</span>
                   <span>{result.internalLinksCount} internal links</span>
+                  <span>{result.generatedImages?.length || 0} AI images</span>
                 </div>
               </div>
+
+              {Boolean(result.generatedImages?.length) && (
+                <div className="bg-surface border border-border rounded-lg p-5">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-muted mb-4 border-b border-border pb-2">
+                    AI Images
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {result.generatedImages.map((image) => (
+                      <div
+                        key={image.assetId}
+                        className="rounded-lg border border-border overflow-hidden bg-bg"
+                      >
+                        <div className="aspect-[16/10] bg-surface">
+                          <img
+                            src={image.url}
+                            alt={image.alt}
+                            className="w-full h-full object-cover block"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-medium text-text">
+                            {image.alt}
+                          </p>
+                          <p className="text-xs text-muted mt-1">
+                            {image.orientation} • {image.width}×{image.height}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {Boolean(result.imageWarnings?.length) && (
+                    <div className="mt-4 rounded border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-300">
+                      {result.imageWarnings.join(" | ")}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Content */}
               <div className="bg-surface border border-border rounded-lg overflow-hidden">
