@@ -32,6 +32,13 @@ type AdminUserListResult = {
   totalPages: number;
 };
 
+type CreateMarketingForm = {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
 function adminFetch(path: string, init?: RequestInit) {
   const key = getAdminKey();
   return fetch(`${API}${path}`, {
@@ -45,7 +52,7 @@ function adminFetch(path: string, init?: RequestInit) {
 }
 
 const inputClass =
-  "rounded border border-border bg-bg px-3 py-2 text-sm outline-none focus:border-text transition-colors";
+  "rounded border border-border bg-bg px-3 py-2 text-sm outline-none transition-colors focus:border-text";
 
 const badgeBaseClass =
   "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider";
@@ -60,6 +67,7 @@ function RoleBadge({ role }: { role: string }) {
       </span>
     );
   }
+
   if (role === "manager") {
     return (
       <span
@@ -69,6 +77,17 @@ function RoleBadge({ role }: { role: string }) {
       </span>
     );
   }
+
+  if (role === "marketing") {
+    return (
+      <span
+        className={`${badgeBaseClass} border-pink-500/40 bg-pink-500/10 text-pink-500`}
+      >
+        Marketing
+      </span>
+    );
+  }
+
   return (
     <span
       className={`${badgeBaseClass} border-gray-500/40 bg-gray-500/10 text-gray-500`}
@@ -94,8 +113,7 @@ function AffiliateBadge({
   }
 
   const status = affiliate.status;
-  let colorClass =
-    "border-gray-500/40 bg-gray-500/10 text-gray-500" as string;
+  let colorClass = "border-gray-500/40 bg-gray-500/10 text-gray-500";
   let label = status;
 
   if (status === "active") {
@@ -124,11 +142,22 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("");
   const [affiliateFilter, setAffiliateFilter] = useState("");
   const [page, setPage] = useState(1);
+  const [creating, setCreating] = useState(false);
+  const [createMessage, setCreateMessage] = useState("");
+  const [createError, setCreateError] = useState("");
+  const [createForm, setCreateForm] = useState<CreateMarketingForm>({
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+
   const limit = 20;
 
   const load = async (pageParam: number) => {
     setLoading(true);
     setError("");
+
     try {
       const query = new URLSearchParams({
         page: String(pageParam),
@@ -145,6 +174,7 @@ export default function AdminUsersPage() {
         };
         throw new Error(body.message ?? "Không tải được danh sách user");
       }
+
       const body = (await res.json()) as AdminUserListResult;
       setData(body);
     } catch (err) {
@@ -167,23 +197,175 @@ export default function AdminUsersPage() {
     load(1);
   };
 
+  const handleCreateMarketing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    setCreateError("");
+    setCreateMessage("");
+
+    try {
+      const res = await adminFetch("/admin/users", {
+        method: "POST",
+        body: JSON.stringify({
+          ...createForm,
+          role: "marketing",
+        }),
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        message?: string;
+      };
+
+      if (!res.ok) {
+        throw new Error(body.message ?? "Không tạo được tài khoản marketing");
+      }
+
+      setCreateForm({ fullName: "", email: "", phone: "", password: "" });
+      setCreateMessage("Đã tạo tài khoản marketing thành công.");
+      setPage(1);
+      load(1);
+    } catch (err) {
+      setCreateError(
+        err instanceof Error
+          ? err.message
+          : "Không tạo được tài khoản marketing",
+      );
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto pb-12">
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="mx-auto max-w-6xl pb-12">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl uppercase tracking-wider mb-1">
+          <h1 className="mb-1 font-display text-2xl uppercase tracking-wider">
             Quản lý Người dùng
           </h1>
           <p className="text-sm text-muted">
-            Xem danh sách người dùng, vai trò và trạng thái affiliate.
+            Tạo account marketing và theo dõi vai trò của người dùng trong hệ
+            thống.
           </p>
         </div>
       </div>
 
-      <div className="bg-surface border border-border rounded-lg p-6 mb-8 flex flex-col md:flex-row gap-4 items-end">
+      <div className="mb-8 grid gap-6 lg:grid-cols-[1.1fr,1.6fr]">
+        <div className="rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-2 text-sm font-bold uppercase tracking-wider">
+            Tạo tài khoản marketing
+          </h2>
+          <p className="mb-4 text-sm text-muted">
+            Role này chỉ dùng được nhóm content, không vào AI, báo cáo hay quản
+            lý sản phẩm.
+          </p>
+
+          <form onSubmit={handleCreateMarketing} className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">
+                Họ tên
+              </label>
+              <input
+                value={createForm.fullName}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    fullName: e.target.value,
+                  }))
+                }
+                required
+                className={`w-full ${inputClass}`}
+                placeholder="Nguyen Van A"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">
+                Email
+              </label>
+              <input
+                type="email"
+                value={createForm.email}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    email: e.target.value,
+                  }))
+                }
+                required
+                className={`w-full ${inputClass}`}
+                placeholder="marketing@fromthestress.vn"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">
+                Số điện thoại
+              </label>
+              <input
+                value={createForm.phone}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    phone: e.target.value,
+                  }))
+                }
+                className={`w-full ${inputClass}`}
+                placeholder="090..."
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-muted">
+                Mật khẩu tạm
+              </label>
+              <input
+                type="password"
+                minLength={8}
+                value={createForm.password}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
+                }
+                required
+                className={`w-full ${inputClass}`}
+                placeholder="Tối thiểu 8 ký tự"
+              />
+            </div>
+
+            {createError ? (
+              <p className="text-sm text-red-500">{createError}</p>
+            ) : null}
+            {createMessage ? (
+              <p className="text-sm text-green-500">{createMessage}</p>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={creating}
+              className="w-full rounded bg-text px-4 py-2 text-sm font-bold uppercase text-bg transition-colors hover:bg-accent hover:text-white disabled:opacity-60"
+            >
+              {creating ? "Đang tạo..." : "Tạo account marketing"}
+            </button>
+          </form>
+        </div>
+
+        <div className="rounded-lg border border-border bg-surface p-6">
+          <div className="mb-3 text-sm font-bold uppercase tracking-wider">
+            Gợi ý vận hành
+          </div>
+          <ul className="space-y-2 text-sm text-muted">
+            <li>Marketing chỉ thấy các màn blog, media, tag, tác giả và danh mục blog.</li>
+            <li>AI Writer, Auto Crawl, dashboard báo cáo và user management đều bị chặn.</li>
+            <li>Xóa sản phẩm cũng bị chặn từ cả giao diện lẫn API.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="mb-8 flex flex-col items-end gap-4 rounded-lg border border-border bg-surface p-6 md:flex-row">
         <form
           onSubmit={handleSearchSubmit}
-          className="flex-1 flex flex-col gap-1.5"
+          className="flex flex-1 flex-col gap-1.5"
         >
           <label className="text-xs font-bold uppercase tracking-wider text-muted">
             Tìm kiếm (Tên, Email, SĐT)
@@ -197,14 +379,14 @@ export default function AdminUsersPage() {
             />
             <button
               type="submit"
-              className="bg-text text-bg px-4 py-2 rounded text-sm font-bold uppercase hover:bg-accent hover:text-white transition-colors"
+              className="rounded bg-text px-4 py-2 text-sm font-bold uppercase text-bg transition-colors hover:bg-accent hover:text-white"
             >
               Lọc
             </button>
           </div>
         </form>
 
-        <div className="w-full md:w-44 flex flex-col gap-1.5">
+        <div className="flex w-full flex-col gap-1.5 md:w-44">
           <label className="text-xs font-bold uppercase tracking-wider text-muted">
             Vai trò
           </label>
@@ -218,12 +400,13 @@ export default function AdminUsersPage() {
           >
             <option value="">Tất cả</option>
             <option value="customer">Customer</option>
+            <option value="marketing">Marketing</option>
             <option value="manager">Manager</option>
             <option value="admin">Admin</option>
           </select>
         </div>
 
-        <div className="w-full md:w-52 flex flex-col gap-1.5">
+        <div className="flex w-full flex-col gap-1.5 md:w-52">
           <label className="text-xs font-bold uppercase tracking-wider text-muted">
             Affiliate
           </label>
@@ -244,26 +427,26 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <div className="bg-surface border border-border rounded-lg overflow-hidden">
-        <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead className="bg-bg/50 border-b border-border">
+      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <table className="w-full whitespace-nowrap text-left text-sm">
+          <thead className="border-b border-border bg-bg/50">
             <tr>
-              <th className="p-4 font-bold uppercase tracking-wider text-xs">
+              <th className="p-4 text-xs font-bold uppercase tracking-wider">
                 Họ tên
               </th>
-              <th className="p-4 font-bold uppercase tracking-wider text-xs">
+              <th className="p-4 text-xs font-bold uppercase tracking-wider">
                 Liên hệ
               </th>
-              <th className="p-4 font-bold uppercase tracking-wider text-xs">
+              <th className="p-4 text-xs font-bold uppercase tracking-wider">
                 Vai trò
               </th>
-              <th className="p-4 font-bold uppercase tracking-wider text-xs">
+              <th className="p-4 text-xs font-bold uppercase tracking-wider">
                 Mã giới thiệu
               </th>
-              <th className="p-4 font-bold uppercase tracking-wider text-xs">
+              <th className="p-4 text-xs font-bold uppercase tracking-wider">
                 Affiliate
               </th>
-              <th className="p-4 font-bold uppercase tracking-wider text-xs">
+              <th className="p-4 text-xs font-bold uppercase tracking-wider">
                 Ngày tạo
               </th>
             </tr>
@@ -288,46 +471,43 @@ export default function AdminUsersPage() {
                 </td>
               </tr>
             ) : (
-              data.users.map((u) => (
+              data.users.map((user) => (
                 <tr
-                  key={u._id}
-                  className="border-b border-border last:border-0 hover:bg-bg/30 transition-colors"
+                  key={user._id}
+                  className="border-b border-border transition-colors last:border-0 hover:bg-bg/30"
                 >
                   <td className="p-4">
                     <div className="font-semibold text-text">
-                      {u.fullName || "—"}
+                      {user.fullName || "—"}
                     </div>
                     <div className="text-xs text-muted">
-                      ID:{" "}
-                      <span className="font-mono">
-                        {u._id.slice(0, 6)}…
-                      </span>
+                      ID: <span className="font-mono">{user._id.slice(0, 6)}…</span>
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="text-sm text-text">{u.email}</div>
-                    {u.phone && (
-                      <div className="text-xs text-muted">{u.phone}</div>
-                    )}
+                    <div className="text-sm text-text">{user.email}</div>
+                    {user.phone ? (
+                      <div className="text-xs text-muted">{user.phone}</div>
+                    ) : null}
                   </td>
                   <td className="p-4">
-                    <RoleBadge role={u.role} />
+                    <RoleBadge role={user.role} />
                   </td>
                   <td className="p-4 text-sm">
-                    {u.referralCode ? (
-                      <span className="font-mono text-xs bg-bg px-2 py-1 rounded border border-border">
-                        {u.referralCode}
+                    {user.referralCode ? (
+                      <span className="rounded border border-border bg-bg px-2 py-1 font-mono text-xs">
+                        {user.referralCode}
                       </span>
                     ) : (
                       <span className="text-xs text-muted">—</span>
                     )}
                   </td>
                   <td className="p-4">
-                    <AffiliateBadge affiliate={u.affiliateId ?? null} />
+                    <AffiliateBadge affiliate={user.affiliateId ?? null} />
                   </td>
                   <td className="p-4 text-xs text-muted">
-                    {u.createdAt
-                      ? new Date(u.createdAt).toLocaleDateString("vi-VN")
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString("vi-VN")
                       : "—"}
                   </td>
                 </tr>
@@ -336,37 +516,35 @@ export default function AdminUsersPage() {
           </tbody>
         </table>
 
-        {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-border bg-bg/30">
+        {data && data.totalPages > 1 ? (
+          <div className="flex items-center justify-between border-t border-border bg-bg/30 p-4">
             <span className="text-sm text-muted">
-              Hiển thị trang{" "}
-              <span className="font-bold text-text">{data.page}</span> /{" "}
+              Hiển thị trang <span className="font-bold text-text">{data.page}</span> /{" "}
               {data.totalPages}
             </span>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={data.page === 1}
-                className="rounded border border-border bg-bg px-3 py-1.5 text-sm hover:border-text transition-colors disabled:opacity-50"
+                className="rounded border border-border bg-bg px-3 py-1.5 text-sm transition-colors hover:border-text disabled:opacity-50"
               >
                 Trang trước
               </button>
               <button
                 type="button"
                 onClick={() =>
-                  setPage((p) => Math.min(data.totalPages, p + 1))
+                  setPage((current) => Math.min(data.totalPages, current + 1))
                 }
                 disabled={data.page === data.totalPages}
-                className="rounded border border-border bg-bg px-3 py-1.5 text-sm hover:border-text transition-colors disabled:opacity-50"
+                className="rounded border border-border bg-bg px-3 py-1.5 text-sm transition-colors hover:border-text disabled:opacity-50"
               >
                 Trang sau
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
 }
-

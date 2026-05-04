@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { setAdminKey } from "./AdminGuard";
+import { useEffect, useState } from "react";
+import {
+  clearAdminSession,
+  getAdminProfile,
+  hasAdminPermission,
+  normalizeAdminPath,
+  type AdminProfile,
+} from "./AdminGuard";
 
 type NavItem = {
   href: string;
   label: string;
   icon: React.ReactNode;
+  permission?: string;
   isActive: (pathname: string) => boolean;
   badge?: string;
 };
@@ -29,6 +37,7 @@ const navSections: NavSection[] = [
             ⌂
           </span>
         ),
+        permission: "reports:view",
         isActive: (pathname) => pathname === "/admin",
       },
       {
@@ -39,6 +48,7 @@ const navSections: NavSection[] = [
             ⇄
           </span>
         ),
+        permission: "orders:manage",
         isActive: (pathname) =>
           pathname === "/admin/orders" || pathname.startsWith("/admin/orders/"),
       },
@@ -50,6 +60,7 @@ const navSections: NavSection[] = [
             👤
           </span>
         ),
+        permission: "users:manage",
         isActive: (pathname) =>
           pathname === "/admin/users" || pathname.startsWith("/admin/users/"),
       },
@@ -66,6 +77,7 @@ const navSections: NavSection[] = [
             #
           </span>
         ),
+        permission: "catalog:manage",
         isActive: (pathname) =>
           pathname === "/admin/categories" ||
           pathname.startsWith("/admin/categories/"),
@@ -78,6 +90,7 @@ const navSections: NavSection[] = [
             ☐
           </span>
         ),
+        permission: "catalog:manage",
         isActive: (pathname) =>
           pathname === "/admin/products" ||
           pathname.startsWith("/admin/products/"),
@@ -90,6 +103,7 @@ const navSections: NavSection[] = [
             T
           </span>
         ),
+        permission: "catalog:manage",
         isActive: (pathname) =>
           pathname === "/admin/templates" ||
           pathname.startsWith("/admin/templates/"),
@@ -102,6 +116,7 @@ const navSections: NavSection[] = [
             %
           </span>
         ),
+        permission: "catalog:manage",
         isActive: (pathname) =>
           pathname === "/admin/events" || pathname.startsWith("/admin/events/"),
         badge: "NEW",
@@ -119,6 +134,7 @@ const navSections: NavSection[] = [
             ✎
           </span>
         ),
+        permission: "content:write",
         isActive: (pathname) =>
           pathname === "/admin/blogs" || pathname.startsWith("/admin/blogs/"),
       },
@@ -130,6 +146,7 @@ const navSections: NavSection[] = [
             ⚡
           </span>
         ),
+        permission: "ai:use",
         isActive: (pathname) =>
           pathname === "/admin/blog-crawl" ||
           pathname.startsWith("/admin/blog-crawl/"),
@@ -143,6 +160,7 @@ const navSections: NavSection[] = [
             ⎙
           </span>
         ),
+        permission: "content:write",
         isActive: (pathname) =>
           pathname === "/admin/media" || pathname.startsWith("/admin/media/"),
       },
@@ -154,6 +172,7 @@ const navSections: NavSection[] = [
             ✦
           </span>
         ),
+        permission: "ai:use",
         isActive: (pathname) =>
           pathname === "/admin/ai-writer" ||
           pathname.startsWith("/admin/ai-writer/"),
@@ -167,21 +186,10 @@ const navSections: NavSection[] = [
             ☰
           </span>
         ),
+        permission: "content:write",
         isActive: (pathname) =>
           pathname === "/admin/blog-categories" ||
           pathname.startsWith("/admin/blog-categories/"),
-      },
-      {
-        href: "/admin/authors",
-        label: "Tác giả",
-        icon: (
-          <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm bg-lime-500/10 text-lime-400">
-            ✹
-          </span>
-        ),
-        isActive: (pathname) =>
-          pathname === "/admin/authors" ||
-          pathname.startsWith("/admin/authors/"),
       },
       {
         href: "/admin/tags",
@@ -191,6 +199,7 @@ const navSections: NavSection[] = [
             ⌗
           </span>
         ),
+        permission: "content:write",
         isActive: (pathname) =>
           pathname === "/admin/tags" || pathname.startsWith("/admin/tags/"),
       },
@@ -207,6 +216,7 @@ const navSections: NavSection[] = [
             %
           </span>
         ),
+        permission: "affiliates:manage",
         isActive: (pathname) =>
           pathname === "/admin/affiliates" ||
           pathname.startsWith("/admin/affiliates/"),
@@ -219,6 +229,7 @@ const navSections: NavSection[] = [
             ↻
           </span>
         ),
+        permission: "referrals:manage",
         isActive: (pathname) =>
           pathname === "/admin/referrals" ||
           pathname.startsWith("/admin/referrals/"),
@@ -229,12 +240,19 @@ const navSections: NavSection[] = [
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const pathname = normalizeAdminPath(usePathname());
   const router = useRouter();
+  const [profile, setProfile] = useState<AdminProfile | null>(() =>
+    getAdminProfile(),
+  );
   const isLogin = pathname === "/admin/login";
 
+  useEffect(() => {
+    setProfile(getAdminProfile());
+  }, [pathname]);
+
   const handleLogout = () => {
-    setAdminKey(null);
+    clearAdminSession();
     router.replace("/admin/login");
   };
 
@@ -249,7 +267,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           Admin Panel
         </div>
         <nav className="flex flex-col gap-4 text-[13px]">
-          {navSections.map((section) => (
+          {navSections
+            .map((section) => ({
+              ...section,
+              items: section.items.filter(
+                (item) =>
+                  !item.permission || hasAdminPermission(profile, item.permission),
+              ),
+            }))
+            .filter((section) => section.items.length > 0)
+            .map((section) => (
             <div key={section.label}>
               <div className="px-6 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
                 {section.label}

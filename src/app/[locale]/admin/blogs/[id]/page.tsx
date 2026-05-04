@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getAdminKey } from "@/components/admin/AdminGuard";
+import { getAdminKey, getAdminProfile } from "@/components/admin/AdminGuard";
 import type { BlogCategory, Author, BlogItem, Tag } from "@/lib/api";
 import RichTextEditor from "@/components/RichTextEditor";
 import { ImageUploader, MediaLibrary } from "@/components/admin/ImageUploader";
@@ -31,6 +31,8 @@ export default function EditBlogPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const adminProfile = getAdminProfile();
+  const isMarketing = adminProfile?.role === "marketing";
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
@@ -62,13 +64,14 @@ export default function EditBlogPage({
     Promise.all([
       adminFetch(`/admin/blogs/${id}`),
       adminFetch("/admin/blog-categories"),
-      adminFetch("/admin/authors"),
       adminFetch("/admin/tags"),
+      ...(isMarketing ? [] : [adminFetch("/admin/authors")]),
     ])
-      .then(async ([blogRes, catRes, authRes, tagRes]) => {
+      .then(async (responses) => {
+        const [blogRes, catRes, tagRes, authRes] = responses;
         if (catRes.ok) setCategories(await catRes.json());
-        if (authRes.ok) setAuthors(await authRes.json());
         if (tagRes.ok) setAvailableTags(await tagRes.json());
+        if (authRes?.ok) setAuthors(await authRes.json());
 
         if (blogRes.ok) {
           const b = (await blogRes.json()) as BlogItem;
@@ -106,7 +109,7 @@ export default function EditBlogPage({
         setMessage("Error loading data");
         setLoading(false);
       });
-  }, [id]);
+  }, [id, isMarketing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +120,7 @@ export default function EditBlogPage({
     // Sanitize Quill's &nbsp; to prevent word-wrap bugs on frontend
     payload.content = payload.content.replace(/&nbsp;/g, " ");
     if (!payload.categoryId) delete (payload as any).categoryId;
-    if (!payload.authorId) delete (payload as any).authorId;
+    if (!payload.authorId || isMarketing) delete (payload as any).authorId;
     if (!payload.publishedAt) delete (payload as any).publishedAt;
     else
       payload.publishedAt = new Date(payload.publishedAt).toISOString() as any;
@@ -369,16 +372,22 @@ export default function EditBlogPage({
             {/* Tác giả */}
             <div>
               <label className={labelClass}>Tác giả</label>
-              <select
-                value={form.authorId}
-                onChange={(e) => setForm((f) => ({ ...f, authorId: e.target.value }))}
-                className={inputClass}
-              >
-                <option value="">-- Chọn tác giả --</option>
-                {authors.map((a) => (
-                  <option key={a._id} value={a._id}>{a.name}</option>
-                ))}
-              </select>
+              {isMarketing ? (
+                <div className="w-full rounded border border-border bg-bg px-4 py-2.5 text-sm text-text">
+                  {adminProfile?.fullName || "Tài khoản marketing hiện tại"}
+                </div>
+              ) : (
+                <select
+                  value={form.authorId}
+                  onChange={(e) => setForm((f) => ({ ...f, authorId: e.target.value }))}
+                  className={inputClass}
+                >
+                  <option value="">-- Chọn tác giả --</option>
+                  {authors.map((a) => (
+                    <option key={a._id} value={a._id}>{a.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Danh mục */}

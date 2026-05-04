@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getAdminKey } from "@/components/admin/AdminGuard";
+import { getAdminKey, getAdminProfile } from "@/components/admin/AdminGuard";
 import type { BlogCategory, Author, Tag } from "@/lib/api";
 import RichTextEditor from "@/components/RichTextEditor";
 import { ImageUploader, MediaLibrary } from "@/components/admin/ImageUploader";
@@ -24,6 +24,8 @@ function adminFetch(path: string, init?: RequestInit) {
 
 export default function CreateBlogPage() {
   const router = useRouter();
+  const adminProfile = getAdminProfile();
+  const isMarketing = adminProfile?.role === "marketing";
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
@@ -64,14 +66,15 @@ export default function CreateBlogPage() {
 
     Promise.all([
       adminFetch("/admin/blog-categories"),
-      adminFetch("/admin/authors"),
+      ...(isMarketing ? [] : [adminFetch("/admin/authors")]),
       adminFetch("/admin/tags"),
-    ]).then(async ([catRes, authRes, tagRes]) => {
+    ]).then(async (responses) => {
+      const [catRes, maybeAuthRes, tagRes] = responses;
       if (catRes.ok) setCategories(await catRes.json());
-      if (authRes.ok) setAuthors(await authRes.json());
+      if (maybeAuthRes?.ok) setAuthors(await maybeAuthRes.json());
       if (tagRes.ok) setAvailableTags(await tagRes.json());
     });
-  }, []);
+  }, [isMarketing]);
 
   // Basic slug auto-gen from title if slug is empty
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +115,7 @@ export default function CreateBlogPage() {
     // Sanitize Quill's &nbsp; to prevent word-wrap bugs on frontend
     payload.content = payload.content.replace(/&nbsp;/g, " ");
     if (!payload.categoryId) delete (payload as any).categoryId;
-    if (!payload.authorId) delete (payload as any).authorId;
+    if (!payload.authorId || isMarketing) delete (payload as any).authorId;
     if (!payload.publishedAt) delete (payload as any).publishedAt;
     else
       payload.publishedAt = new Date(payload.publishedAt).toISOString() as any;
@@ -370,16 +373,22 @@ export default function CreateBlogPage() {
             {/* Tác giả */}
             <div>
               <label className={labelClass}>Tác giả</label>
-              <select
-                value={form.authorId}
-                onChange={(e) => setForm((f) => ({ ...f, authorId: e.target.value }))}
-                className={inputClass}
-              >
-                <option value="">-- Chọn tác giả --</option>
-                {authors.map((a) => (
-                  <option key={a._id} value={a._id}>{a.name}</option>
-                ))}
-              </select>
+              {isMarketing ? (
+                <div className="w-full rounded border border-border bg-bg px-4 py-2.5 text-sm text-text">
+                  {adminProfile?.fullName || "Tài khoản marketing hiện tại"}
+                </div>
+              ) : (
+                <select
+                  value={form.authorId}
+                  onChange={(e) => setForm((f) => ({ ...f, authorId: e.target.value }))}
+                  className={inputClass}
+                >
+                  <option value="">-- Chọn tác giả --</option>
+                  {authors.map((a) => (
+                    <option key={a._id} value={a._id}>{a.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Danh mục */}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { fetchApi } from "@/lib/api";
+import { getAdminKey } from "@/components/admin/AdminGuard";
 
 const AdminBarChart = dynamic(
   () => import("@/components/admin/AdminBarChart").then((m) => m.AdminBarChart),
@@ -31,6 +31,24 @@ interface TopBuyer {
   totalSpent: number;
 }
 
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+function adminFetch<T>(path: string) {
+  const key = getAdminKey();
+  return fetch(`${API}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-key": key ?? "",
+    },
+  }).then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { message?: string }).message ?? res.statusText);
+    }
+    return res.json() as Promise<T>;
+  });
+}
+
 export default function AdminDashboardPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -53,8 +71,8 @@ export default function AdminDashboardPage() {
 
     setLoading(true);
     Promise.all([
-      fetchApi<BestSeller[]>(urlBestSellers),
-      fetchApi<TopBuyer[]>(urlTopBuyers),
+      adminFetch<BestSeller[]>(urlBestSellers),
+      adminFetch<TopBuyer[]>(urlTopBuyers),
     ])
       .then(([bs, tb]) => {
         setBestSellers(bs);
