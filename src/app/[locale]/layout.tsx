@@ -15,7 +15,6 @@ import { Suspense } from "react";
 import { NavigationOverlay } from "@/components/NavigationOverlay";
 import { Oswald, DM_Sans } from "next/font/google";
 
-const GA_ID = "G-HWRRD05NNB";
 const FB_PIXEL_ID = "1164538798780806";
 import "../globals.css";
 
@@ -103,13 +102,6 @@ export default async function RootLayout({
     <html lang={locale} className={`${oswald.variable} ${dmSans.variable}`}>
       <head>
         <ThemeScript />
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
-        </Script>
         <Script id="fb-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
