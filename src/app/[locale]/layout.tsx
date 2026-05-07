@@ -13,16 +13,22 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Suspense } from "react";
 import { NavigationOverlay } from "@/components/NavigationOverlay";
-import { Oswald, DM_Sans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
 const FB_PIXEL_ID = "1164538798780806";
 import "../globals.css";
 
-const oswald = Oswald({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
+const bdStreet = localFont({
+  src: [
+    {
+      path: "../../../public/fonts/YoungBold.otf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-bd-street",
   display: "optional",
-  variable: "--font-oswald",
 });
 
 const dmSans = DM_Sans({
@@ -47,7 +53,13 @@ export const metadata: Metadata = {
   description: DEFAULT_DESC,
   icons: {
     icon: [{ url: "/favicon/favicon-32x32.png", type: "image/svg+xml" }],
-    apple: [{ url: "/icon/maskable_icon_x192.png", sizes: "192x192", type: "image/png" }],
+    apple: [
+      {
+        url: "/icon/maskable_icon_x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
   },
   manifest: "/favicon/site.webmanifest",
   openGraph: {
@@ -99,7 +111,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale} className={`${oswald.variable} ${dmSans.variable}`}>
+    <html lang={locale} className={`${bdStreet.variable} ${dmSans.variable}`}>
       <head>
         <ThemeScript />
         <Script id="fb-pixel" strategy="lazyOnload">

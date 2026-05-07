@@ -74,20 +74,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Product Categories
   const productCategoryPages: MetadataRoute.Sitemap = productCategories.map((c) => ({
-    url: `${BASE}/san-pham?danh_muc=${c.slug}`,
+    url: `${BASE}/san-pham/${c.slug}`,
     lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
     changeFrequency: "daily",
     priority: 0.8,
-    alternates: getAlternates(`/san-pham?danh_muc=${c.slug}`),
+    alternates: getAlternates(`/san-pham/${c.slug}`),
   }));
 
   // Special Nav Groups
   const specialNavPages: MetadataRoute.Sitemap = ["tops", "bottoms"].map((slug) => ({
-    url: `${BASE}/san-pham?danh_muc=${slug}`,
+    url: `${BASE}/san-pham/${slug}`,
     lastModified: now,
     changeFrequency: "daily",
     priority: 0.7,
-    alternates: getAlternates(`/san-pham?danh_muc=${slug}`),
+    alternates: getAlternates(`/san-pham/${slug}`),
   }));
 
   // Blogs Detail

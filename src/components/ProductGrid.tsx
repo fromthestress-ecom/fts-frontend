@@ -12,6 +12,7 @@ type ProductGridProps = {
   events?: EventItem[];
   currentParams: Record<string, string | undefined>;
   effectiveCategorySlug?: string;
+  categorySlug?: string;
   basePath: string;
 };
 
@@ -21,20 +22,32 @@ export function ProductGrid({
   events = [],
   currentParams,
   effectiveCategorySlug,
+  categorySlug,
   basePath,
 }: ProductGridProps) {
   const t = useTranslations('products');
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const activeCategorySlug = categorySlug ?? effectiveCategorySlug;
+  const categoryPath = activeCategorySlug ? `${basePath}/${activeCategorySlug}` : basePath;
+
   const buildUrl = (updates: Record<string, string | null>) => {
     const next = new URLSearchParams(searchParams?.toString() ?? "");
+    // Remove category from query params - now handled in path
+    next.delete("danh_muc");
     for (const [k, v] of Object.entries(updates)) {
+      if (k === "danh_muc") continue;
       if (v === null || v === "") next.delete(k);
       else next.set(k, v);
     }
     const q = next.toString();
-    return q ? `${basePath}?${q}` : basePath;
+    return q ? `${categoryPath}?${q}` : categoryPath;
+  };
+
+  const getCategoryHref = (slug: string | null) => {
+    if (!slug) return basePath;
+    return `${basePath}/${slug}`;
   };
 
   const sortedItems = sortProductsBySoldOut(initialData.items);
@@ -46,9 +59,9 @@ export function ProductGrid({
       <aside className="w-full flex-shrink-0 lg:w-64">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[20px] font-bold text-text">{t('filter')}</h2>
-          {(effectiveCategorySlug || currentParams.danh_muc) && (
+          {activeCategorySlug && (
             <Link
-              href={buildUrl({ danh_muc: null, page: null })}
+              href={basePath}
               className="text-[13px] text-text hover:underline"
             >
               {t('clearAll')}
@@ -62,11 +75,9 @@ export function ProductGrid({
         {/* Categories as text links */}
         <div className="flex flex-col gap-[14px]">
           <Link
-            href={buildUrl({ danh_muc: null, page: null })}
+            href={basePath}
             className={`text-[14px] ${
-              !effectiveCategorySlug &&
-              currentParams.danh_muc !== "tops" &&
-              currentParams.danh_muc !== "bottoms"
+              !activeCategorySlug
                 ? "font-medium underline decoration-1 underline-offset-[6px]"
                 : "text-text hover:underline hover:decoration-1 hover:underline-offset-[6px]"
             }`}
@@ -75,13 +86,11 @@ export function ProductGrid({
           </Link>
 
           {categories.map((c) => {
-            const isActive =
-              effectiveCategorySlug === c.slug ||
-              currentParams.danh_muc === c.slug;
+            const isActive = activeCategorySlug === c.slug;
             return (
               <Link
                 key={c._id}
-                href={buildUrl({ danh_muc: c.slug, page: null })}
+                href={getCategoryHref(c.slug)}
                 className={`text-[14px] ${
                   isActive
                     ? "font-medium underline decoration-1 underline-offset-[6px]"
@@ -99,12 +108,8 @@ export function ProductGrid({
         {/* Filter Group: Checkboxes for Tops/Bottoms */}
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-[14px] font-bold text-text">{t('type')}</h3>
-          {(currentParams.danh_muc === "tops" ||
-            currentParams.danh_muc === "bottoms") && (
-            <Link
-              href={buildUrl({ danh_muc: null, page: null })}
-              className="text-[13px] text-text hover:underline"
-            >
+          {(activeCategorySlug === "tops" || activeCategorySlug === "bottoms") && (
+            <Link href={basePath} className="text-[13px] text-text hover:underline">
               {t('clear')}
             </Link>
           )}
@@ -113,17 +118,9 @@ export function ProductGrid({
           <label className="flex cursor-pointer items-center gap-3">
             <input
               type="checkbox"
-              checked={
-                currentParams.danh_muc === "tops" ||
-                effectiveCategorySlug === "tops"
-              }
+              checked={activeCategorySlug === "tops"}
               onChange={() =>
-                router.push(
-                  buildUrl({
-                    danh_muc: currentParams.danh_muc === "tops" ? null : "tops",
-                    page: null,
-                  }),
-                )
+                router.push(activeCategorySlug === "tops" ? basePath : getCategoryHref("tops"))
               }
               className="h-[18px] w-[18px] cursor-pointer appearance-none rounded-sm border-[1.5px] border-text bg-transparent checked:bg-text checked:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2.5%206.5L5%209L9.5%203.5%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] checked:bg-center checked:bg-no-repeat focus:outline-none focus:ring-2 focus:ring-text/30 focus:ring-offset-1 focus:ring-offset-bg"
             />
@@ -132,18 +129,9 @@ export function ProductGrid({
           <label className="flex cursor-pointer items-center gap-3">
             <input
               type="checkbox"
-              checked={
-                currentParams.danh_muc === "bottoms" ||
-                effectiveCategorySlug === "bottoms"
-              }
+              checked={activeCategorySlug === "bottoms"}
               onChange={() =>
-                router.push(
-                  buildUrl({
-                    danh_muc:
-                      currentParams.danh_muc === "bottoms" ? null : "bottoms",
-                    page: null,
-                  }),
-                )
+                router.push(activeCategorySlug === "bottoms" ? basePath : getCategoryHref("bottoms"))
               }
               className="h-[18px] w-[18px] cursor-pointer appearance-none rounded-sm border-[1.5px] border-text bg-transparent checked:bg-text checked:bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M2.5%206.5L5%209L9.5%203.5%22%20stroke%3D%22white%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] checked:bg-center checked:bg-no-repeat focus:outline-none focus:ring-2 focus:ring-text/30 focus:ring-offset-1 focus:ring-offset-bg"
             />
@@ -160,25 +148,17 @@ export function ProductGrid({
         <div className="mb-6 flex min-h-[40px] flex-wrap items-center justify-between gap-4 border-b border-transparent lg:border-border pb-2 lg:pb-0 lg:border-none">
           <div className="flex flex-wrap items-center gap-2">
             {/* Tag matching screenshot */}
-            {(effectiveCategorySlug || currentParams.danh_muc) && (
+            {activeCategorySlug && (
               <div className="flex items-center gap-2 bg-surface px-3 py-1.5 text-[13px] border border-border/60 rounded flex-shrink-0">
                 <span>
-                  {currentParams.danh_muc === "tops"
+                  {activeCategorySlug === "tops"
                     ? t('tops')
-                    : currentParams.danh_muc === "bottoms"
+                    : activeCategorySlug === "bottoms"
                       ? t('bottoms')
-                      : categories.find(
-                          (c) =>
-                            c.slug === effectiveCategorySlug ||
-                            c.slug === currentParams.danh_muc,
-                        )?.name ||
-                        effectiveCategorySlug ||
-                        currentParams.danh_muc}
+                      : categories.find((c) => c.slug === activeCategorySlug)?.name || activeCategorySlug}
                 </span>
                 <button
-                  onClick={() =>
-                    router.push(buildUrl({ danh_muc: null, page: null }))
-                  }
+                  onClick={() => router.push(basePath)}
                   className="cursor-pointer text-muted hover:text-text ml-1"
                 >
                   <svg

@@ -204,6 +204,18 @@ export interface OrderListResult {
  * Sorts products so that sold out items are at the end of the array.
  * Maintains relative order for items with the same sold out status.
  */
+export function getProductUrl(product: Product): string {
+  const catId = product.categoryId;
+  if (typeof catId === "object" && catId !== null) {
+    const navGroup = (catId as Category).navGroup?.toLowerCase();
+    if (navGroup === "tops") return `/san-pham/tops/${product.slug}`;
+    if (navGroup === "bottoms") return `/san-pham/bottoms/${product.slug}`;
+    const slug = (catId as Category).slug;
+    if (slug) return `/san-pham/${slug}/${product.slug}`;
+  }
+  return `/san-pham/${product.slug}`;
+}
+
 export function sortProductsBySoldOut(products: Product[] | readonly Product[]): Product[] {
   return [...products].sort((a, b) => {
     const aSoldOut = a.isSoldOut || !a.inStock;

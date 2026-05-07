@@ -17,20 +17,17 @@ import type { NavGroupItem } from "@/lib/navGroups";
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function getChildHref(_parentLabel: string, slug: string): string {
-  return `/san-pham?danh_muc=${encodeURIComponent(slug)}`;
+  return `/san-pham/${encodeURIComponent(slug)}`;
 }
 
 function isNavItemActive(
   item: NavGroupItem,
-  searchParams: URLSearchParams | null,
+  _searchParams: URLSearchParams | null,
   pathname: string,
 ): boolean {
-  if (pathname !== "/san-pham" && pathname !== "/en/san-pham") return false;
-  if (!searchParams) return false;
-  const value = searchParams.get("danh_muc");
-  if (!value) return false;
-  if (value.toLowerCase() === item.label.toLowerCase()) return true;
-  return item.children.some((c) => c.slug === value);
+  const base = pathname.replace(/^\/en/, "");
+  if (base === `/san-pham/${item.label.toLowerCase()}`) return true;
+  return item.children.some((c) => base === `/san-pham/${c.slug}`);
 }
 
 // ─── Logo ────────────────────────────────────────────────────────────────────
@@ -163,7 +160,7 @@ function NavItems({
                   aria-expanded={isOpen}
                 >
                   <Link
-                    href={`/san-pham?danh_muc=${encodeURIComponent(item.label.toLowerCase())}`}
+                    href={`/san-pham/${encodeURIComponent(item.label.toLowerCase())}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onClose?.();
@@ -186,9 +183,7 @@ function NavItems({
                 {isOpen && (
                   <div className="flex flex-col gap-0.5 pl-4">
                     {item.children.map((child) => {
-                      const childActive =
-                        pathname === "/san-pham" &&
-                        (searchParams?.get("danh_muc") ?? "") === child.slug;
+                      const childActive = pathname?.replace(/^\/en/, "") === `/san-pham/${child.slug}`;
                       return (
                         <Link
                           key={child.slug}
@@ -215,7 +210,7 @@ function NavItems({
               onMouseLeave={() => onPanelLeave?.()}
             >
               <Link
-                href={`/san-pham?danh_muc=${encodeURIComponent(item.label.toLowerCase())}`}
+                href={`/san-pham/${encodeURIComponent(item.label.toLowerCase())}`}
                 className={`${linkBase} ${itemActiveClass} relative block px-3 py-3 transition-colors duration-200 hover:text-accent ${activePanel === key ? "text-accent" : ""}`}
               >
                 {item.label}
@@ -353,9 +348,7 @@ function SlideDownPanel({
                 </h3>
                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                   {activeGroup.children.map((child) => {
-                    const childActive =
-                      pathname === "/san-pham" &&
-                      (searchParams?.get("danh_muc") ?? "") === child.slug;
+                    const childActive = pathname?.replace(/^\/en/, "") === `/san-pham/${child.slug}`;
                     return (
                       <li key={child.slug}>
                         <Link
@@ -371,7 +364,7 @@ function SlideDownPanel({
               </div>
               <div className="flex items-center">
                 <Link
-                  href={`/san-pham?danh_muc=${encodeURIComponent(activeGroup.label.toLowerCase())}`}
+                  href={`/san-pham/${encodeURIComponent(activeGroup.label.toLowerCase())}`}
                   className="text-xs font-semibold uppercase tracking-[0.15em] text-muted transition-colors hover:text-accent"
                 >
                   VIEW ALL {activeGroup.label}

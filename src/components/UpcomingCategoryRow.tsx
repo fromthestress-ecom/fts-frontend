@@ -163,7 +163,7 @@ export function UpcomingCategoryRow({ group, imageLeft }: Props) {
             </div>
           </div>
           <Link
-            href={`/san-pham?danh_muc=${group.id}&preOrder=true`}
+            href={`/san-pham/${group.id}?preOrder=true`}
             className="collections-section__cta inline-flex items-center justify-center rounded-full bg-text px-6 py-3 font-semibold text-bg transition-opacity hover:opacity-80"
           >
             Xem tất cả {group.name}

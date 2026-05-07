@@ -22,49 +22,15 @@ function normalizeParams(
   return out;
 }
 
-async function getBestSelling(params: Record<string, string>, categories: Category[]): Promise<ProductListResult> {
+async function getBestSelling(params: Record<string, string>): Promise<ProductListResult> {
   try {
-    let products = await fetchBestSellingProducts(48); // fetch more to allow filtering
-
-    const categoryId = params.danh_muc;
+    let products = await fetchBestSellingProducts(48);
     const sort = params.sap_xep;
-
-    // Local filtering by category slug or ID
-    if (categoryId) {
-      const targetCategory = categories.find(c => c.slug === categoryId || c._id === categoryId);
-      if (targetCategory) {
-        products = products.filter(p => {
-          const pCatId = typeof p.categoryId === 'string' ? p.categoryId : p.categoryId?._id;
-          return pCatId === targetCategory._id;
-        });
-      } else if (categoryId.toLowerCase() === "tops" || categoryId.toLowerCase() === "bottoms") {
-        const navGroup = categoryId.toLowerCase() === "tops" ? "Tops" : "Bottoms";
-        const groupCatIds = categories.filter(c => c.navGroup === navGroup).map(c => c._id);
-        products = products.filter(p => {
-          const pCatId = typeof p.categoryId === 'string' ? p.categoryId : p.categoryId?._id;
-          return groupCatIds.includes(pCatId!);
-        });
-      }
-    }
-
-    // Local sorting
-    if (sort === "price_asc") {
-      products.sort((a, b) => (a.finalPrice ?? a.price) - (b.finalPrice ?? b.price));
-    } else if (sort === "price_desc") {
-      products.sort((a, b) => (b.finalPrice ?? b.price) - (a.finalPrice ?? a.price));
-    } else if (sort === "newest") {
-      products.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
-    }
-
-    return {
-      items: sortProductsBySoldOut(products),
-      total: products.length,
-      page: 1,
-      limit: 48,
-      totalPages: 1,
-    };
-  } catch (error) {
-    console.error("Failed to fetch best selling products:", error);
+    if (sort === "price_asc") products.sort((a, b) => (a.finalPrice ?? a.price) - (b.finalPrice ?? b.price));
+    else if (sort === "price_desc") products.sort((a, b) => (b.finalPrice ?? b.price) - (a.finalPrice ?? a.price));
+    else if (sort === "newest") products.sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+    return { items: sortProductsBySoldOut(products), total: products.length, page: 1, limit: 48, totalPages: 1 };
+  } catch {
     return { items: [], total: 0, page: 1, limit: 48, totalPages: 0 };
   }
 }
@@ -90,20 +56,7 @@ export async function generateMetadata({
   const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
 
   // Xây dựng URL canonical sạch (giữ lại danh mục nếu có, loại bỏ các tham số lọc khác)
-  const canonicalBase = `${base}${localePrefix}/best-selling`;
-  const urlObj = new URL(canonicalBase);
-  if (typeof rawSearchParams.danh_muc === "string") {
-    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc);
-  } else if (Array.isArray(rawSearchParams.danh_muc)) {
-    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc[0]);
-  }
-  const canonicalUrl = urlObj.toString();
-
-  const categorySuffix = typeof rawSearchParams.danh_muc === "string" 
-    ? `?danh_muc=${rawSearchParams.danh_muc}`
-    : Array.isArray(rawSearchParams.danh_muc)
-    ? `?danh_muc=${rawSearchParams.danh_muc[0]}`
-    : "";
+  const canonicalUrl = `${base}${localePrefix}/best-selling`;
 
   return {
     title: "Best Selling Items",
@@ -111,8 +64,8 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalUrl,
       languages: {
-        vi: `${base}/best-selling${categorySuffix}`,
-        en: `${base}/en/best-selling${categorySuffix}`,
+        vi: `${base}/best-selling`,
+        en: `${base}/en/best-selling`,
       },
     },
     openGraph: {
@@ -142,9 +95,7 @@ export default async function BestSellingPage({
   const raw = await searchParams;
   const params = normalizeParams(raw);
   const categories = await getCategories();
-  const result = await getBestSelling(params, categories);
-
-  const effectiveCategorySlug = params.danh_muc;
+  const result = await getBestSelling(params);
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
@@ -160,7 +111,6 @@ export default async function BestSellingPage({
         initialData={result}
         categories={categories}
         currentParams={params}
-        effectiveCategorySlug={effectiveCategorySlug}
         basePath="/best-selling"
       />
     </div>

@@ -1,79 +1,84 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { fetchApi, type Product, type ProductListResult } from "@/lib/api";
-import dynamic from "next/dynamic";
-import { AddToCartForm } from "@/components/AddToCartForm";
-import { TrackViewItem } from "@/components/TrackViewItem";
-
-const CountdownPrice = dynamic(() =>
-  import("@/components/CountdownPrice").then((m) => m.CountdownPrice),
-);
-
-const ProductImageSlider = dynamic(() =>
-  import("@/components/ProductImageSlider").then((m) => m.ProductImageSlider),
-);
-
-const OtherProductsSection = dynamic(() =>
-  import("@/components/OtherProductsSection").then(
-    (m) => m.OtherProductsSection,
-  ),
-);
+import { notFound, redirect } from "next/navigation";
+import { fetchApi, type ProductListResult, type Category, type EventItem, type Product, getProductUrl } from "@/lib/api";
+import { ProductGrid } from "@/components/ProductGrid";
+import { TrackViewItemList } from "@/components/TrackViewItemList";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn";
+const NAV_SLUG_TO_CATEGORY_SLUG: Record<string, string> = {
+  boxy: "ao-thun", "baby-tee": "ao-thun", oversize: "ao-thun",
+  cargo: "quan", shorts: "quan", jeans: "quan",
+  "heavy-crown": "ao-hoodie", "gen-stress": "ao-thun",
+};
+const NAV_GROUPS = ["tops", "bottoms"];
 
-async function getProduct(slug: string): Promise<Product | null> {
+async function getCategories(): Promise<Category[]> {
+  try { return await fetchApi<Category[]>("/categories"); } catch { return []; }
+}
+
+async function getEvents(): Promise<EventItem[]> {
+  try { return await fetchApi<EventItem[]>("/events"); } catch { return []; }
+}
+
+function isCategorySlug(slug: string, categories: Category[]): boolean {
+  if (NAV_GROUPS.includes(slug.toLowerCase())) return true;
+  if (categories.some((c) => c.slug === slug)) return true;
+  if (NAV_SLUG_TO_CATEGORY_SLUG[slug]) return true;
+  return false;
+}
+
+async function getCategoryProducts(
+  categorySlug: string,
+  categories: Category[],
+  searchParams: Record<string, string>,
+): Promise<ProductListResult> {
+  const page = searchParams.page ?? "1";
+  const q = (searchParams.q ?? "").trim();
+  const sort = searchParams.sap_xep ?? "";
+  const params = new URLSearchParams({ page, limit: "12" });
+
+  if (NAV_GROUPS.includes(categorySlug.toLowerCase())) {
+    params.set("navGroup", categorySlug.toLowerCase() === "tops" ? "Tops" : "Bottoms");
+  } else {
+    let cat = categories.find((c) => c.slug === categorySlug);
+    if (!cat) {
+      const mapped = NAV_SLUG_TO_CATEGORY_SLUG[categorySlug];
+      if (mapped) cat = categories.find((c) => c.slug === mapped);
+    }
+    if (cat) params.set("category", cat._id);
+  }
+  if (q) params.set("q", q);
+  if (sort) params.set("sort", sort);
   try {
-    return await fetchApi<Product>(`/products/${encodeURIComponent(slug)}`);
+    return await fetchApi<ProductListResult>(`/products?${params}`);
   } catch {
-    return null;
+    return { items: [], total: 0, page: 1, limit: 12, totalPages: 0 };
   }
 }
 
-async function getOtherProductsByNavGroup(
-  navGroup: string,
-  excludeSlug: string,
-): Promise<Product[]> {
-  if (!navGroup.trim()) return [];
-  try {
-    const params = new URLSearchParams({
-      navGroup: navGroup.trim(),
-      exclude: excludeSlug,
-      limit: "20",
-    });
-    const result = await fetchApi<ProductListResult>(`/products?${params}`);
-    return result.items ?? [];
-  } catch {
-    return [];
-  }
-}
-
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string; locale?: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug, locale } = (await params) as { slug: string; locale?: string };
-  const product = await getProduct(slug);
-  const t = await getTranslations("products");
-  if (!product) return { title: t("productsTitle") };
-  const template =
-    typeof product.templateId === "object" && product.templateId !== null
-      ? product.templateId
-      : null;
-  const description = template?.description || product.description;
-
-  const title = `${product.name} | STREETWEAR`;
-  const desc =
-    description?.slice(0, 160) ??
-    `Mua ${product.name} - ${new Intl.NumberFormat("vi-VN").format(product.price)}₫`;
-  const image = product.images?.[0];
+  const { slug, locale } = await params;
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
   const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
+  const categories = await getCategories();
+
+  if (!isCategorySlug(slug, categories)) {
+    return { title: "FROM THE STRESS" };
+  }
+
+  const isNavGroup = NAV_GROUPS.includes(slug.toLowerCase());
+  const cat = isNavGroup ? null : categories.find((c) => c.slug === slug);
+  const label = isNavGroup ? slug.charAt(0).toUpperCase() + slug.slice(1) : (cat?.name ?? slug);
   const url = `${base}${localePrefix}/san-pham/${slug}`;
 
   return {
-    title: product.name,
-    description: desc,
+    title: `${label} | FROM THE STRESS`,
+    description: `Khám phá bộ sưu tập ${label} - streetwear phong cách từ FROM THE STRESS.`,
     alternates: {
       canonical: url,
       languages: {
@@ -82,250 +87,55 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title,
-      description: desc,
-      images: image ? [{ url: image, alt: product.name }] : undefined,
-      type: "website",
       url,
+      title: `${label} | STREETWEAR`,
+      images: [{ url: "/images/og_image.jpg", width: 1200, height: 630 }],
     },
-    twitter: { card: "summary_large_image", title, description: desc },
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function CategoryOrRedirectPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const product = await getProduct(slug);
-  const tp = await getTranslations("products");
-  const td = await getTranslations("productDetails");
-  if (!product) notFound();
+  const categories = await getCategories();
 
-  const category =
-    typeof product.categoryId === "object" && product.categoryId !== null
-      ? (product.categoryId as { name?: string; navGroup?: string })
-      : null;
-  const categoryName = category?.name ?? null;
-  const navGroup = category?.navGroup ?? "";
+  if (!isCategorySlug(slug, categories)) {
+    // Old product URL - fetch product and redirect to correct URL
+    try {
+      const product = await fetchApi<Product>(`/products/${encodeURIComponent(slug)}`);
+      redirect(getProductUrl(product));
+    } catch {
+      notFound();
+    }
+  }
 
-  const template =
-    typeof product.templateId === "object" && product.templateId !== null
-      ? product.templateId
-      : null;
-  const description = template?.description || product.description;
-  const sizeChart = template?.sizeChart || product.sizeChart;
+  const rawSearch = (await searchParams) ?? {};
+  const normalizedSearch: Record<string, string> = {};
+  for (const [k, v] of Object.entries(rawSearch)) {
+    if (!v) continue;
+    normalizedSearch[k] = Array.isArray(v) ? v[0] : v;
+  }
 
-  const otherProducts =
-    navGroup.trim() !== ""
-      ? await getOtherProductsByNavGroup(navGroup, slug)
-      : [];
-
-  const isSoldOut = product.isSoldOut || !product.inStock;
-
-  const now = new Date();
-  const qEndMonth = (Math.floor(now.getMonth() / 3) + 1) * 3;
-  const priceValidUntil = new Date(now.getFullYear(), qEndMonth, 0)
-    .toISOString()
-    .split("T")[0];
-  const productUrl = `${SITE_URL}/san-pham/${slug}`;
-  const lowPrice = product.finalPrice ?? product.price;
-  const highPrice = product.compareAtPrice ?? lowPrice;
-  const sizeCount = product.sizes?.length || 1;
-  const colorCount = product.colors?.length || 1;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "@id": `${productUrl}/#product`,
-    name: product.name,
-    ...(description ? { description: description.slice(0, 500) } : {}),
-    ...(product.images.length > 0 ? { image: product.images } : {}),
-    sku: product.slug,
-    brand: { "@type": "Brand", name: "FROM THE STRESS" },
-    ...(product.colors?.length ? { color: product.colors.join(", ") } : {}),
-    ...(otherProducts.length > 0
-      ? {
-          isRelatedTo: otherProducts.slice(0, 3).map((p) => ({
-            "@type": "Product",
-            name: p.name,
-            url: `${SITE_URL}/san-pham/${p.slug}`,
-          })),
-        }
-      : {}),
-    offers: {
-      "@type": "AggregateOffer",
-      url: productUrl,
-      priceCurrency: "VND",
-      lowPrice,
-      highPrice,
-      offerCount: String(sizeCount * colorCount),
-      priceValidUntil,
-      availability: isSoldOut
-        ? "https://schema.org/OutOfStock"
-        : "https://schema.org/InStock",
-      itemCondition: "https://schema.org/NewCondition",
-      seller: { "@id": `${SITE_URL}/#organization` },
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingRate: {
-          "@type": "MonetaryAmount",
-          value: 0,
-          currency: "VND",
-        },
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "VN",
-        },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: 0,
-            maxValue: 1,
-            unitCode: "DAY",
-          },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: 1,
-            maxValue: 3,
-            unitCode: "DAY",
-          },
-        },
-      },
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "VN",
-        returnPolicyCategory:
-          "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 7,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn",
-      },
-    },
-  };
+  const events = await getEvents();
+  const result = await getCategoryProducts(slug, categories, normalizedSearch);
+  const t = await getTranslations("products");
+  const isNavGroup = NAV_GROUPS.includes(slug.toLowerCase());
+  const cat = isNavGroup ? null : categories.find((c) => c.slug === slug);
+  const label = isNavGroup ? slug.charAt(0).toUpperCase() + slug.slice(1) : (cat?.name ?? slug);
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+      <TrackViewItemList products={result.items} listName={label} />
+      <h1 className="font-display mb-6 text-2xl tracking-wide sm:text-3xl">
+        {label.toUpperCase()}
+      </h1>
+      <ProductGrid
+        initialData={result}
+        categories={categories}
+        events={events}
+        currentParams={normalizedSearch}
+        categorySlug={slug}
+        basePath="/san-pham"
       />
-      <TrackViewItem
-        itemId={product._id}
-        itemName={product.name}
-        price={product.finalPrice ?? product.price}
-        category={categoryName ?? undefined}
-      />
-      <div className="mx-auto max-w-[960px] px-4 py-8 sm:px-6">
-        <nav className="mb-4 text-sm text-muted sm:text-base">
-          <Link href="/san-pham">{tp("productsTitle")}</Link>
-          {categoryName && (
-            <>
-              {" / "}
-              <span>{categoryName}</span>
-            </>
-          )}
-          {" / "}
-          <span className="text-text">{product.name}</span>
-        </nav>
-
-        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 md:gap-8">
-          <ProductImageSlider
-            images={product.images ?? []}
-            productName={product.name}
-          />
-
-          <div>
-            <h1 className="font-display mb-2 text-2xl sm:text-3xl flex items-start gap-3 flex-col ">
-              {product.name}
-              {isSoldOut ? (
-                <span className="rounded bg-red-600 px-2 py-1 text-sm font-bold text-white shadow-sm">
-                  {td("soldOut")}
-                </span>
-              ) : null}
-            </h1>
-            {product.eventDiscount?.status === "upcoming" &&
-            product.eventDiscount.discountedPrice != null &&
-            product.eventDiscount.startDate ? (
-              <div className="mb-4">
-                <p className="text-lg font-bold text-accent sm:text-xl">
-                  {new Intl.NumberFormat("vi-VN").format(product.price)}₫
-                </p>
-                <CountdownPrice
-                  discountedPrice={product.eventDiscount.discountedPrice}
-                  startDate={product.eventDiscount.startDate}
-                  size="lg"
-                />
-                <p className="mt-1 text-sm text-muted">
-                  {td("event")} {product.eventDiscount.eventName}
-                </p>
-              </div>
-            ) : product.eventDiscount?.status === "active" ? (
-              <div className="mb-4">
-                <span className="text-lg font-bold text-accent sm:text-xl">
-                  {new Intl.NumberFormat("vi-VN").format(
-                    product.finalPrice ?? product.price,
-                  )}
-                  ₫
-                </span>
-                <span className="ml-2 text-base text-muted line-through">
-                  {new Intl.NumberFormat("vi-VN").format(
-                    product.eventDiscount.originalPrice,
-                  )}
-                  ₫
-                </span>
-                <span className="ml-2 rounded bg-red-500 px-2 py-1 text-xs font-bold text-white">
-                  {product.eventDiscount.discountType === "percent"
-                    ? `-${product.eventDiscount.discountValue}%`
-                    : `-${new Intl.NumberFormat("vi-VN").format(product.eventDiscount.discountValue)}₫`}
-                </span>
-                <p className="mt-1 text-sm text-muted">
-                  {td("event")} {product.eventDiscount.eventName}
-                </p>
-              </div>
-            ) : (
-              <p className="mb-4 text-lg font-bold text-accent sm:text-xl">
-                {new Intl.NumberFormat("vi-VN").format(product.price)}₫
-                {product.compareAtPrice != null &&
-                  product.compareAtPrice > product.price && (
-                    <span className="ml-2 text-base text-muted line-through">
-                      {new Intl.NumberFormat("vi-VN").format(
-                        product.compareAtPrice,
-                      )}
-                      ₫
-                    </span>
-                  )}
-              </p>
-            )}
-            <AddToCartForm product={product} />
-          </div>
-        </div>
-
-        {/* Description & Size Chart full width below the fold */}
-        {(description || sizeChart) && (
-          <div className="mx-auto mt-16 max-w-[800px] border-t border-border pt-10">
-            {description && (
-              <div className="mb-10 text-muted leading-relaxed">
-                {description.split("\n").map((line, i) => (
-                  <p key={i} className="mb-0 min-h-[1em]">
-                    {line}
-                  </p>
-                ))}
-              </div>
-            )}
-
-            {sizeChart && (
-              <div className="mt-8 text-center">
-                <img
-                  src={sizeChart}
-                  alt={`Size Chart - ${product.name}`}
-                  className="mx-auto max-w-full h-auto rounded-lg shadow-sm"
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <OtherProductsSection products={otherProducts} />
-    </>
+    </div>
   );
 }

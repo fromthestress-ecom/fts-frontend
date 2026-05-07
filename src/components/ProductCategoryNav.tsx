@@ -20,8 +20,7 @@ export function ProductCategoryNav({
   className = "",
   linkClassName = "",
 }: ProductCategoryNavProps) {
-  const isAllActive =
-    pathname === basePath && !pathname?.includes("?danh_muc=");
+  const isAllActive = pathname === basePath;
   const baseLink =
     "block px-4 py-2 text-sm transition-colors duration-150 hover:bg-border/60 hover:text-text " +
     linkClassName;
@@ -39,8 +38,8 @@ export function ProductCategoryNav({
         Tất cả
       </Link>
       {categories.map((c) => {
-        const href = `${basePath}?danh_muc=${encodeURIComponent(c._id)}`;
-        const isActive = pathname?.includes(`danh_muc=${c._id}`);
+        const href = `${basePath}/${encodeURIComponent(c.slug)}`;
+        const isActive = pathname === href || pathname?.endsWith(`/${c.slug}`);
         return (
           <Link
             key={c._id}

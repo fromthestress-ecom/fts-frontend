@@ -17,70 +17,14 @@ function normalizeParams(
   return out;
 }
 
-/** Map nav slugs to backend category slug when slug is not a category in DB. */
-const NAV_SLUG_TO_CATEGORY_SLUG: Record<string, string> = {
-  boxy: "ao-thun",
-  "baby-tee": "ao-thun",
-  oversize: "ao-thun",
-  cargo: "quan",
-  shorts: "quan",
-  jeans: "quan",
-  "heavy-crown": "ao-hoodie",
-  "gen-stress": "ao-thun",
-};
-
-const OBJECT_ID_REGEX = /^[a-fA-F0-9]{24}$/;
-
-function resolveCategoryId(
-  params: Record<string, string>,
-  categories: Category[],
-): string | undefined {
-  const v = params.danh_muc;
-  if (!v) return undefined;
-  if (v.toLowerCase() === "tops" || v.toLowerCase() === "bottoms")
-    return undefined; // Special nav groups handled separately
-  if (OBJECT_ID_REGEX.test(v)) return v;
-  let cat = categories.find((c) => c.slug === v);
-  if (cat) return cat._id;
-  const categorySlug = NAV_SLUG_TO_CATEGORY_SLUG[v];
-  if (categorySlug) cat = categories.find((c) => c.slug === categorySlug);
-  return cat?._id;
-}
-
-/** Resolve current filter to category slug for dropdown display (URL uses slug). */
-function resolveCategorySlug(
-  params: Record<string, string>,
-  categories: Category[],
-): string | undefined {
-  const v = params.danh_muc;
-  if (!v) return undefined;
-  if (v.toLowerCase() === "tops") return "tops";
-  if (v.toLowerCase() === "bottoms") return "bottoms";
-  if (OBJECT_ID_REGEX.test(v)) {
-    const cat = categories.find((c) => c._id === v);
-    return cat?.slug;
-  }
-  if (categories.some((c) => c.slug === v)) return v;
-  return NAV_SLUG_TO_CATEGORY_SLUG[v];
-}
-
 async function getProducts(
   searchParams: Record<string, string>,
-  categories: Category[],
 ): Promise<ProductListResult> {
   const page = searchParams.page ?? "1";
-  const categoryId = resolveCategoryId(searchParams, categories);
-  const v = searchParams.danh_muc;
-  let navGroup = "";
-  if (v && (v.toLowerCase() === "tops" || v.toLowerCase() === "bottoms")) {
-    navGroup = v.toLowerCase() === "tops" ? "Tops" : "Bottoms";
-  }
   const q = (searchParams.q ?? "").trim();
   const sort = searchParams.sap_xep ?? "";
   const event = searchParams.event ?? "";
   const params = new URLSearchParams({ page, limit: "12" });
-  if (categoryId) params.set("category", categoryId);
-  if (navGroup) params.set("navGroup", navGroup);
   if (q) params.set("q", q);
   if (sort) params.set("sort", sort);
   if (event) params.set("event", event);
@@ -120,25 +64,8 @@ export async function generateMetadata({
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://fromthestress.vn";
   const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
 
-  // Xây dựng URL canonical sạch (giữ lại danh mục nếu có, loại bỏ page, sort, event)
-  const canonicalBase = `${base}${localePrefix}/san-pham`;
-  const urlObj = new URL(canonicalBase);
-  if (typeof rawSearchParams.danh_muc === "string") {
-    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc);
-  } else if (Array.isArray(rawSearchParams.danh_muc)) {
-    urlObj.searchParams.set("danh_muc", rawSearchParams.danh_muc[0]);
-  }
-  const canonicalUrl = urlObj.toString();
-
-  // Noindex cho trang tìm kiếm để tránh pha loãng SEO
+  const canonicalUrl = `${base}${localePrefix}/san-pham`;
   const isSearch = !!rawSearchParams.q;
-
-  // Xây dựng alternates languages sạch
-  const categorySuffix = typeof rawSearchParams.danh_muc === "string" 
-    ? `?danh_muc=${rawSearchParams.danh_muc}`
-    : Array.isArray(rawSearchParams.danh_muc)
-    ? `?danh_muc=${rawSearchParams.danh_muc[0]}`
-    : "";
 
   return {
     title: t("productsTitle"),
@@ -146,8 +73,8 @@ export async function generateMetadata({
     alternates: {
       canonical: canonicalUrl,
       languages: {
-        vi: `${base}/san-pham${categorySuffix}`,
-        en: `${base}/en/san-pham${categorySuffix}`,
+        vi: `${base}/san-pham`,
+        en: `${base}/en/san-pham`,
       },
     },
     robots: isSearch ? { index: false, follow: true } : { index: true, follow: true },
@@ -155,14 +82,7 @@ export async function generateMetadata({
       url: canonicalUrl,
       title: `${t("productsTitle")} | STREETWEAR`,
       description: t("productsDesc"),
-      images: [
-        {
-          url: "/images/og_image.jpg",
-          width: 1200,
-          height: 630,
-          alt: "FROM THE STRESS",
-        },
-      ],
+      images: [{ url: "/images/og_image.jpg", width: 1200, height: 630, alt: "FROM THE STRESS" }],
     },
   };
 }
@@ -179,8 +99,7 @@ export default async function ProductsPage({
   const params = normalizeParams(raw);
   const categories = await getCategories();
   const events = await getEvents();
-  const result = await getProducts(params, categories);
-  const effectiveCategorySlug = resolveCategorySlug(params, categories);
+  const result = await getProducts(params);
   const t = await getTranslations('products');
 
   return (
@@ -194,7 +113,6 @@ export default async function ProductsPage({
         categories={categories}
         events={events}
         currentParams={params}
-        effectiveCategorySlug={effectiveCategorySlug}
         basePath="/san-pham"
       />
     </div>

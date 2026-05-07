@@ -7,6 +7,7 @@ import { CountdownPrice } from "@/components/CountdownPrice";
 import { useCartDrawer } from "@/contexts/CartDrawerContext";
 import { setCartCount } from "@/hooks/useCartCount";
 import type { Product } from "@/lib/api";
+import { getProductUrl } from "@/lib/api";
 import { trackAddToCart } from "@/lib/gtag";
 import { useTranslations } from 'next-intl';
 
@@ -84,7 +85,7 @@ export function ProductCard({
   return (
     <div className="product-card overflow-hidden rounded-lg border border-border bg-surface flex flex-col">
       {/* Clickable image + info area */}
-      <Link href={`/san-pham/${p.slug}`} className="block flex-1">
+      <Link href={getProductUrl(p)} className="block flex-1">
         <div className="relative aspect-square overflow-hidden bg-border">
           {p.images?.[0] ? (
             <ImageWithSkeleton
