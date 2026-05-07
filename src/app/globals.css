@@ -1029,10 +1029,15 @@
 
 .collections-section__row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.9fr;
   gap: 1rem;
   border-radius: 14px;
   overflow: hidden;
+  align-items: stretch;
+}
+
+.collections-section__row--img-right {
+  grid-template-columns: 1.9fr 1fr;
 }
 
 .collections-section__row--img-right .collections-section__img-card {
@@ -1059,7 +1064,16 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--surface);
-  min-height: 380px;
+  aspect-ratio: 1 / 1;
+  width: min(420px, 100%);
+}
+
+.collections-section__img-card .slick-slider,
+.collections-section__img-card .slick-list,
+.collections-section__img-card .slick-track,
+.collections-section__img-card .slick-slide,
+.collections-section__img-card .slick-slide > div {
+  height: 100%;
 }
 
 .collections-section__img {

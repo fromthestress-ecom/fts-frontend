@@ -4,13 +4,13 @@ import { ThemeAwareImg } from "./ThemeAwareImg";
 
 const BRAND_ITEMS = [
   {
-    darkSrc: "/logo/logo-from-the-stress_white.webp",
-    lightSrc: "/logo/logo-from-the-stress_black.webp",
+    darkSrc: "/logo/from_the_stress_signature_logo_white.webp",
+    lightSrc: "/logo/from_the_stress_signature_logo_black.webp",
     title: "signature logo",
   },
   {
-    darkSrc: "/logo/from-the-stress-logo-signature_white.webp",
-    lightSrc: "/logo/from-the-stress-logo-signature_black.webp",
+    darkSrc: "/logo/from_the_stress_big_logo_white.webp",
+    lightSrc: "/logo/from_the_stress_big_logo_black.webp",
     title: "fts big logo",
   },
 ] as const;

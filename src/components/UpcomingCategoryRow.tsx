@@ -73,7 +73,7 @@ export function UpcomingCategoryRow({ group, imageLeft }: Props) {
       <div className="collections-section__img-card relative">
         <Slider {...mainSliderSettings} className="h-full">
           {productsWithImage.map((p) => (
-            <div key={p._id} className="relative w-full h-[380px] sm:h-[450px]">
+            <div key={p._id} className="relative w-full h-full">
               <Link
                 href={`/san-pham/${p.slug}`}
                 className="block w-full h-full cursor-pointer"
