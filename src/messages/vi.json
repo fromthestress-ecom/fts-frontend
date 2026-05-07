@@ -6,7 +6,7 @@
   },
   "nav": {
     "shop": "Sản phẩm",
-    "bestSellers": "Bán chạy nhất",
+    "bestSellers": "Sản phẩm bán chạy",
     "aboutUs": "Về chúng tôi",
     "contact": "Liên hệ",
     "blogs": "Bài viết",
@@ -31,11 +31,11 @@
   },
   "home": {
     "title": "FROM THE STRESS | Thời trang dành cho giới trẻ",
-    "description": "Thương hiệu thời trang streetwear dành cho Gen Stress. Khám phá các bộ sưu tập Hoodie, Tee, Jogger độc bản.",
+    "description": "FROM THE STRESS là thương hiệu thời trang giới trẻ chuyên cung cấp các bộ sưu tập quần, áo và dòng hoodie độc đáo giúp bạn tự tin khẳng định phong cách cá nhân",
     "h1": "From the Stress: VIETNAMESE STREETWEAR BRAND",
     "newProducts": "SẢN PHẨM MỚI",
     "viewAll": "Xem tất cả →",
-    "bestSelling": "BÁN CHẠY NHẤT",
+    "bestSelling": "SẢN PHẨM BÁN CHẠY",
     "promotions": "KHUYẾN MÃI",
     "latestStories": "BÀI VIẾT MỚI",
     "storiesDesc": "Khám phá những tin tức, văn hóa và câu chuyện streetwear mới nhất từ tạp chí của chúng tôi.",

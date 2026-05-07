@@ -22,13 +22,13 @@ const FEATURES = [
     lightSrc: "/icon/phone-xxl-black.png",
     alt: "mua-hang-icon",
   },
-  {
-    title: "HỆ THỐNG CỬA HÀNG",
-    description: "Cửa hàng trên toàn hệ thống",
-    darkSrc: "/icon/shop-xxl-white.png",
-    lightSrc: "/icon/shop-xxl-black.png",
-    alt: "cua-hang-icon",
-  },
+  // {
+  //   title: "HỆ THỐNG CỬA HÀNG",
+  //   description: "Cửa hàng trên toàn hệ thống",
+  //   darkSrc: "/icon/shop-xxl-white.png",
+  //   lightSrc: "/icon/shop-xxl-black.png",
+  //   alt: "cua-hang-icon",
+  // },
 ] as const;
 
 export function FeaturesBar() {
@@ -38,7 +38,7 @@ export function FeaturesBar() {
       aria-label="Tiện ích và chính sách"
     >
       <div className="mx-auto max-w-[1280px]">
-        <ul className="grid list-none grid-cols-1 gap-8 p-0 m-0 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid list-none grid-cols-1 gap-8 p-0 m-0 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <li
               key={feature.title}

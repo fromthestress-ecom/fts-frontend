@@ -36,9 +36,16 @@ export function Footer() {
           <br />
           <span>GEN STRESS STYLE - Thời trang chữa lành</span>
           <p className="mt-2 max-w-[280px] text-sm text-muted sm:text-base">
-            📍: Tan Binh, HCMC <br />
+            📍: Tan Binh, HCMC (Shop Online) <br />
             <Link href="tel:0853783578" className="text-accent hover:underline">
               📞: 085 378 3578
+            </Link>
+            <br />
+            <Link
+              href="mailto:fromthestress@gmail.com"
+              className="text-accent hover:underline"
+            >
+              📧: fromthestress@gmail.com
             </Link>
           </p>
         </div>
