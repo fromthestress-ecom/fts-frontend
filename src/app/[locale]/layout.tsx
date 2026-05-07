@@ -21,7 +21,7 @@ import "../globals.css";
 const oswald = Oswald({
   subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
-  display: "swap",
+  display: "optional",
   variable: "--font-oswald",
 });
 

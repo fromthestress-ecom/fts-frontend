@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -95,12 +96,14 @@ export function HeroBanner() {
 
   return (
     <section className="hero-text-banner" ref={containerRef}>
-      <img
+      <Image
         src="/images/HERO_BANNER.webp"
         alt=""
+        fill
         className="hero-text-banner__bg-img"
-        loading="eager"
-        fetchPriority="high"
+        priority
+        sizes="100vw"
+        quality={75}
       />
       <div
         className="hero-text-banner__bg"
