@@ -1,4 +1,4 @@
-const logoURL = "/logo/big_logo_white.webp";
+const logoURL = "/logo/from-the-stress-logo-signature_white.webp";
 
 const LoadingIcon = () => {
   return (
