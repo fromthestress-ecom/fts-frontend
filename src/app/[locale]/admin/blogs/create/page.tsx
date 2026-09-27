@@ -22,6 +22,19 @@ function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
+const AI_WRITER_DRAFT_KEY = "ai_writer_draft";
+
+function readAiWriterDraft(): Record<string, string> | null {
+  if (typeof window === "undefined") return null;
+  const raw = sessionStorage.getItem(AI_WRITER_DRAFT_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 export default function CreateBlogPage() {
   const router = useRouter();
   const adminProfile = getAdminProfile();
@@ -31,10 +44,14 @@ export default function CreateBlogPage() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [fromAi, setFromAi] = useState(false);
+  // Read the AI Writer draft during the first render so the Quill editor is
+  // created with the content already in place. Filling it from an effect after
+  // Quill has mounted makes Quill overwrite the content with an empty "<p></p>".
+  const [aiDraft] = useState(readAiWriterDraft);
+  const [fromAi, setFromAi] = useState(aiDraft !== null);
   const [showInlineLibrary, setShowInlineLibrary] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(() => ({
     title: "",
     slug: "",
     excerpt: "",
@@ -50,19 +67,11 @@ export default function CreateBlogPage() {
     metaTitle: "",
     metaDescription: "",
     ogImage: "",
-  });
+    ...aiDraft,
+  }));
 
   useEffect(() => {
-    // Pre-fill from AI Writer if available
-    const aiDraft = sessionStorage.getItem("ai_writer_draft");
-    if (aiDraft) {
-      try {
-        const parsed = JSON.parse(aiDraft);
-        setForm((f) => ({ ...f, ...parsed }));
-        setFromAi(true);
-      } catch {}
-      sessionStorage.removeItem("ai_writer_draft");
-    }
+    sessionStorage.removeItem(AI_WRITER_DRAFT_KEY);
 
     Promise.all([
       adminFetch("/admin/blog-categories"),

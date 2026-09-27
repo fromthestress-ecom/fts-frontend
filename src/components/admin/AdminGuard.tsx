@@ -171,7 +171,10 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       };
     }
 
-    setOk(false);
+    // Keep the current page mounted while revalidating if the cached profile
+    // already grants access. Unmounting here on every client navigation wipes
+    // page state that was initialised on mount (e.g. the AI Writer draft).
+    setOk(canAccessAdminPath(getAdminProfile(), normalizedPath));
     loadAdminProfile(credential)
       .then((profile) => {
         if (!active) return;
