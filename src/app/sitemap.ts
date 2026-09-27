@@ -1,7 +1,16 @@
 import type { MetadataRoute } from 'next';
-import { fetchApi } from '@/lib/api';
+import { fetchApi, getProductUrl, type Product, type ProductListResult } from '@/lib/api';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fromthestress.vn';
+
+async function fetchAllProducts(): Promise<Product[]> {
+  const all: Product[] = [];
+  for (let page = 1; ; page++) {
+    const res = await fetchApi<ProductListResult>(`/products?limit=100&page=${page}`);
+    all.push(...res.items);
+    if (page >= res.totalPages || res.items.length === 0) return all;
+  }
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -38,21 +47,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // 2. Fetch Dynamic Data
-  let productSlugs: { slug: string; updatedAt?: string }[] = [];
+  let products: Product[] = [];
   let blogSlugs: { slug: string; updatedAt?: string }[] = [];
   let productCategories: { slug: string; updatedAt?: string }[] = [];
   let blogCategories: { slug: string; updatedAt?: string }[] = [];
   let blogTags: { slug: string; updatedAt?: string }[] = [];
 
   try {
-    const [products, blogsData, categories, blogCats, tags] = await Promise.all([
-      fetchApi<{ slug: string; updatedAt?: string }[]>("/products/slugs"),
+    const [productList, blogsData, categories, blogCats, tags] = await Promise.all([
+      fetchAllProducts(),
       fetchApi<any>("/blogs?limit=1000"),
       fetchApi<any[]>("/categories"),
       fetchApi<any[]>("/blogs/categories"),
       fetchApi<any[]>("/blogs/tags"),
     ]);
-    productSlugs = products;
+    products = productList;
     blogSlugs = blogsData.blogs || [];
     productCategories = categories;
     blogCategories = blogCats || [];
@@ -63,14 +72,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 3. Map Dynamic Pages
 
-  // Products Detail
-  const productPages: MetadataRoute.Sitemap = productSlugs.map((p) => ({
-    url: `${BASE}/san-pham/${p.slug}`,
-    lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-    alternates: getAlternates(`/san-pham/${p.slug}`),
-  }));
+  // Products Detail — use the canonical /san-pham/{category}/{slug} URL.
+  // The bare /san-pham/{slug} form only redirects, so listing it here makes
+  // Google crawl redirects instead of the real product pages.
+  const productPages: MetadataRoute.Sitemap = products.map((p) => {
+    const path = getProductUrl(p);
+    return {
+      url: `${BASE}${path}`,
+      lastModified: p.updatedAt ? new Date(p.updatedAt) : now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+      alternates: getAlternates(path),
+    };
+  });
 
   // Product Categories
   const productCategoryPages: MetadataRoute.Sitemap = productCategories.map((c) => ({

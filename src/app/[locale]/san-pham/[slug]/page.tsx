@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import { fetchApi, type ProductListResult, type Category, type EventItem, type Product, getProductUrl } from "@/lib/api";
 import { ProductGrid } from "@/components/ProductGrid";
 import { TrackViewItemList } from "@/components/TrackViewItemList";
@@ -68,7 +68,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const categories = await getCategories();
 
   if (!isCategorySlug(slug, categories)) {
-    return { title: "FROM THE STRESS" };
+    // Legacy product URL (redirects) or unknown slug (404): keep it out of the index.
+    return { title: { absolute: "FROM THE STRESS" }, robots: { index: false, follow: true } };
   }
 
   const isNavGroup = NAV_GROUPS.includes(slug.toLowerCase());
@@ -77,7 +78,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const url = `${base}${localePrefix}/san-pham/${slug}`;
 
   return {
-    title: `${label} | FROM THE STRESS`,
+    // The layout title template already appends "| FROM THE STRESS".
+    title: label,
     description: `Khám phá bộ sưu tập ${label} - streetwear phong cách từ FROM THE STRESS.`,
     alternates: {
       canonical: url,
@@ -95,17 +97,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CategoryOrRedirectPage({ params, searchParams }: Props) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const categories = await getCategories();
 
   if (!isCategorySlug(slug, categories)) {
-    // Old product URL - fetch product and redirect to correct URL
+    // Old product URL - fetch product and redirect to correct URL.
+    // permanentRedirect() works by throwing, so it must stay outside the
+    // try/catch or the catch turns every redirect into a (soft) 404.
+    let product: Product | null = null;
     try {
-      const product = await fetchApi<Product>(`/products/${encodeURIComponent(slug)}`);
-      redirect(getProductUrl(product));
+      product = await fetchApi<Product>(`/products/${encodeURIComponent(slug)}`);
     } catch {
-      notFound();
+      product = null;
     }
+    if (!product) notFound();
+    const localePrefix = locale && locale !== "vi" ? `/${locale}` : "";
+    permanentRedirect(`${localePrefix}${getProductUrl(product)}`);
   }
 
   const rawSearch = (await searchParams) ?? {};

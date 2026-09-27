@@ -44,10 +44,10 @@ export async function generateMetadata({
   const url = `${base}${localePrefix}`;
 
   return {
-    title: t("title") || "FROM THE STRESS | Thời trang đường phố",
+    title: t("title") || "FROM THE STRESS | Thời trang chữa lành cho Gen Z",
     description:
       t("description") ||
-      "Shop streetwear cao cấp - áo hoodie, tee, quần jogger, giày sneaker. Giao hàng toàn quốc.",
+      "Mặc để nhẹ lòng. FROM THE STRESS – thời trang chữa lành cho Gen Z: hoodie, tee, boxy tối giản, vải dày dặn, form chuẩn. Less stress, more drip.",
     alternates: {
       canonical: url,
       languages: {
@@ -241,7 +241,7 @@ const webSiteJsonLd = {
   name: "FROM THE STRESS",
   url: SITE_URL,
   description:
-    "From the Stress: VIETNAMESE STREETWEAR BRAND - Biến Áp Lực Thành Bản Sắc Và Sức Mạnh Tinh Thần",
+    "FROM THE STRESS – thương hiệu thời trang chữa lành của người trẻ Việt. Biến áp lực thành bản sắc và sức mạnh tinh thần.",
   potentialAction: {
     "@type": "SearchAction",
     target: {
@@ -273,7 +273,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1 style={{ display: "none" }}>{t("h1")}</h1>
+      <h1 className="sr-only">{t("h1")}</h1>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}

@@ -40,14 +40,14 @@ const dmSans = DM_Sans({
 
 const SITE_NAME = "FROM THE STRESS";
 const DEFAULT_DESC =
-  "Shop streetwear cao cấp - áo hoodie, tee, quần jogger, giày sneaker. Giao hàng toàn quốc.";
+  "Mặc để nhẹ lòng. FROM THE STRESS – thời trang chữa lành cho Gen Z: hoodie, tee, boxy tối giản, vải dày dặn, form chuẩn. Less stress, more drip.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://fromthestress.vn",
   ),
   title: {
-    default: `${SITE_NAME} | Thời trang đường phố`,
+    default: `${SITE_NAME} | Thời trang chữa lành cho Gen Z`,
     template: `%s | ${SITE_NAME}`,
   },
   description: DEFAULT_DESC,
